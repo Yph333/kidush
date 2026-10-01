@@ -1,0 +1,67 @@
+# VERIFICATION — how we know the engines are right
+
+All numbers below are in `tests/vectors.json`, generated from the legacy engines.
+Port the engines to TypeScript and make every vector pass before building UI.
+
+## 1. Fixed calendar (exact)
+- Rosh Hashana dates, weekdays, dechiyot applied, year length, keviut and Pesach dates for
+  4938, 5600, 5620, 5688, 5766, 5769, 5784–5788, 5800.
+  Spot checks against public calendars: RH 5784 = Sat 2023-09-16, 5785 = Thu 2024-10-03,
+  5786 = Tue 2025-09-23, 5787 = Sat 2026-09-12; Pesach 5785 = Sun 2025-04-13.
+- Excesses: month א׳ י״ב תשצ״ג · common year ד׳ ח׳ תתע״ו · leap year ה׳ כ״א תקפ״ט · 19-year cycle ב׳ ט״ז תקצ״ה.
+- Molad Bahrad = ב׳ ה׳ ר״ד; Bahrad + one common year = ויה״ד (ו׳ י״ד 0).
+- Exactly 14 keviot occur over years 5000–6500; no year length outside {353,354,355,383,384,385}.
+- Gematria edge case: parts 1000–1079 render as תתר… (e.g. 1063 → תתרס״ג).
+
+## 2. Modern astronomy (tolerance ±2 min, Odeh V ±0.3)
+- New moon 2024-04-08 18:21 UTC (total solar eclipse day), full moon 2024-04-23 23:49 UTC.
+- Sunset Jerusalem 2024-04-08 19:03 IDT, sunrise 06:18; sunset 2024-12-21 16:39 IST.
+- Molad Tishrei 5787 = Fri 2026-09-11 18:38 UTC (molad times are Jerusalem mean local time, UTC+2:20:56);
+  true conjunction 2026-09-11 03:27 UTC → mean molad is ~15h late that month.
+- Odeh, Jerusalem: 2024-04-08 zone D, 04-09 zone A (V≈6.9), 04-10 zone A.
+
+## 3. Rambam, Hilchot Kiddush HaChodesh 12–17 (exact, to the minute)
+Source text used: Mishneh Torah, Laws of Sanctification of the Month ch. 12–17
+(https://mechon-mamre.org/i/en/3812.htm … 3817.htm). Verify Hebrew wording against the original.
+
+Epoch: start of Thursday night, 3 Nisan 4938. Worked example: night of Friday, 2 Iyar 4938 (N = 29 days).
+Expected chain (all match the Rambam's text):
+
+| step | value |
+|---|---|
+| mean sun | 35° 38′ 33″ |
+| sun apogee | 86° 45′ 12″ |
+| sun course | 308° 53′ 21″ → 309 → equation 1° 30′ (add) |
+| true sun | 7° 9′ Taurus |
+| mean moon (+15′ season) | 53° 36′ 39″ |
+| mean course | 103° 21′ 46″ |
+| doubled distance | 35° 56′ 12″ → add 5° → corrected course 108 |
+| moon equation | 5° 1′ (subtract) |
+| true moon | 18° 36′ Taurus |
+| head | 27° 30′ Virgo; latitude course 231 → latitude 3° 53′ south |
+| first longitude | 11° 27′ |
+| second longitude | 10° 27′ (−1° parallax, Taurus) |
+| second latitude | 4° 3′ (+10′, south) |
+| circle of the moon | ¼ → 1° 1′ |
+| third longitude | 11° 28′ |
+| fourth longitude | 13° 46′ (+⅕, Taurus) |
+| altitude-of-country portion | 2° 35′ (⅔ of first latitude, subtract: south) |
+| arc of sighting | 11° 11′ → visible (arc 11–12 needs first longitude ≥ 11°) |
+
+### Rounding rules taken from the text
+- Course values (sun, corrected moon, latitude) are rounded to whole degrees before table lookup
+  (13:9, 15:8, 16:20); tables are interpolated per degree (13:7).
+- Seconds are dropped from final positions; round to the nearest minute (13:10, 15:9).
+- Mean motions: use the Rambam's own block values for 10000/1000/354/100/29/10/1 days (greedy
+  decomposition). Using daily motion × N drifts by a few seconds and breaks the example.
+
+### Open points to confirm in the Hebrew original
+- 17:12 — the translation gives "add ⅙" for both Capricorn/Gemini and Pisces/Aries. Implemented as written.
+- 15:3 — doubled distance ranges are whole degrees; fractional values are rounded to the nearest degree.
+- 16:20 uses the moon at 18° 40′ while 15:9 and 17:13 use 18° 36′. Both give latitude 3° 53′.
+  Good classroom discussion point; the engine uses 18° 36′.
+
+## 4. Zmanim (to be added in milestone 3)
+- Oracle: KosherJava Zmanim (open source). Tolerance ±1 min for identical definitions.
+- Cities: Jerusalem (31.778, 35.235, ~750 m), Haifa (32.794, 34.990), Eilat (29.558, 34.952).
+- Dates: both equinoxes, both solstices, in a DST and a non-DST year.

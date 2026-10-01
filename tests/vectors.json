@@ -1,0 +1,265 @@
+{
+  "_about": "Generated from legacy engines (verified). Tolerances: calendar exact; Rambam exact; astro times ±2 min; Odeh V ±0.3.",
+  "calendar": {
+    "years": [
+      {
+        "year": 4938,
+        "heb": "ד׳תתקל״ח",
+        "roshHashana": "1177-09-03",
+        "weekday": 6,
+        "moladTishrei": "ו׳ ח׳ תק״ע",
+        "dechiyot": [
+          "adu"
+        ],
+        "length": 383,
+        "keviut": "זחג",
+        "leap": true,
+        "pesach": "1178-04-11"
+      },
+      {
+        "year": 5600,
+        "heb": "ה׳ת״ר",
+        "roshHashana": "1839-09-09",
+        "weekday": 1,
+        "moladTishrei": "א׳ כ׳ תרצ״ד",
+        "dechiyot": [
+          "zaken"
+        ],
+        "length": 385,
+        "keviut": "בשז",
+        "leap": true,
+        "pesach": "1840-04-18"
+      },
+      {
+        "year": 5620,
+        "heb": "ה׳תר״כ",
+        "roshHashana": "1859-09-29",
+        "weekday": 4,
+        "moladTishrei": "ג׳ י׳ תשצ״ח",
+        "dechiyot": [
+          "gatrad",
+          "adu"
+        ],
+        "length": 354,
+        "keviut": "הכז",
+        "leap": false,
+        "pesach": "1860-04-07"
+      },
+      {
+        "year": 5688,
+        "heb": "ה׳תרפ״ח",
+        "roshHashana": "1927-09-27",
+        "weekday": 2,
+        "moladTishrei": "ב׳ ט״ז רע״א",
+        "dechiyot": [
+          "betu"
+        ],
+        "length": 354,
+        "keviut": "גכה",
+        "leap": false,
+        "pesach": "1928-04-05"
+      },
+      {
+        "year": 5766,
+        "heb": "ה׳תשס״ו",
+        "roshHashana": "2005-10-04",
+        "weekday": 2,
+        "moladTishrei": "ב׳ ט״ז תתע״ו",
+        "dechiyot": [
+          "betu"
+        ],
+        "length": 354,
+        "keviut": "גכה",
+        "leap": false,
+        "pesach": "2006-04-13"
+      },
+      {
+        "year": 5769,
+        "heb": "ה׳תשס״ט",
+        "roshHashana": "2008-09-30",
+        "weekday": 2,
+        "moladTishrei": "ג׳ ז׳ תתרנ״ז",
+        "dechiyot": [],
+        "length": 354,
+        "keviut": "גכה",
+        "leap": false,
+        "pesach": "2009-04-09"
+      },
+      {
+        "year": 5784,
+        "heb": "ה׳תשפ״ד",
+        "roshHashana": "2023-09-16",
+        "weekday": 6,
+        "moladTishrei": "ו׳ י״א תתפ״ב",
+        "dechiyot": [
+          "adu"
+        ],
+        "length": 383,
+        "keviut": "זחג",
+        "leap": true,
+        "pesach": "2024-04-23"
+      },
+      {
+        "year": 5785,
+        "heb": "ה׳תשפ״ה",
+        "roshHashana": "2024-10-03",
+        "weekday": 4,
+        "moladTishrei": "ה׳ ט׳ שצ״א",
+        "dechiyot": [],
+        "length": 355,
+        "keviut": "השא",
+        "leap": false,
+        "pesach": "2025-04-13"
+      },
+      {
+        "year": 5786,
+        "heb": "ה׳תשפ״ו",
+        "roshHashana": "2025-09-23",
+        "weekday": 2,
+        "moladTishrei": "ב׳ י״ח קפ״ז",
+        "dechiyot": [
+          "zaken"
+        ],
+        "length": 354,
+        "keviut": "גכה",
+        "leap": false,
+        "pesach": "2026-04-02"
+      },
+      {
+        "year": 5787,
+        "heb": "ה׳תשפ״ז",
+        "roshHashana": "2026-09-12",
+        "weekday": 6,
+        "moladTishrei": "ז׳ ב׳ תתרס״ג",
+        "dechiyot": [],
+        "length": 385,
+        "keviut": "זשה",
+        "leap": true,
+        "pesach": "2027-04-22"
+      },
+      {
+        "year": 5788,
+        "heb": "ה׳תשפ״ח",
+        "roshHashana": "2027-10-02",
+        "weekday": 6,
+        "moladTishrei": "ו׳ 0 תקע״ב",
+        "dechiyot": [
+          "adu"
+        ],
+        "length": 355,
+        "keviut": "זשג",
+        "leap": false,
+        "pesach": "2028-04-11"
+      },
+      {
+        "year": 5800,
+        "heb": "ה׳ת״ת",
+        "roshHashana": "2039-09-19",
+        "weekday": 1,
+        "moladTishrei": "א׳ י״ג רט״ז",
+        "dechiyot": [
+          "adu"
+        ],
+        "length": 355,
+        "keviut": "בשה",
+        "leap": false,
+        "pesach": "2040-03-29"
+      }
+    ],
+    "excess": {
+      "month": "א׳ י״ב תשצ״ג",
+      "pashut": "ד׳ ח׳ תתע״ו",
+      "meubar": "ה׳ כ״א תקפ״ט",
+      "cycle": "ב׳ ט״ז תקצ״ה"
+    },
+    "bahrad": "ב׳ ה׳ ר״ד",
+    "vayehad": "ו׳ י״ד 0",
+    "monthParts": 765433,
+    "keviotCount": 14,
+    "epochRambam": {
+      "day": "3 Nisan 4938",
+      "weekday": 4,
+      "gregorianProleptic": "1178-03-30"
+    }
+  },
+  "rambamExample": {
+    "evening": "ליל ערב שבת, ב׳ אייר ד׳תתקל״ח (day index weekday 5 = Friday)",
+    "N": 29,
+    "sunMean_sec": 128313,
+    "apogee_sec": 312312,
+    "sunMaslulRounded": 309,
+    "sunEq_min": 90,
+    "sunTrue_min": 2229,
+    "moonMean_sec": 192099,
+    "moonAdj_sec": 192999,
+    "course_sec": 372106,
+    "doubledDistance_sec": 129372,
+    "dblAdd_deg": 5,
+    "correctedCourseRounded": 108,
+    "moonEq_min": 301,
+    "moonTrue_min": 2916,
+    "headMean_sec": 656977,
+    "head_min": 10650,
+    "latCourseRounded": 231,
+    "lat1_min": 233,
+    "north": false,
+    "long1_min": 687,
+    "long2_min": 627,
+    "lat2_min": 243,
+    "circle_min": 61,
+    "long3_min": 688,
+    "long4_min": 826,
+    "geo_min": 155,
+    "arc_min": 671,
+    "visible": true,
+    "humanReadable": {
+      "sunTrue": "7° 9′ בשור",
+      "moonTrue": "18° 36′ בשור",
+      "head": "27° 30′ בבתולה",
+      "lat1": "3° 53′ south",
+      "long1": "11° 27′",
+      "long2": "10° 27′",
+      "lat2": "4° 3′",
+      "circle": "1° 1′",
+      "long3": "11° 28′",
+      "long4": "13° 46′",
+      "geo": "2° 35′",
+      "arc": "11° 11′"
+    }
+  },
+  "astro": {
+    "newMoon_2024_04_08": "2024-04-08T18:21:15.447Z",
+    "fullMoon_2024_04_23": "2024-04-23T23:49:28.558Z",
+    "newMoon_2026_09_11": "2026-09-11T03:26:38.900Z",
+    "moladTishrei5787_UTC": "2026-09-11T18:38:06.933Z",
+    "sunsetJerusalem_2024_04_08_local": "19:03",
+    "sunriseJerusalem_2024_04_08_local": "06:18",
+    "sunsetJerusalem_2024_12_21_local": "16:39",
+    "odehJerusalem": [
+      {
+        "date": "2024-04-08",
+        "zone": "D",
+        "V": -9.38,
+        "lagMin": -11
+      },
+      {
+        "date": "2024-04-09",
+        "zone": "A",
+        "V": 6.92,
+        "lagMin": 59
+      },
+      {
+        "date": "2024-04-10",
+        "zone": "A",
+        "V": 27.54,
+        "lagMin": 130
+      }
+    ],
+    "hebDate_2026_10_02": {
+      "y": 5787,
+      "mi": 0,
+      "d": 21,
+      "name": "תשרי"
+    }
+  }
+}
