@@ -88,20 +88,39 @@ describe('building blocks', () => {
 
 describe('horizon profile', () => {
   const p = { lat: 31.778, lon: 35.235, elevation: 0 };
-  it('interpolates around the circle', () => {
-    const prof = [{ az: 90, alt: 2 }, { az: 270, alt: 0 }];
+  it('interpolates between close points; far gaps and missing directions are open', () => {
+    const prof = [{ az: 90, alt: 2 }, { az: 120, alt: 0 }];
     expect(horizonAlt(prof, 90)).toBe(2);
-    expect(horizonAlt(prof, 180)).toBeCloseTo(1, 6);
-    expect(horizonAlt(prof, 0)).toBeCloseTo(1, 6);
-    expect(horizonAlt(undefined, 123)).toBe(0);
+    expect(horizonAlt(prof, 105)).toBeCloseTo(1, 6);
+    expect(horizonAlt(prof, 270)).toBeNull();            // the west was never entered
+    expect(horizonAlt([{ az: 350, alt: 1 }, { az: 10, alt: 3 }], 0)).toBeCloseTo(2, 6); // wraps through north
+    expect(horizonAlt([{ az: 90, alt: 1 }], 100)).toBe(1);
+    expect(horizonAlt([{ az: 90, alt: 1 }], 120)).toBeNull();
+    expect(horizonAlt(undefined, 123)).toBeNull();
+  });
+  it('an eastern-only profile does not touch sunset', () => {
+    const east = [60, 75, 90, 105, 120].map(az => ({ az, alt: 3 }));
+    expect(visibleSun(2026, 2, 20, { ...p, horizon: east }, false).ms).toBe(sunAt(2026, 2, 20, p, H0_STANDARD, false).ms);
   });
   it('a 2° eastern ridge delays sunrise by several minutes; a flat profile matches the mishor', () => {
     const flat = visibleSun(2026, 2, 20, { ...p, horizon: [{ az: 0, alt: 0 }] }, true).ms!;
     const mishor = sunAt(2026, 2, 20, p, H0_STANDARD, true).ms!;
     expect(Math.abs(flat - mishor) / MIN).toBeLessThan(0.6);
-    const ridge = visibleSun(2026, 2, 20, { ...p, horizon: [{ az: 0, alt: 2 }, { az: 180, alt: 2 }] }, true).ms!;
+    const ridge = visibleSun(2026, 2, 20, { ...p, horizon: [60, 90, 120].map(az => ({ az, alt: 2 })) }, true).ms!;
     expect((ridge - mishor) / MIN).toBeGreaterThan(8);
     expect((ridge - mishor) / MIN).toBeLessThan(14);
+  });
+  it('a skyline at exactly 0° seen from 750 m hides the dipped horizon: equals the mishor time', () => {
+    const q = { lat: 31.778, lon: 35.235, elevation: 750, horizon: [60, 90, 120].map(az => ({ az, alt: 0 })) };
+    const mishor = sunAt(2026, 2, 20, q, H0_STANDARD, true).ms!;
+    expect(Math.abs(visibleSun(2026, 2, 20, q, true).ms! - mishor) / MIN).toBeLessThan(0.05);
+  });
+  it('ridges lower than the sea-horizon dip (−0.8° at 750 m) change nothing', () => {
+    const q = { lat: 31.778, lon: 35.235, elevation: 750 };
+    const a = visibleSun(2026, 2, 20, { ...q, horizon: [{ az: 90, alt: -0.9 }] }, true).ms!;
+    const b = visibleSun(2026, 2, 20, { ...q, horizon: [{ az: 90, alt: -1.5 }] }, true).ms!;
+    expect(a).toBe(b);
+    expect(Math.abs(a - sunAt(2026, 2, 20, q, H0_STANDARD - dip(750), true).ms!) / MIN).toBeLessThan(0.05);
   });
   it('without a profile, visible = elevation-adjusted', () => {
     const q = { lat: 31.778, lon: 35.235, elevation: 750 };

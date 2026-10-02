@@ -6,7 +6,7 @@ import type { ReactNode } from 'react';
 import { useStore } from '../state/store';
 import { SlideSources } from './Sources';
 
-export function Slide({ kicker, title, text, more, stage, wide, hero }: {
+export function Slide({ kicker, title, text, more, stage, wide, hero, className = '' }: {
   kicker: ReactNode;
   title: ReactNode;
   text: ReactNode;
@@ -15,11 +15,12 @@ export function Slide({ kicker, title, text, more, stage, wide, hero }: {
   stage: ReactNode;
   wide?: boolean;
   hero?: boolean;
+  className?: string;
 }) {
   const mode = useStore(s => s.mode);
   const path = useStore(s => s.slide);
   return (
-    <section className={`slide ${wide ? 'wide' : ''} ${hero ? 'hero' : ''}`} aria-labelledby="slide-title">
+    <section className={`slide ${wide ? 'wide' : ''} ${hero ? 'hero' : ''} ${className}`} aria-labelledby="slide-title">
       <div className="text">
         <p className="kicker">{kicker}</p>
         {hero ? <h1 id="slide-title">{title}</h1> : <h2 id="slide-title">{title}</h2>}

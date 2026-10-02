@@ -126,17 +126,24 @@ export function refraction(a: number): number {
   return 1 / Math.tan((a + 7.31 / (a + 4.4)) * D2R) / 60;
 }
 
-/** Skyline altitude (deg) at azimuth az, linearly interpolated around the profile; 0 if none. */
-export function horizonAlt(profile: HorizonPoint[] | undefined, az: number): number {
-  if (!profile?.length) return 0;
+/** Profile points further apart than this are not joined: the directions between them are open horizon. */
+export const MAX_GAP = 45;
+
+/**
+ * Skyline altitude (deg) at azimuth az, linearly interpolated between neighbouring profile points that are
+ * at most MAX_GAP apart (a single point covers ±MAX_GAP/2). null = no skyline given there (open horizon).
+ */
+export function horizonAlt(profile: HorizonPoint[] | undefined, az: number): number | null {
+  if (!profile?.length) return null;
   const pts = [...profile].sort((a, b) => a.az - b.az);
-  if (pts.length === 1) return pts[0].alt;
+  const dist = (x: number, y: number) => Math.abs(((x - y + 540) % 360) - 180);
+  if (pts.length === 1) return dist(az, pts[0].az) <= MAX_GAP / 2 ? pts[0].alt : null;
   for (let i = 0; i < pts.length; i++) {
     const a = pts[i], b = pts[(i + 1) % pts.length];
     const span = ((b.az - a.az + 360) % 360) || 360, off = ((az - a.az + 360) % 360);
-    if (off <= span) return a.alt + (b.alt - a.alt) * (off / span);
+    if (off <= span) return span <= MAX_GAP ? a.alt + (b.alt - a.alt) * (off / span) : null;
   }
-  return pts[0].alt;
+  return null;
 }
 
 /**
@@ -149,12 +156,17 @@ export function visibleSun(y: number, m: number, d: number, p: ZPlace, rising: b
     const h0 = H0_STANDARD - dip(p.elevation ?? 0);
     return { ms: sunAt(y, m, d, p, h0, rising).ms, h0, skyline: -dip(p.elevation ?? 0) };
   }
-  let h0 = H0_STANDARD, a = 0, ms: number | null = null;
+  // A skyline below the sea horizon cannot hide the sun: the effective skyline is max(a, −dip).
+  // At or below 0° keep the standard 34′ refraction (so an open horizon equals the elevation-adjusted time);
+  // above it, use Bennett's refraction for that altitude.
+  const sea = -dip(p.elevation ?? 0);
+  const h0For = (a: number) => (a <= 0 ? H0_STANDARD + a : a - refraction(a) - 16 / 60);
+  let h0 = h0For(sea), a = sea, ms: number | null = null;
   for (let i = 0; i < 4; i++) {
     ms = sunAt(y, m, d, p, h0, rising).ms;
     if (ms === null) break;
-    a = horizonAlt(p.horizon, sunAltAz(ms, p).az);
-    h0 = a - refraction(a) - 16 / 60;
+    a = Math.max(sea, horizonAlt(p.horizon, sunAltAz(ms, p).az) ?? sea);
+    h0 = h0For(a);
   }
   return { ms, h0, skyline: a };
 }

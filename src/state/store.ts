@@ -38,6 +38,10 @@ export interface State {
   slide: string;
   /** slides seen, per demo year */
   seen: Record<number, string[]>;
+  /** chapter 2: the civil date the zmanim slides look at (YYYY-MM-DD) */
+  zDate: string;
+  /** chapter 2: chosen opinion per zman group (ids from content/zmanimOpinions.ts) */
+  zPick: Record<string, string>;
   /** GuessGate answers, keyed "<gate>@<year>" */
   guesses: Record<string, GuessRecord>;
   notesOpen: boolean;
@@ -50,7 +54,7 @@ const LS_KEY = 'luach.v1';
 const MIN_YEAR = 2, MAX_YEAR = 9998;
 export const clampYear = (y: number): number => Math.max(MIN_YEAR, Math.min(MAX_YEAR, Math.round(y)));
 
-type Persisted = Pick<State, 'demoYear' | 'city' | 'mode' | 'theme' | 'seen' | 'guesses'>;
+type Persisted = Pick<State, 'demoYear' | 'city' | 'mode' | 'theme' | 'seen' | 'guesses' | 'zPick'>;
 
 function readLS(): Partial<Persisted> {
   try {
@@ -61,7 +65,7 @@ function readLS(): Partial<Persisted> {
 
 function writeLS(s: State): void {
   try {
-    const p: Persisted = { demoYear: s.demoYear, city: s.city, mode: s.mode, theme: s.theme, seen: s.seen, guesses: s.guesses };
+    const p: Persisted = { demoYear: s.demoYear, city: s.city, mode: s.mode, theme: s.theme, seen: s.seen, guesses: s.guesses, zPick: s.zPick };
     localStorage.setItem(LS_KEY, JSON.stringify(p));
   } catch { /* storage unavailable: state still works for this session */ }
 }
@@ -100,6 +104,8 @@ function initial(): State {
     slide: hs.slide,
     seen: ls.seen && typeof ls.seen === 'object' ? ls.seen : {},
     guesses: ls.guesses && typeof ls.guesses === 'object' ? ls.guesses : {},
+    zDate: `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`,
+    zPick: ls.zPick && typeof ls.zPick === 'object' ? ls.zPick : {},
     notesOpen: false,
     mapOpen: false,
     glossaryOpen: null,

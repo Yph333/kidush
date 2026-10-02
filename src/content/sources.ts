@@ -12,7 +12,11 @@ const KH = 'רמב״ם, הלכות קידוש החודש';
 export const SOURCES: Record<SlidePath, SourceRef[]> = {
   'yesodot/petiha': [{ ref: KITZUR }, { ref: `${KH}, פרקים ו–ח` }],
   'yesodot/yehidot': [{ ref: `${KH}, פרק ו`, note: 'השעה מחולקת ל־1080 חלקים' }],
-  'yom/bekarov': [],
+  'yom/shemesh': [{ ref: 'J. Meeus, Astronomical Algorithms, פרקים 25, 28', note: 'נטיית השמש ומשוואת הזמן' }, { ref: 'NOAA Solar Calculator', note: 'אותו מודל משמש את KosherJava' }],
+  'yom/zmanim': [{ ref: 'src/content/zmanimOpinions.ts', note: 'מקור לכל שיטה בנפרד; ייחוסים שלא אומתו מסומנים TODO: verify' }],
+  'yom/mad': [{ ref: 'J. Meeus, Astronomical Algorithms, פרק 13', note: 'גובה השמש' }],
+  'yom/gova': [{ ref: 'J. Meeus, Astronomical Algorithms, פרק 16', note: 'שבירת אור (Bennett)' }, { ref: 'שקיעת האופק ≈ 1.76′·√h', note: 'נוסחה ניווטית מקובלת' }],
+  'yom/shnati': [{ ref: 'src/content/zmanimOpinions.ts' }],
   'chodesh/levana': [{ ref: KITZUR, note: 'אורך חודש הלבנה' }, { ref: `${KH}, פרק ו` }],
   'chodesh/maslul': [{ ref: 'J. Meeus, Astronomical Algorithms, פרקים 25, 47', note: 'המודל האסטרונומי המקוצר' }],
   'chodesh/shamayim': [{ ref: 'J. Meeus, Astronomical Algorithms, פרקים 13, 15', note: 'גובה ואזימוט, זריחה ושקיעה' }],

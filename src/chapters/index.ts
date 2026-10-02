@@ -1,7 +1,11 @@
 import type { ChapterDef, FlatSlide } from './types';
 import { Opening } from './01-yesodot/Opening';
 import { Units } from './01-yesodot/Units';
-import { DayComingSoon } from './02-yom/ComingSoon';
+import { Sun } from './02-yom/Sun';
+import { Zmanim } from './02-yom/Zmanim';
+import { Gauge } from './02-yom/Gauge';
+import { Horizon } from './02-yom/Horizon';
+import { Annual } from './02-yom/Annual';
 import { LunarMonth } from './03-chodesh/LunarMonth';
 import { MoonMonth } from './03-chodesh/MoonMonth';
 import { SkyAbove } from './03-chodesh/SkyAbove';
@@ -26,7 +30,11 @@ export const CHAPTERS: ChapterDef[] = [
     { id: 'yehidot', title: 'יום, שעה וחלק', Component: Units },
   ] },
   { id: 'yom', num: 2, title: 'היום', slides: [
-    { id: 'bekarov', title: 'השמש וזמני היום', Component: DayComingSoon },
+    { id: 'shemesh', title: 'למה השמש זורחת בזמנים שונים', Component: Sun },
+    { id: 'zmanim', title: 'זמני היום כשיטות', Component: Zmanim },
+    { id: 'mad', title: 'מד שקיעה', Component: Gauge },
+    { id: 'gova', title: 'גובה ואופק', Component: Horizon },
+    { id: 'shnati', title: 'לוח זמנים שנתי', Component: Annual },
   ] },
   { id: 'chodesh', num: 3, title: 'החודש', slides: [
     { id: 'levana', title: 'חודש הלבנה', Component: LunarMonth },

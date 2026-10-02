@@ -2,7 +2,11 @@
 export const SLIDE_PATHS = [
   'yesodot/petiha',
   'yesodot/yehidot',
-  'yom/bekarov',
+  'yom/shemesh',
+  'yom/zmanim',
+  'yom/mad',
+  'yom/gova',
+  'yom/shnati',
   'chodesh/levana',
   'chodesh/maslul',
   'chodesh/shamayim',

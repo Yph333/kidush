@@ -31,9 +31,9 @@ export const GLOSSARY = {
   shinui: { term: 'שינוי מראה', def: 'ההבדל בין מקום הירח כפי שהוא נראה מפני הארץ לבין מקומו כפי שהיה נראה ממרכז הארץ (פרלקסה).', source: `${KH}, פרק יז`, slide: 'reiya/reiya' },
   keshet: { term: 'קשת הראייה', def: 'התוצאה הסופית בחשבון הרמב״ם: כמה הירח רחוק מהשמש לעניין הראייה, אחרי כל התיקונים.', source: `${KH}, פרק יז`, slide: 'reiya/reiya' },
   kitzei: { term: 'קיצי הראייה', def: 'הגבולות שבהם מכריעים אם הסהר ייראה: השוואה בין קשת הראייה לאורך הראשון.', source: `${KH}, פרק יז`, slide: 'reiya/reiya' },
-  shaaZmanit: { term: 'שעה זמנית', def: 'חלק אחד משנים עשר של היום. אורכה משתנה לפי עונת השנה ולפי השיטה שבה מגדירים את תחילת היום וסופו.', source: 'TODO: verify', slide: 'yom/bekarov' },
-  alot: { term: 'עלות השחר', def: 'תחילת האור לפני הזריחה. מחושב לפי זווית השמש מתחת לאופק או לפי מספר דקות קבוע, לפי השיטות השונות.', source: 'TODO: verify', slide: 'yom/bekarov' },
-  tzeit: { term: 'צאת הכוכבים', def: 'הזמן שבו רואים שלושה כוכבים בינוניים. מחושב לפי זווית השמש מתחת לאופק או לפי דקות קבועות, לפי השיטות השונות.', source: 'TODO: verify', slide: 'yom/bekarov' },
+  shaaZmanit: { term: 'שעה זמנית', def: 'חלק אחד משנים עשר של היום. אורכה משתנה לפי עונת השנה ולפי השיטה שבה מגדירים את תחילת היום וסופו.', source: 'TODO: verify', slide: 'yom/zmanim' },
+  alot: { term: 'עלות השחר', def: 'תחילת האור לפני הזריחה. מחושב לפי זווית השמש מתחת לאופק או לפי מספר דקות קבוע, לפי השיטות השונות.', source: 'TODO: verify', slide: 'yom/zmanim' },
+  tzeit: { term: 'צאת הכוכבים', def: 'הזמן שבו רואים שלושה כוכבים בינוניים. מחושב לפי זווית השמש מתחת לאופק או לפי דקות קבועות, לפי השיטות השונות.', source: 'TODO: verify', slide: 'yom/mad' },
 } satisfies Record<string, GlossaryEntry>;
 
 export type GlossaryKey = keyof typeof GLOSSARY;

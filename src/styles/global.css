@@ -7,6 +7,8 @@
   --sans: "Assistant", "Segoe UI", "Arial Hebrew", Arial, sans-serif;
   --rashi: "Noto Rashi Hebrew", "Frank Ruhl Libre", "David", serif;
   --map-w: 17rem;
+  /* chart series (dataviz reference palette, validated on these surfaces) */
+  --s1: #2a78d6; --s2: #eb6834; --s3: #1baf7a; --s4: #eda100;
   color-scheme: light;
 }
 @media (prefers-color-scheme: dark) {
@@ -14,12 +16,14 @@
     --bg: #131A30; --panel: #1B2441; --panel2: #232F4F; --ink: #EDE9DD; --muted: #9BA4BF; --line: #33405F;
     --moon: #E7C76F; --moon-soft: #3B3828; --shift: #EF8F76; --shift-soft: #4A2D2C; --leap: #88C5D8; --leap-soft: #1F3D49;
     --night: #222C4A; --day: #2D3A5D; --ok: #7FCE9C; --ok-soft: #1F3B2C; color-scheme: dark;
+    --s1: #3987e5; --s2: #d95926; --s3: #199e70; --s4: #c98500;
   }
 }
 :root[data-theme="dark"] {
   --bg: #131A30; --panel: #1B2441; --panel2: #232F4F; --ink: #EDE9DD; --muted: #9BA4BF; --line: #33405F;
   --moon: #E7C76F; --moon-soft: #3B3828; --shift: #EF8F76; --shift-soft: #4A2D2C; --leap: #88C5D8; --leap-soft: #1F3D49;
   --night: #222C4A; --day: #2D3A5D; --ok: #7FCE9C; --ok-soft: #1F3B2C; color-scheme: dark;
+    --s1: #3987e5; --s2: #d95926; --s3: #199e70; --s4: #c98500;
 }
 
 html { font-size: clamp(15px, 0.7vw + 9px, 23px); }
@@ -248,7 +252,7 @@ svg.full, .viz .full { width: 100%; }
 .step.bad .sn { background: var(--shift); color: var(--panel); }
 .step.good .sn { background: var(--ok); color: var(--panel); }
 .sl { color: var(--muted); font-size: .9rem; }
-.sv { font-size: 1.1rem; font-weight: 700; overflow-wrap: anywhere; }
+.sv { font-size: 1.1rem; font-weight: 700; overflow-wrap: break-word; min-width: 0; }
 .sv .sig { font-size: 1.2rem; }
 .ss { font-size: .85rem; color: var(--muted); }
 .result { padding: .7rem 1rem; border-radius: 10px; background: var(--moon-soft); font-weight: 700; }
@@ -363,3 +367,65 @@ svg.full, .viz .full { width: 100%; }
 .bars tr.bad .bar i { background: var(--shift); }
 .bars .ex { display: block; font-size: .78rem; }
 .ex-list { margin: 0 0 .6rem; padding-inline-start: 1.1rem; }
+
+/* ===== charts ===== */
+.lchart { position: relative; width: 100%; }
+.lchart svg { width: 100%; height: auto; display: block; touch-action: pan-y; }
+.lchart .grid { stroke: var(--line); stroke-width: 1; opacity: .7; }
+.lchart .axis { font-family: var(--sans); font-size: 12px; fill: var(--muted); }
+.lchart .refline { stroke: var(--muted); stroke-width: 1; stroke-dasharray: 4 4; }
+.lchart .reflabel { font-family: var(--sans); font-size: 11px; fill: var(--muted); }
+.lchart .marker { stroke: var(--ink); stroke-width: 1.5; }
+.lchart .crosshair { stroke: var(--muted); stroke-width: 1; }
+.lchart .dlabel { font-family: var(--sans); font-size: 12px; font-weight: 700; fill: var(--ink); }
+.lchart .tip { position: absolute; top: .3rem; background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: .3rem .55rem; font-size: .8rem; box-shadow: 0 4px 14px rgb(0 0 0 / .15); pointer-events: none; white-space: nowrap; }
+.lchart .tip i { display: inline-block; width: .6rem; height: .6rem; border-radius: 2px; margin-inline-end: .3rem; }
+.chart-title { font-family: var(--serif); font-weight: 700; margin: 0 0 .2rem; width: 100%; }
+
+/* ===== chapter 2: zmanim ===== */
+.disclaimer { font-size: .82rem; color: var(--muted); border-inline-start: 3px solid var(--line); padding-inline-start: .6rem; margin-top: 1rem; }
+.muted { color: var(--muted); }
+.zt { width: 100%; border-collapse: collapse; font-size: .92rem; }
+.zt caption { text-align: start; color: var(--muted); font-size: .85rem; padding-bottom: .4rem; }
+.zt th, .zt td { padding: .45rem .4rem; border-bottom: 1px solid var(--line); vertical-align: top; text-align: start; }
+.zt thead th { color: var(--muted); font-size: .8rem; }
+.zt tbody th { white-space: nowrap; font-family: var(--serif); font-size: 1.05rem; }
+.zt .ztime { font-size: 1.25rem; font-weight: 800; white-space: nowrap; }
+.zops { gap: .25rem; }
+.zops button { font-family: var(--sans); font-weight: 600; font-size: .85rem; padding: .15rem .5rem; }
+.zops button small { color: var(--muted); font-weight: 400; margin-inline-start: .2rem; }
+.zops button[aria-checked=true] { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+.zops button[aria-checked=true] small { color: inherit; opacity: .8; }
+.zdef { font-size: .82rem; margin-top: .3rem; }
+.src-ref { color: var(--muted); }
+.passed { list-style: none; margin: .6rem 0 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(10rem, 1fr)); gap: .25rem .6rem; font-size: .88rem; }
+.passed li { color: var(--muted); }
+.passed li.on { color: var(--ink); font-weight: 700; }
+.profile { border: 1px solid var(--line); border-radius: 10px; margin: .6rem 0 0; padding: .4rem .7rem .6rem; display: flex; flex-wrap: wrap; gap: .4rem .7rem; }
+.profile legend { font-size: .8rem; color: var(--muted); padding: 0 .3rem; }
+.profile .fld input { width: 4.6rem; direction: ltr; text-align: center; }
+.skyline { fill: var(--muted); opacity: .45; }
+.colpick { display: grid; grid-template-columns: repeat(auto-fill, minmax(10.5rem, 1fr)); gap: .3rem .8rem; margin-bottom: .8rem; }
+.colpick small { color: var(--muted); }
+.annual { width: 100%; border-collapse: collapse; font-size: .85rem; }
+.annual caption { text-align: start; color: var(--muted); padding-bottom: .4rem; }
+.annual th, .annual td { padding: .2rem .4rem; border-bottom: 1px solid var(--line); text-align: start; white-space: nowrap; }
+.annual thead th { position: sticky; top: 0; background: var(--panel); color: var(--muted); font-size: .78rem; white-space: normal; }
+.annual tr.shabbat { background: var(--panel2); }
+.print-table { max-height: 70vh; overflow: auto; display: block; }
+
+@media print {
+  .has-print > .text, .has-print .stage > *:not(.print-table) { display: none !important; }
+  .has-print { display: block; padding: 0; }
+  .print-table { max-height: none; overflow: visible; border: 0; padding: 0; }
+  .annual { font-size: 9pt; }
+  .annual thead th { position: static; }
+  .annual tr { break-inside: avoid; }
+}
+
+/* steps in a narrow panel: value under the label */
+.engine { container-type: inline-size; }
+@container (max-width: 36rem) {
+  .step { grid-template-columns: 1.8rem minmax(0, 1fr); }
+  .step > div:last-child { grid-column: 2; }
+}

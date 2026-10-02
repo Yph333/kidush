@@ -60,6 +60,7 @@ docs/  tests/  legacy/
 - `npm test` — unit tests (must pass before any commit)
 - `npm run e2e` — Playwright screenshots of every slide in both modes, desktop 1600×900 and mobile 390×800
 - `npm run build` / `npm run build:single`
+- `npm run oracle:zmanim` — regenerate tests/zmanim-oracle.json from KosherJava (needs a JDK + the jar in tools/kosherjava/lib)
 
 ## Working style
 - Work milestone by milestone (docs/SPEC.md §7). Finish a milestone with tests + screenshots before

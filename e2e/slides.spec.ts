@@ -145,3 +145,31 @@ test('sandbox: switching off גטר״ד produces a 356-day year, fast', async ({
   await expect(page.locator('.ex-list')).toContainText('356');
   if (info.project.name === 'desktop') await page.screenshot({ path: 'e2e/__screenshots__/desktop/sandbox-gatrad-off.png', fullPage: true });
 });
+
+test('zmanim: picking an opinion changes the time and the annual table; CSV downloads', async ({ page }, info) => {
+  test.skip(info.project.name !== 'desktop');
+  await page.goto('/#/yom/zmanim?y=5787&city=0&mode=explore');
+  const tzeit = page.locator('.zt tbody tr').filter({ hasText: 'צאת הכוכבים' });
+  const before = await tzeit.locator('.ztime').innerText();
+  await tzeit.getByRole('radio', { name: /רבנו תם, 72/ }).click();
+  await expect(tzeit.locator('.ztime')).not.toHaveText(before);
+  await page.goto('/#/yom/shnati?y=5787&city=0&mode=explore');
+  await expect(page.locator('.annual thead')).toContainText('רבנו תם, 72 דקות');
+  const rows = await page.locator('.annual tbody tr').count();
+  expect(rows).toBe(385);                         // תשפ״ז is a 385-day year
+  const [dl] = await Promise.all([page.waitForEvent('download'), page.getByRole('button', { name: 'הורדה כ־CSV' }).click()]);
+  expect(dl.suggestedFilename()).toMatch(/^zmanim-.*-5787\.csv$/);
+  const text = await (await dl.createReadStream()).toArray().then(b => Buffer.concat(b).toString('utf8'));
+  expect(text.split('\r\n').filter(Boolean)).toHaveLength(386);
+  expect(text).toContain('צאת הכוכבים (רבנו תם, 72 דקות)');
+});
+
+test('horizon: a ridge in the east delays the visible sunrise', async ({ page }) => {
+  await page.goto('/#/yom/gova?y=5787&city=0&mode=explore');
+  const last = page.locator('.step.final .ss');
+  const open = await last.innerText();
+  await page.getByRole('button', { name: 'הרים במזרח' }).click();
+  await expect(last).not.toHaveText(open);
+  const m = (await last.innerText()).match(/זריחה\s*(-?[\d.]+)/);
+  expect(Number(m![1])).toBeGreaterThan(5);
+});
