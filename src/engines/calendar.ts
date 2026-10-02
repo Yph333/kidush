@@ -240,3 +240,109 @@ export function fmtDur(t: number): string {
 
 /** Normalise parts to within one week (for excess arithmetic). */
 export const weekParts = wk;
+
+// ---- Shmuel's tekufot and the great (28-year) cycle (from legacy app.js, slide 6)
+
+export interface Tekufot {
+  /** great cycle number (1-based) */
+  cycle: number;
+  /** year within the great cycle (1–28) */
+  year: number;
+  /** hours from the start of Sunday night (0–168), Shmuel. Tishrei is the one before Nisan of the same year. */
+  tishrei: number;
+  tevet: number;
+  nisan: number;
+  tammuz: number;
+}
+
+const wkH = (H: number): number => ((H % 168) + 168) % 168;
+
+export function tekufotShmuel(y: number): Tekufot {
+  const cycle = Math.floor((y - 1) / 28) + 1, n = (y - 1) % 28 + 1, N = 72 + 30 * (n - 1);
+  return { cycle, year: n, tishrei: wkH(N - 15), tevet: wkH(N - 7.5), nisan: wkH(N), tammuz: wkH(N + 7.5) };
+}
+
+/** First year ≥ y that begins a great cycle (Birkat HaChama in its Nisan). */
+export function nextBirkatHachama(y: number): number {
+  const n = (y - 1) % 28 + 1;
+  return n === 1 ? y : y + (29 - n);
+}
+
+// ---- step-by-step decompositions used by the teaching slides
+
+export interface MonthsBeforeSteps {
+  /** whole years elapsed (y − 1) */
+  years: number;
+  /** whole 19-year cycles */
+  cycles: number;
+  /** years into the current cycle */
+  rem: number;
+  /** common / leap years among `rem` */
+  common: number;
+  leap: number;
+  /** = monthsBefore(y) */
+  total: number;
+}
+
+export function monthsBeforeSteps(y: number): MonthsBeforeSteps {
+  const years = y - 1, cycles = Math.floor(years / 19), rem = years % 19;
+  const leap = Math.floor((7 * rem + 1) / 19), common = rem - leap;
+  return { years, cycles, rem, common, leap, total: 235 * cycles + 12 * common + 13 * leap };
+}
+
+export interface ExcessStep {
+  kind: 'cycle' | 'pashut' | 'meubar' | 'month';
+  count: number;
+  /** excess per unit (parts, < one week) */
+  ex: number;
+  /** count × ex */
+  prod: number;
+  /** running molad, reduced to one week */
+  run: number;
+}
+
+/** The Kitzur method: Bahrad + cycles, common years, leap years and months, each reduced by whole weeks. */
+export function moladByExcess(y: number, mi = 0): { steps: ExcessStep[]; molad: number } {
+  const m = monthsBeforeSteps(y);
+  let run = BAHRAD;
+  const steps: ExcessStep[] = [];
+  const add = (kind: ExcessStep['kind'], count: number, ex: number) => {
+    const prod = count * ex;
+    run = wk(run + prod);
+    steps.push({ kind, count, ex, prod, run });
+  };
+  add('cycle', m.cycles, EX.cycle);
+  add('pashut', m.common, EX.pashut);
+  add('meubar', m.leap, EX.meubar);
+  if (mi > 0) add('month', mi, EX.month);
+  return { steps, molad: run };
+}
+
+/** Each dechiya's conditions for year y, in the order they are checked (mirrors rhFrom). */
+export interface DechiyotDetail {
+  wd: number;
+  hours: number;
+  /** parts into the molad day */
+  pp: number;
+  leap: boolean;
+  prevLeap: boolean;
+  zaken: boolean;
+  gatrad: { applies: boolean; checked: boolean; tuesday: boolean; common: boolean; late: boolean };
+  betu: { applies: boolean; checked: boolean; monday: boolean; afterLeap: boolean; late: boolean };
+  adu: { applies: boolean; candidate: number };
+}
+
+export function dechiyotDetail(y: number): DechiyotDetail {
+  const r = rh(y), L = isLeap(y), PL = isLeap(y - 1), pp = r.p, wd = r.wd;
+  const zaken = pp >= 18 * P_HOUR;
+  const gLate = pp >= 9 * P_HOUR + 204, bLate = pp >= 15 * P_HOUR + 589;
+  const gatrad = !zaken && wd === 2 && !L && gLate;
+  const betu = !zaken && !gatrad && wd === 1 && PL && bLate;
+  const adu = r.rules.includes('adu');
+  return {
+    wd, hours: Math.floor(pp / P_HOUR), pp, leap: L, prevLeap: PL, zaken,
+    gatrad: { applies: gatrad, checked: !zaken, tuesday: wd === 2, common: !L, late: gLate },
+    betu: { applies: betu, checked: !zaken && !gatrad, monday: wd === 1, afterLeap: PL, late: bLate },
+    adu: { applies: adu, candidate: r.day - (adu ? 1 : 0) },
+  };
+}

@@ -1,8 +1,9 @@
 import { describe, expect, it } from 'vitest';
 import vectors from '../../tests/vectors.json';
 import {
-  ALLOWED_LENGTHS, BAHRAD, EX, P_MONTH, currentYear, dayOfCivil, fmtDur, fmtMolad, gDate, gq, hebDate, isLeap,
-  keviut, moladTotal, monthStart, monthsOf, parseYear, pesachDay, rh, yearHeb, yearLen,
+  ALLOWED_LENGTHS, BAHRAD, EX, P_MONTH, currentYear, dayOfCivil, dechiyotDetail, fmtDur, fmtMolad, gDate, gq, hebDate, isLeap,
+  keviut, moladByExcess, moladTotal, monthStart, monthsBefore, monthsBeforeSteps, monthsOf, nextBirkatHachama, parseYear,
+  pesachDay, rh, tekufotShmuel, weekParts, yearHeb, yearLen,
 } from './calendar';
 import { rambamD0 } from './rambam';
 
@@ -90,5 +91,63 @@ describe('dates', () => {
     expect(currentYear(new Date(2026, 9, 2))).toBe(5787);
     expect(currentYear(new Date(2026, 8, 11))).toBe(5786);
     expect(currentYear(new Date(2026, 8, 12))).toBe(5787);
+  });
+});
+
+describe('tekufot (Shmuel) and the great cycle', () => {
+  it('5769 opens a great cycle: tekufat Nisan at the start of Wednesday night', () => {
+    const t = tekufotShmuel(5769);
+    expect(t.year).toBe(1);
+    expect(t.nisan).toBe(72);
+    expect(nextBirkatHachama(5769)).toBe(5769);
+    expect(gDate(pesachDay(5769)).getUTCFullYear()).toBe(2009);
+  });
+  it('next Birkat HaChama after 5769 is 5797', () => {
+    expect(nextBirkatHachama(5770)).toBe(5797);
+    expect(nextBirkatHachama(5787)).toBe(5797);
+  });
+  it('each year moves the tekufa by one day and six hours', () => {
+    for (const y of [5770, 5787, 5796]) {
+      expect((tekufotShmuel(y).nisan - tekufotShmuel(y - 1).nisan + 168) % 168).toBe(30);
+    }
+  });
+  it('tekufot are 91 days 7½ hours apart (7½ hours on the week)', () => {
+    const t = tekufotShmuel(5787);
+    expect((t.tevet - t.tishrei + 168) % 168).toBe(7.5);
+    expect((t.nisan - t.tevet + 168) % 168).toBe(7.5);
+    expect((t.tammuz - t.nisan + 168) % 168).toBe(7.5);
+  });
+});
+
+describe('teaching decompositions', () => {
+  it('monthsBeforeSteps adds up to monthsBefore', () => {
+    for (let y = 2; y <= 6000; y += 37) expect(monthsBeforeSteps(y).total).toBe(monthsBefore(y));
+  });
+  it('moladByExcess equals the direct molad for every month', () => {
+    for (const y of [4938, 5600, 5784, 5785, 5787, 5800]) {
+      monthsOf(y).forEach((_, mi) => {
+        expect(moladByExcess(y, mi).molad).toBe(weekParts(moladTotal(y, mi)));
+      });
+    }
+  });
+  it('Tishrei 5787 by excess', () => expect(fmtMolad(moladByExcess(5787).molad)).toBe('ז׳ ב׳ תתרס״ג'));
+});
+
+describe('dechiyotDetail', () => {
+  it('agrees with rh().rules for every year 5000–6500', () => {
+    for (let y = 5000; y <= 6500; y++) {
+      const d = dechiyotDetail(y), rules = rh(y).rules;
+      expect(d.zaken).toBe(rules.includes('zaken'));
+      expect(d.gatrad.applies).toBe(rules.includes('gatrad'));
+      expect(d.betu.applies).toBe(rules.includes('betu'));
+      expect(d.adu.applies).toBe(rules.includes('adu'));
+    }
+  });
+  it('vector years', () => {
+    for (const v of V.years) {
+      const d = dechiyotDetail(v.year);
+      const got = [d.zaken && 'zaken', d.gatrad.applies && 'gatrad', d.betu.applies && 'betu', d.adu.applies && 'adu'].filter(Boolean);
+      expect(got).toEqual(v.dechiyot);
+    }
   });
 });
