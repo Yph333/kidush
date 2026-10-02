@@ -9,7 +9,9 @@ import { Annual } from './02-yom/Annual';
 import { Dome } from './02-yom/Dome';
 import { InclinedOrbit } from './03-chodesh/InclinedOrbit';
 import { Seasons } from './04-shana/Seasons';
+import { Timeline } from './04-shana/Timeline';
 import { Wheels } from './07-reiya/Wheels';
+import { Tables } from './07-reiya/Tables';
 import { LunarMonth } from './03-chodesh/LunarMonth';
 import { MoonMonth } from './03-chodesh/MoonMonth';
 import { SkyAbove } from './03-chodesh/SkyAbove';
@@ -27,6 +29,8 @@ import { Sandbox } from './06-dechiyot/Sandbox';
 import { MeanTrue } from './07-reiya/MeanTrue';
 import { Visibility } from './07-reiya/Visibility';
 import { Calculator } from './08-kelim/Calculator';
+import { MonthCalendar } from './08-kelim/MonthCalendar';
+import { SourcePage } from './08-kelim/SourcePage';
 
 export const CHAPTERS: ChapterDef[] = [
   { id: 'yesodot', num: 1, title: 'יסודות', slides: [
@@ -51,6 +55,7 @@ export const CHAPTERS: ChapterDef[] = [
     { id: 'katan', title: 'המחזור הקטן', Component: SmallCycle },
     { id: 'gadol', title: 'המחזור הגדול', Component: GreatCycle },
     { id: 'tekufot', title: 'העונות והתקופות', Component: Seasons },
+    { id: 'tsir', title: 'הלוח מול העונות לאורך הדורות', Component: Timeline },
   ] },
   { id: 'luach', num: 5, title: 'הלוח הקבוע', slides: [
     { id: 'bahrad', title: 'בהר״ד: נקודת ההתחלה', Component: Bahrad },
@@ -69,9 +74,12 @@ export const CHAPTERS: ChapterDef[] = [
     { id: 'memutza', title: 'מולד ממוצע ומולד אמיתי', Component: MeanTrue },
     { id: 'reiya', title: 'נראות הירח', Component: Visibility },
     { id: 'galgalim', title: 'גלגלי הרמב״ם', Component: Wheels },
+    { id: 'tavlaot', title: 'הטבלאות של הרמב״ם', Component: Tables },
   ] },
   { id: 'kelim', num: 8, title: 'כלים', slides: [
     { id: 'machshevon', title: 'המחשבון המלא', Component: Calculator },
+    { id: 'luach', title: 'לוח שנה חודשי', Component: MonthCalendar },
+    { id: 'makor', title: 'הדף מהמקור', Component: SourcePage },
   ] },
 ];
 

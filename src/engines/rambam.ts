@@ -62,15 +62,35 @@ export function interp(tab: readonly number[], deg: number): number {
 }
 
 /** Circle-of-the-moon fraction by the moon's position. */
+/** [up to (deg of the moon's position, folded to 0–180), fraction, name] */
+export const CIRCLE_TABLE: readonly (readonly [number, number, string])[] = [[20, 2 / 5, 'שני חומשים'], [40, 1 / 3, 'שליש'], [50, 1 / 4, 'רביע'], [60, 1 / 5, 'חומש'], [70, 1 / 6, 'שתות'], [80, 1 / 12, 'חצי שתות'], [85, 1 / 24, 'רביע שתות'], [95, 0, 'כלום'], [100, 1 / 24, 'רביע שתות'], [110, 1 / 12, 'חצי שתות'], [120, 1 / 6, 'שתות'], [130, 1 / 5, 'חומש'], [140, 1 / 4, 'רביע'], [160, 1 / 3, 'שליש'], [180, 2 / 5, 'שני חומשים']];
+
 export function circleFrac(posMin: number): [number, string] {
   const x = (posMin / 60) % 180;
-  const T: [number, number, string][] = [[20, 2 / 5, 'שני חומשים'], [40, 1 / 3, 'שליש'], [50, 1 / 4, 'רביע'], [60, 1 / 5, 'חומש'], [70, 1 / 6, 'שתות'], [80, 1 / 12, 'חצי שתות'], [85, 1 / 24, 'רביע שתות'], [95, 0, 'כלום'], [100, 1 / 24, 'רביע שתות'], [110, 1 / 12, 'חצי שתות'], [120, 1 / 6, 'שתות'], [130, 1 / 5, 'חומש'], [140, 1 / 4, 'רביע'], [160, 1 / 3, 'שליש'], [180, 2 / 5, 'שני חומשים']];
-  for (const [lim, f, n] of T) if (x < lim) return [f, n];
+  for (const [lim, f, n] of CIRCLE_TABLE) if (x < lim) return [f, n];
   return [2 / 5, 'שני חומשים'];
 }
 
 /** Fourth-longitude correction by sign (17:12). As written in the translation — see VERIFICATION.md open points. */
 export const R_FOURTH: readonly (readonly [number, string])[] = [[1 / 6, 'מוסיפים שתותו'], [1 / 5, 'מוסיפים חומשו'], [1 / 6, 'מוסיפים שתותו'], [0, 'משאירים כמו שהוא'], [-1 / 5, 'גורעים חומשו'], [-1 / 3, 'גורעים שלישיתו'], [-1 / 3, 'גורעים שלישיתו'], [-1 / 5, 'גורעים חומשו'], [0, 'משאירים כמו שהוא'], [1 / 6, 'מוסיפים שתותו'], [1 / 5, 'מוסיפים חומשו'], [1 / 6, 'מוסיפים שתותו']];
+
+/** The same ranges as season(), for display: [from deg, to deg, arc-minutes]. Kept in step by a test. */
+export const SEASON_TABLE: readonly (readonly [number, number, number])[] = [
+  [345, 15, 0], [15, 60, 15], [60, 120, 30], [120, 165, 15], [165, 195, 0], [195, 240, -15], [240, 300, -30], [300, 345, -15],
+];
+
+/** Limits of sighting: [arc of sighting up to (deg), first longitude needed (deg)]. */
+export const SIGHTING_LIMITS: readonly (readonly [number, number])[] = [[10, 13], [11, 12], [12, 11], [13, 10], [14, 9]];
+
+/** First longitude (deg) needed for an arc of sighting A (deg), 9 < A ≤ 14. */
+export function limitNeed(A: number): number {
+  return A <= 10 ? 13 : A <= 11 ? 12 : A <= 12 ? 11 : A <= 13 ? 10 : 9;
+}
+
+/** Latitude course (whole degrees, 0–359) folded into 0–90 for the latitude table. */
+export function foldLatCourse(lc: number): number {
+  return lc <= 90 ? lc : lc <= 180 ? 180 - lc : lc <= 270 ? lc - 180 : 360 - lc;
+}
 
 /** Seasonal adjustment to the mean moon at sunset by the mean sun, arc-minutes. */
 export function season(sunDeg: number): number {
@@ -161,7 +181,7 @@ export function rambam(dayIdx: number): RambamResult {
   const latCourse = nM(moonTrue - head);
   const latCourseR = Math.round(latCourse / 60) % 360;
   const lc = latCourseR;
-  const l2 = lc <= 90 ? lc : lc <= 180 ? 180 - lc : lc <= 270 ? lc - 180 : 360 - lc;
+  const l2 = foldLatCourse(lc);
   const lat1 = Math.round(interp(R_LAT, l2));
   const north = lc > 0 && lc < 180;
 
@@ -195,7 +215,7 @@ export function rambam(dayIdx: number): RambamResult {
   } else if (A <= 9) { visible = false; reason = { kind: 'arcAtMost9' }; }
   else if (A > 14) { visible = true; reason = { kind: 'arcAbove14' }; }
   else {
-    const need = A <= 10 ? 13 : A <= 11 ? 12 : A <= 12 ? 11 : A <= 13 ? 10 : 9;
+    const need = limitNeed(A);
     visible = L >= need;
     reason = { kind: 'limits', arc, need, long1 };
   }

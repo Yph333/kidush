@@ -25,6 +25,7 @@ export const SOURCES: Record<SlidePath, SourceRef[]> = {
   'shana/katan': [{ ref: `${KH}, פרק ו`, note: 'מחזור של 19 שנה וסימן גו״ח אדז״ט' }],
   'shana/gadol': [{ ref: KITZUR, note: 'אורך התקופה' }, { ref: `${KH}, פרק ט`, note: 'תקופת שמואל' }, { ref: 'ברכות נט ע״ב', note: 'ברכת החמה. TODO: verify' }],
   'shana/tekufot': [{ ref: `${KH}, פרקים ט–י`, note: 'תקופות שמואל ורב אדא; מספרי ההלכות: TODO: verify' }, { ref: 'J. Meeus, Astronomical Algorithms, פרק 27', note: 'שוויון ויפוך' }],
+  'shana/tsir': [{ ref: `${KH}, פרקים ט–י` }, { ref: 'שולחן ערוך, אורח חיים, סימן קיז', note: 'טל ומטר בחוץ לארץ. TODO: verify' }],
   'luach/bahrad': [{ ref: `${KH}, פרק ו`, note: 'מולד בהר״ד' }],
   'luach/odfim': [{ ref: KITZUR, note: 'חישוב בעודפים' }, { ref: `${KH}, פרק ו` }],
   'luach/sugim': [{ ref: `${KH}, פרק ח`, note: 'חודשים מלאים וחסרים' }],
@@ -40,5 +41,8 @@ export const SOURCES: Record<SlidePath, SourceRef[]> = {
     { ref: 'M. Sh. Odeh, “New Criterion for Lunar Crescent Visibility”, Experimental Astronomy 18', note: 'TODO: verify year' },
   ],
   'reiya/galgalim': [{ ref: `${KH}, פרקים יד–טו`, note: 'גלגל קטן בתוך גלגל גדול; לוח מנת המסלול' }],
+  'kelim/luach': [{ ref: 'שולחן ערוך, אורח חיים, סימנים תקמט–תקנ, תרפו', note: 'דחיית הצומות. TODO: verify' }],
+  'reiya/tavlaot': [{ ref: `${KH}, פרקים יב–יז`, note: 'הטבלאות; מספרי ההלכות לכל טבלה: TODO: verify' }],
+  'kelim/makor': [{ ref: 'ויקיטקסט: רמב״ם הלכות קידוש החודש ו–ח (דפוס וורשא־ווילנא)' }],
   'kelim/machshevon': [{ ref: KITZUR }, { ref: `${KH}, פרקים ו–ח` }],
 };

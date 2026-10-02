@@ -10,6 +10,8 @@ export interface Series {
   color: string;
   /** one y per x index; null = gap */
   values: (number | null)[];
+  /** thin, translucent, no direct label (e.g. the raw data behind a smoothed line of the same entity) */
+  faint?: boolean;
 }
 
 export interface RefLine { y: number; label: string }
@@ -92,9 +94,9 @@ export function LineChart({
         ))}
         {marker != null && <line x1={X(marker)} x2={X(marker)} y1={padT} y2={H - padB} className="marker" />}
         <g clipPath={`url(#${id})`}>
-          {series.map(s => <path key={s.key} d={path(s.values)} fill="none" stroke={s.color} strokeWidth="2" strokeLinejoin="round" />)}
+          {series.map(s => <path key={s.key} d={path(s.values)} fill="none" stroke={s.color} strokeWidth={s.faint ? 1 : 2} strokeOpacity={s.faint ? 0.3 : 1} strokeLinejoin="round" />)}
         </g>
-        {series.map(s => {
+        {series.filter(s => !s.faint).map(s => {
           // direct label at the right (first) end of the line, in the right margin
           let i = 0;
           while (i < s.values.length - 1 && (s.values[i] === null || !Number.isFinite(s.values[i]!))) i++;
@@ -115,9 +117,9 @@ export function LineChart({
           ))}
         </div>
       )}
-      {series.length > 1 && (
+      {series.filter(s => !s.faint).length > 1 && (
         <div className="legend">
-          {series.map(s => <span key={s.key}><i style={{ background: s.color }} />{s.label}</span>)}
+          {series.filter(s => !s.faint).map(s => <span key={s.key}><i style={{ background: s.color }} />{s.label}</span>)}
         </div>
       )}
     </div>

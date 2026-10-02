@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import vectors from '../../tests/vectors.json';
 import { monthStart, monthsOf } from './calendar';
-import { RB, type RambamResult, moonEquation, rambam, rambamD0, rMotion } from './rambam';
+import { RB, type RambamResult, SEASON_TABLE, SIGHTING_LIMITS, circleFrac, limitNeed, moonEquation, rambam, rambamD0, rMotion, season } from './rambam';
 
 const V = vectors.rambamExample;
 // Night of Friday, 2 Iyar 4938
@@ -76,5 +76,24 @@ describe('moonEquation (teaching helper)', () => {
   });
   it('is symmetric around 180°', () => {
     for (const c of [10, 95, 108, 170]) expect(moonEquation(360 - c).eq).toBe(moonEquation(c).eq);
+  });
+});
+
+describe('display tables agree with the functions', () => {
+  it('SEASON_TABLE matches season() for every degree', () => {
+    for (let d = 0; d < 360; d += 0.5) {
+      const row = SEASON_TABLE.find(([a, b]) => (a < b ? d >= a && d < b : d >= a || d < b))!;
+      expect(row[2], `${d}°`).toBe(season(d));
+    }
+  });
+  it('SIGHTING_LIMITS matches limitNeed()', () => {
+    for (let k = 181; k <= 280; k++) {
+      const A = k / 20;
+      const row = SIGHTING_LIMITS.find(([upTo]) => A <= upTo)!;
+      expect(row[1]).toBe(limitNeed(A));
+    }
+  });
+  it('CIRCLE_TABLE drives circleFrac', () => {
+    expect(circleFrac(18 * 60 + 36 + 30 * 60)).toEqual([1 / 4, 'רביע']);   // the worked example: 48° 36′ → ¼
   });
 });

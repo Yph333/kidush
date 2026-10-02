@@ -448,3 +448,36 @@ svg.full, .viz .full { width: 100%; }
 .scene-2d { width: 100%; }
 .scene-2d svg { width: 100%; height: auto; display: block; }
 @media (max-width: 760px) { .scene-host { height: 380px !important; } }
+
+/* ===== monthly calendar ===== */
+.cal-wrap { display: flex; flex-direction: column; gap: 1.2rem; max-height: none; }
+.cal-month h3 { margin: 0 0 .4rem; }
+.cal-month h3 small { font-family: var(--sans); font-weight: 400; color: var(--muted); font-size: .85rem; }
+.cal { width: 100%; border-collapse: collapse; table-layout: fixed; background: var(--panel); }
+.cal th { font-size: .78rem; color: var(--muted); padding: .3rem; border: 1px solid var(--line); background: var(--panel2); }
+.cal td { vertical-align: top; height: 5.6rem; padding: .25rem .3rem; border: 1px solid var(--line); font-size: .78rem; overflow: hidden; }
+.cal td.empty { background: var(--bg); }
+.cal td.shabbat { background: var(--leap-soft); }
+.cal td.yomtov { background: var(--moon-soft); }
+.cal td.fast { box-shadow: inset 0 0 0 2px var(--shift-soft); }
+.cal-d { display: flex; justify-content: space-between; align-items: baseline; }
+.cal-d b { font-family: var(--serif); font-size: 1.15rem; }
+.cal-d span { color: var(--muted); font-size: .72rem; }
+.cal-h { font-weight: 700; line-height: 1.25; margin-top: .1rem; }
+.cal-h.fast { color: var(--shift); }
+.cal-h.roshchodesh, .cal-h.minor { color: var(--leap); font-weight: 600; }
+.cal-h.chanukah { color: var(--moon); }
+.cal-z { margin-top: .15rem; color: var(--muted); font-size: .72rem; }
+@media (max-width: 760px) { .cal td { height: 4.2rem; font-size: .66rem; padding: .15rem; } .cal-d b { font-size: .95rem; } .cal th { font-size: .6rem; } }
+@media print {
+  .cal-month { break-after: page; }
+  .cal td { height: 2.6cm; font-size: 8.5pt; }
+  .cal td.shabbat, .cal td.yomtov { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+}
+
+/* ===== Rambam live tables ===== */
+.tgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(17rem, 1fr)); gap: .9rem; align-items: start; }
+.tcard .rtable { font-size: .82rem; }
+.tcard .rtable td, .tcard .rtable th { padding: .15rem .4rem; }
+.tcard .table-wrap { max-height: 16rem; overflow: auto; }
+.tcard-x { margin-top: .5rem; font-size: .88rem; }

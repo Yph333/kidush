@@ -198,3 +198,25 @@ test.describe('3D scenes', () => {
     });
   }
 });
+
+test('monthly calendar: Av 5782 shows Tisha BeAv postponed to Sunday', async ({ page }) => {
+  await page.goto('/#/kelim/luach?y=5782&city=0&mode=explore');
+  await page.locator('.cal-slide select').first().selectOption({ label: 'אב' });
+  const cell = page.locator('.cal td').filter({ hasText: 'תשעה באב' });
+  await expect(cell).toHaveCount(1);
+  await expect(cell).toContainText('(נדחה)');
+  await expect(cell).toContainText('7/8');
+  expect(await cell.evaluate(td => (td as HTMLTableCellElement).cellIndex)).toBe(0);   // Sunday column
+});
+
+test('Rambam tables: the worked example highlights the right rows', async ({ page }, info) => {
+  test.skip(info.project.name !== 'desktop');
+  await page.goto('/#/reiya/tavlaot?y=5787&city=0&mode=explore');
+  await page.getByRole('button', { name: /הדוגמה של הרמב״ם/ }).click();
+  await expect(page.locator('.slide')).toContainText('ליל ב׳ אייר');
+  const card = (t: string) => page.locator('.tcard').filter({ hasText: t });
+  await expect(card('המרחק הכפול').locator('tr.hl')).toContainText('32°–38°');
+  await expect(card('מנת המסלול של הירח').locator('tr.hl')).toHaveCount(2);
+  await expect(card('קיצי הראייה').locator('tr.hl')).toContainText('11°');
+  await expect(card('קיצי הראייה')).toContainText('11° 11′');
+});

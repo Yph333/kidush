@@ -15,6 +15,7 @@ export const SLIDE_PATHS = [
   'shana/katan',
   'shana/gadol',
   'shana/tekufot',
+  'shana/tsir',
   'luach/bahrad',
   'luach/odfim',
   'luach/sugim',
@@ -27,7 +28,10 @@ export const SLIDE_PATHS = [
   'reiya/memutza',
   'reiya/reiya',
   'reiya/galgalim',
+  'reiya/tavlaot',
   'kelim/machshevon',
+  'kelim/luach',
+  'kelim/makor',
 ] as const;
 
 export type SlidePath = (typeof SLIDE_PATHS)[number];
