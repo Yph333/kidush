@@ -8,6 +8,7 @@ import { type StepRow, Steps } from '../../components/Steps';
 import { Chips, Civil, Num, Sig } from '../../components/text';
 import { dayWord } from '../../lib/format';
 import { useStore } from '../../state/store';
+import { OurYear } from './OurYear';
 import { findYears, moladOf } from './shared';
 
 const ADU = [0, 3, 5];
@@ -15,7 +16,7 @@ const ADU = [0, 3, 5];
 export function Zaken() {
   const [m, setM] = useState({ d: 1, h: 18, p: 187 });
   const demo = useStore(s => s.demoYear);
-  const examples = useMemo(() => findYears(y => rh(y).rules[0] === 'zaken', demo, demo + 40, 6), [demo]);
+  const examples = useMemo(() => findYears(y => rh(y).rules[0] === 'zaken', demo + 1, demo + 40, 6), [demo]);
   const t = moladParts(m), z = m.h >= 18;
   const r = rhFrom(t, false, false, { gatrad: true, betu: true });
   const cand = z ? (m.d + 1) % 7 : m.d;
@@ -50,6 +51,7 @@ export function Zaken() {
           <Steps rows={rows} />
           <Chips label="שנים עם מולד זקן:" items={examples} onPick={y => setM(moladOf(y))} render={yearHeb} />
         </Engine>
+        <OurYear which="zaken" />
       </>}
     />
   );

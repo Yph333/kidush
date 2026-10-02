@@ -15,6 +15,7 @@ import { Adu } from './06-dechiyot/Adu';
 import { Zaken } from './06-dechiyot/Zaken';
 import { Gatrad } from './06-dechiyot/Gatrad';
 import { Betu } from './06-dechiyot/Betu';
+import { Sandbox } from './06-dechiyot/Sandbox';
 import { MeanTrue } from './07-reiya/MeanTrue';
 import { Visibility } from './07-reiya/Visibility';
 import { Calculator } from './08-kelim/Calculator';
@@ -47,6 +48,7 @@ export const CHAPTERS: ChapterDef[] = [
     { id: 'zaken', title: 'מולד זקן', Component: Zaken },
     { id: 'gatrad', title: 'גטר״ד', Component: Gatrad },
     { id: 'betu', title: 'בטו תקפט', Component: Betu },
+    { id: 'argaz', title: 'ארגז חול: בלי הדחיות', Component: Sandbox },
   ] },
   { id: 'reiya', num: 7, title: 'ראייה מול חשבון', slides: [
     { id: 'memutza', title: 'מולד ממוצע ומולד אמיתי', Component: MeanTrue },

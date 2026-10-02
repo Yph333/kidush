@@ -16,6 +16,7 @@ export const SLIDE_PATHS = [
   'dechiyot/zaken',
   'dechiyot/gatrad',
   'dechiyot/betu',
+  'dechiyot/argaz',
   'reiya/memutza',
   'reiya/reiya',
   'kelim/machshevon',

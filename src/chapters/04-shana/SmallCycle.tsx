@@ -1,5 +1,7 @@
 import { LEAP_POS, isLeap, yearHeb } from '../../engines/calendar';
 import { Term } from '../../components/Glossary';
+import { GuessGate, useGateDone } from '../../components/GuessGate';
+import { gateKey } from '../../content/gates';
 import { Ring } from '../../components/Ring';
 import { Engine, Slide, Viz } from '../../components/Slide';
 import { Steps } from '../../components/Steps';
@@ -39,6 +41,7 @@ function Drift({ cur }: { cur: number }) {
 export function SmallCycle() {
   const yr = useSlideYear();
   const y = yr.y, c = Math.floor((y - 1) / 19), r = (y - 1) % 19, pos = r + 1, L = isLeap(y), v = (7 * y + 1) % 19;
+  const key = gateKey('leap', y), done = useGateDone(key);
   return (
     <Slide
       kicker="השנה · 1"
@@ -52,12 +55,15 @@ export function SmallCycle() {
       stage={<>
         <Viz>
           <Ring n={19} cls={i => (LEAPS.includes(i) ? 'rl' : 'rp')} cur={pos}
-            center={['מחזור ' + NUM(c + 1), `שנה ${pos}`, L ? 'מעוברת' : 'פשוטה']} aria="מחזור של 19 שנה" />
+            center={['מחזור ' + NUM(c + 1), `שנה ${pos}`, done ? (L ? 'מעוברת' : 'פשוטה') : '?']} aria="מחזור של 19 שנה" />
           <div className="explore-only full"><Drift cur={pos} /></div>
           <Legend items={[['var(--leap-soft)', 'שנה מעוברת: מוסיפים חודש והפער מתאפס'], ['var(--moon-soft)', 'שנה פשוטה: הלבנה מקדימה כ־11 יום']]} />
         </Viz>
         <Engine title="איפה השנה במחזור" sub="ומעוברת או פשוטה">
           <div className="ctl"><SlideYear yr={yr} /></div>
+          <GuessGate gateKey={key} kind={{ type: 'yesno' }} answer={L}
+            question={<>האם {yearHeb(y)} שנה מעוברת?</>}
+            explain={<>שנה <Num>{pos}</Num> במחזור {L ? 'נמצאת' : 'לא נמצאת'} בגו״ח אדז״ט.</>}>
           <Steps rows={[
             { l: 'מחלקים ב־19', v: <><Num>{`(${NUM(y)} − 1) ÷ 19 = ${NUM(c)}`}</Num>, שארית <Num>{r}</Num></> },
             { l: 'המקום במחזור', v: <>מחזור <Num>{NUM(c + 1)}</Num>, שנה <Num>{pos}</Num></> },
@@ -65,6 +71,7 @@ export function SmallCycle() {
             { l: 'בדיקה מהירה בנוסחה', v: <Num>{`(7 × ${y} + 1) mod 19 = ${v}`}</Num>, s: <><Num>{v}</Num> {v < 7 ? 'קטן מ־7 ← מעוברת' : 'לא קטן מ־7 ← פשוטה'}</> },
             { l: yearHeb(y), v: L ? <Tag tone="leap">שנה מעוברת: 13 חודשים</Tag> : <Tag tone="moon">שנה פשוטה: 12 חודשים</Tag>, c: 'final' },
           ]} />
+          </GuessGate>
         </Engine>
       </>}
     />

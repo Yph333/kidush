@@ -6,11 +6,13 @@ import { AstroControls, CivStr } from '../../components/astro/AstroControls';
 import { useAstro } from '../../components/astro/useAstro';
 import { SkyPanorama } from '../../components/astro/visuals';
 import { Term } from '../../components/Glossary';
+import { GuessGate } from '../../components/GuessGate';
+import { gateKey } from '../../content/gates';
 import { Engine, Slide, Viz } from '../../components/Slide';
 import { Steps } from '../../components/Steps';
 import { DM, DMS, GDate, Num, Pos, Tag } from '../../components/text';
 import { NUM, dayWord, hrs } from '../../lib/format';
-import { setAstro, setState } from '../../state/store';
+import { setAstro, setState, useStore } from '../../state/store';
 
 const ZoneTag = ({ z }: { z: OdehZone }) => <Tag tone={ZONE[z].tone}>{z} · {ZONE[z].label}</Tag>;
 const RTag = ({ R }: { R: RambamResult }) => (R.visible ? <Tag tone="ok">נראה</Tag> : <Tag tone="bad">לא נראה</Tag>);
@@ -82,6 +84,9 @@ export function Visibility() {
   const mz = splitParts(moladTotal(M.y, M.mi) % P_DAY).h;
   const R = o ? rambam(dayOfMs(o.ss + 60000, c)) : null;
   const hd = R ? hebDate(R.N + rambamD0()) : null;
+  const guesses = useStore(st => st.guesses);
+  const visKey = (di: number) => gateKey('vis', `${di}-${c.name}`);
+  const selKey = o ? visKey(dayOfMs(o.ss + 60000, c)) : '';
   const agree = R && o ? (R.visible && (o.zone === 'A' || o.zone === 'B')) || (!R.visible && (o.zone === 'C' || o.zone === 'D')) : false;
 
   // The Rambam's worked example is computed for Jerusalem.
@@ -121,7 +126,7 @@ export function Visibility() {
             <thead><tr><th>ערב</th><th>גיל הירח</th><th>שהייה</th><th>ARCV</th><th className="explore-only">W</th><th>V</th><th>Odeh</th><th>רמב״ם</th></tr></thead>
             <tbody>
               {M.ev.map((e, i) => {
-                const age = (e.ss - M.conj) / HOUR, di = dayOfMs(e.ss + 60000, c), h = hebDate(di);
+                const age = (e.ss - M.conj) / HOUR, di = dayOfMs(e.ss + 60000, c), h = hebDate(di), shown = visKey(di) in guesses;
                 return (
                   <tr key={i} className={i === sel ? 'sel' : ''} tabIndex={0} aria-selected={i === sel}
                     onClick={() => setAstro({ dSel: i, t: e.tb, playing: false })}
@@ -131,9 +136,9 @@ export function Visibility() {
                     <td>{e.lag != null && e.lag > 0 ? <><Num>{Math.round(e.lag / 60000)}</Num> דק׳</> : 'שוקע לפני השמש'}</td>
                     <td><Num>{e.arcv.toFixed(1)}°</Num></td>
                     <td className="explore-only"><Num>{e.W.toFixed(2)}′</Num></td>
-                    <td><Num>{e.V.toFixed(2)}</Num></td>
-                    <td><ZoneTag z={e.zone} /></td>
-                    <td><RTag R={rambam(di)} /></td>
+                    <td>{shown ? <Num>{e.V.toFixed(2)}</Num> : '?'}</td>
+                    <td>{shown ? <ZoneTag z={e.zone} /> : '?'}</td>
+                    <td>{shown ? <RTag R={rambam(di)} /> : '?'}</td>
                   </tr>
                 );
               })}
@@ -143,15 +148,17 @@ export function Visibility() {
         </Viz>
         {o && <Viz className="sky"><SkyPanorama ms={o.tb} c={c} /></Viz>}
         {o && R && hd && (
+          <GuessGate gateKey={selKey} kind={{ type: 'yesno' }} answer={R.visible}
+            question={<>ערב <Num>{dateShort(o.ss)}</Num>, ליל {gq(hd.d)} {hd.name}: לפי חשבון הרמב״ם, האם הסהר ייראה הערב?</>}
+            explain={<>קשת הראייה <DM min={R.arc} />, אורך ראשון <DM min={R.long1} />.</>}>
           <div className={`result ${agree ? 'ok' : 'bad'}`}>
             ליל {gq(hd.d)} {hd.name} {yearHeb(hd.y)} · Odeh: <ZoneTag z={o.zone} /> · הרמב״ם: <RTag R={R} /> · {agree ? 'השיטות מסכימות' : 'השיטות חלוקות'}{o.zone === 'B' ? ' (Odeh גבולי)' : ''}
           </div>
-        )}
-        {o && R && (
           <div className="vpair">
             <Engine title="Odeh" sub="אסטרונומיה מודרנית"><OdehSteps o={o} mz={mz} name={M.name} /></Engine>
             <Engine title="הרמב״ם" sub="קידוש החודש יא–יז"><RambamSteps R={R} /></Engine>
           </div>
+          </GuessGate>
         )}
       </>}
     />

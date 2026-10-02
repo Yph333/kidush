@@ -2,7 +2,9 @@ import {
   DAY_LETTER, P_DAY, TYPE_NAME, dechiyotDetail, fmtMolad, gDate, keviut, monthsBeforeSteps, monthsOf, pesachDay, rh,
   tekufotShmuel, yearHeb, yearLen, yearType,
 } from '../../engines/calendar';
+import { GuessGate, Hidden, useGateDone } from '../../components/GuessGate';
 import { MonthStrip } from '../../components/Ring';
+import { gateKey } from '../../content/gates';
 import { Engine, Slide, Viz } from '../../components/Slide';
 import { Steps } from '../../components/Steps';
 import { Civil, GDate, Num, Sig, Tag } from '../../components/text';
@@ -18,6 +20,7 @@ export function Calculator() {
   const yr = useSlideYear();
   const y = yr.y, r = rh(y), D = dechiyotDetail(y), m = monthsBeforeSteps(y), T = tekufotShmuel(y);
   const len = yearLen(y), t = yearType(len)!, k = keviut(y), pd = pesachDay(y), next = rh(y + 1);
+  const key = gateKey('rh-day', y), done = useGateDone(key);
   const g1 = gDate(r.day).getUTCFullYear(), g2 = gDate(next.day - 1).getUTCFullYear();
   return (
     <Slide
@@ -28,14 +31,17 @@ export function Calculator() {
         <p>אפשר להקליד מספר (<Num>5787</Num> או <Num>787</Num>) או אותיות (תשפ״ז, ה׳תשפ״ז).</p>
         <p className="explore-only">טיפ לכיתה: לחצו ״שלב־שלב״ ותנו לתלמידים לנחש כל שלב לפני שהוא נחשף.</p>
         <Viz>
-          <WeekWheel markers={[{ x: r.t, cls: 'moon', label: 'מולד' }]}
+          {done ? <WeekWheel markers={[{ x: r.t, cls: 'moon', label: 'מולד' }]}
             arcs={r.rules.length ? [{ from: r.t, to: r.t + (r.day * P_DAY + P_DAY / 2 - r.t), cls: 'shift' }] : []}
-            days={dayMark(r.day)} center={[yearHeb(y), k, dayWord(r.day)]} aria="מולד וראש השנה על גלגל השבוע" />
+            days={dayMark(r.day)} center={[yearHeb(y), k, dayWord(r.day)]} aria="מולד וראש השנה על גלגל השבוע" /> : <Hidden />}
         </Viz>
       </>}
       stage={
         <Engine title="מחשבון הלוח">
           <div className="ctl"><SlideYear yr={yr} /></div>
+          <GuessGate gateKey={key} kind={{ type: 'day' }} answer={r.day % 7}
+            question={<>באיזה יום בשבוע יחול ראש השנה {yearHeb(y)}?</>}
+            explain={<>מולד תשרי <Sig>{fmtMolad(r.t)}</Sig>{r.rules.length ? ', ואחריו דחייה' : ', בלי דחייה'}.</>}>
           <Steps rows={[
             { l: 'השנה', v: <><Sig>{yearHeb(y)}</Sig> (<Num>{y}</Num>)</>, s: g1 > 99 ? <>בערך <Num>{`${g1}–${g2}`}</Num></> : '' },
             { l: 'מחזור קטן', v: <>מחזור <Num>{NUM(m.cycles + 1)}</Num>, שנה <Num>{m.rem + 1}</Num> · {D.leap ? <Tag tone="leap">מעוברת</Tag> : 'פשוטה'}</>, s: `השנה שעברה ${D.prevLeap ? 'מעוברת' : 'פשוטה'}` },
@@ -57,6 +63,7 @@ export function Calculator() {
             { l: 'קביעות', v: <Sig>{k}</Sig>, s: <>פסח: {dayWord(pd)} <GDate day={pd} /></>, c: 'final' },
           ]} />
           <Viz plain><MonthStrip months={monthsOf(y)} /></Viz>
+          </GuessGate>
         </Engine>
       }
     />

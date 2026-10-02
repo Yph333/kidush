@@ -1,6 +1,8 @@
 import { useMemo } from 'react';
-import { TYPE_NAME, type YearType, keviut, pesachDay, rh, yearHeb, yearLen } from '../../engines/calendar';
+import { TYPE_NAME, type YearType, isLeap, keviut, pesachDay, rh, yearHeb, yearLen } from '../../engines/calendar';
 import { Term } from '../../components/Glossary';
+import { GuessGate, useGateDone } from '../../components/GuessGate';
+import { gateKey } from '../../content/gates';
 import { Engine, Slide, Viz } from '../../components/Slide';
 import { Steps } from '../../components/Steps';
 import { Chips, GDate, Num, Sig } from '../../components/text';
@@ -20,6 +22,8 @@ export function Keviut() {
     return f;
   }, []);
   const k = keviut(y), a = rh(y), len = yearLen(y), pd = pesachDay(y), b = rh(y + 1);
+  const key = gateKey('keviut', y), done = useGateDone(key);
+  const options = (isLeap(y) ? ORDER.slice(7) : ORDER.slice(0, 7)).map(v => ({ value: v, label: <span className="sig">{v}</span> }));
   return (
     <Slide
       kicker="הלוח הקבוע · 4"
@@ -36,7 +40,7 @@ export function Keviut() {
             <thead><tr><th>סימן</th><th>ראש השנה</th><th>סוג</th><th>פסח</th><th>שנה</th><th className="explore-only">שכיחות</th></tr></thead>
             <tbody>
               {ORDER.map((s, i) => (
-                <tr key={s} className={s === k ? 'hl' : ''}>
+                <tr key={s} className={done && s === k ? 'hl' : ''}>
                   <td className="sig">{s}</td><td>{dayWord(LET[s[0]])}</td><td>{TYPE_NAME[s[1] as YearType]}</td>
                   <td>{dayWord(LET[s[2]])}</td><td>{i < 7 ? 'פשוטה' : 'מעוברת'}</td>
                   <td className="explore-only"><Num>{(((freq[s] ?? 0) / (TO - FROM + 1)) * 100).toFixed(1)}%</Num></td>
@@ -48,6 +52,9 @@ export function Keviut() {
         </Viz>
         <Engine title="הסימן של השנה">
           <div className="ctl"><SlideYear yr={yr} /></div>
+          <GuessGate gateKey={key} kind={{ type: 'choice', options }} answer={k}
+            question={<>מה הקביעות של {yearHeb(y)}? ({isLeap(y) ? 'שנה מעוברת' : 'שנה פשוטה'})</>}
+            explain={<>ראש השנה {dayWord(a.day)}, השנה {TYPE_NAME[k[1] as YearType]}, ופסח {dayWord(pd)}.</>}>
           <Steps rows={[
             { l: 'ראש השנה', v: <>{dayWord(a.day)} ← <Sig>{k[0]}</Sig></> },
             { l: 'אורך השנה', v: <><Num>{len}</Num> ימים ← {TYPE_NAME[k[1] as YearType]} ← <Sig>{k[1]}</Sig></> },
@@ -55,8 +62,9 @@ export function Keviut() {
             { l: 'פסח = ראש השנה הבא פחות 163 ימים', v: <>{dayWord(pd)} <GDate day={pd} /> ← <Sig>{k[2]}</Sig></> },
             { l: `הקביעות של ${yearHeb(y)}`, v: <Sig>{k}</Sig>, c: 'final' },
           ]} />
+          </GuessGate>
           <Chips label="השנים הבאות:" items={Array.from({ length: 8 }, (_, i) => y + 1 + i)} onPick={yr.setY}
-            render={v => `${yearHeb(v).replace(/^ה׳/, '')} ${keviut(v)}`} />
+            render={v => yearHeb(v)} />
         </Engine>
       </>}
     />

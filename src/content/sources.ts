@@ -26,6 +26,7 @@ export const SOURCES: Record<SlidePath, SourceRef[]> = {
   'dechiyot/zaken': [{ ref: KITZUR, note: 'מולד זקן' }, { ref: 'ראש השנה כ ע״ב' }, { ref: `${KH}, פרק ז` }],
   'dechiyot/gatrad': [{ ref: `${KH}, פרק ז` }],
   'dechiyot/betu': [{ ref: `${KH}, פרק ז` }],
+  'dechiyot/argaz': [{ ref: `${KH}, פרק ז`, note: 'ארבע הדחיות' }],
   'reiya/memutza': [{ ref: `${KH}, פרקים ו–ז` }, { ref: 'J. Meeus, Astronomical Algorithms, פרק 49' }],
   'reiya/reiya': [
     { ref: `${KH}, פרקים יא–יז`, note: 'חשבון הראייה' },

@@ -1,8 +1,10 @@
 import { useState } from 'react';
 import {
-  BAHRAD, EX, P_MONTH, P_WEEK, fmtDur, fmtMolad, moladByExcess, moladTotal, monthsBefore, monthsOf, weekParts, yearHeb,
+  BAHRAD, EX, P_MONTH, P_WEEK, civil, fmtDur, fmtMolad, moladByExcess, moladTotal, monthsBefore, monthsOf, weekParts, yearHeb,
 } from '../../engines/calendar';
 import { Term } from '../../components/Glossary';
+import { GuessGate, useGateDone } from '../../components/GuessGate';
+import { gateKey } from '../../content/gates';
 import { Engine, Slide, Src, Viz } from '../../components/Slide';
 import { type StepRow, Steps } from '../../components/Steps';
 import { DHP, Civil, Num, Sig } from '../../components/text';
@@ -21,6 +23,8 @@ export function Excess() {
   const name = months[mi][0];
   const { steps, molad } = moladByExcess(y, mi);
   const direct = moladTotal(y, mi);
+  // Tishrei is a step on the year path; other months get their own gate
+  const key = gateKey(mi === 0 ? 'molad-day' : `molad-day-${mi}`, y), done = useGateDone(key);
 
   const rows: StepRow[] = [
     { l: 'מתחילים מבהר״ד', v: <Sig>{fmtMolad(BAHRAD)}</Sig> },
@@ -54,8 +58,8 @@ export function Excess() {
       more={<Src cite="קיצור שלחן ערוך, סדר לעשות לוח בקצרה">אם כן הרי שמונה ימים; צא מהן שבעה שכלים בשבוע, אם כן הרי המולד א׳ י״א שי״ד</Src>}
       stage={<>
         <Viz>
-          <WeekWheel markers={[{ x: BAHRAD, cls: 'leap', label: 'בהר״ד' }, { x: molad, cls: 'moon', label: 'מולד' }]}
-            center={['מולד ' + name, fmtMolad(molad), yearHeb(y)]} aria="מולד החודש על גלגל השבוע" />
+          <WeekWheel markers={done ? [{ x: BAHRAD, cls: 'leap', label: 'בהר״ד' }, { x: molad, cls: 'moon', label: 'מולד' }] : [{ x: BAHRAD, cls: 'leap', label: 'בהר״ד' }]}
+            center={['מולד ' + name, done ? fmtMolad(molad) : '?', yearHeb(y)]} aria="מולד החודש על גלגל השבוע" />
         </Viz>
         <Engine title="מנוע המולד" sub="לכל חודש בכל שנה">
           <div className="ctl">
@@ -66,7 +70,11 @@ export function Excess() {
               </select>
             </label>
           </div>
-          <Steps rows={rows} />
+          <GuessGate gateKey={key} kind={{ type: 'day' }} answer={civil(molad).wd}
+            question={<>באיזה יום בשבוע יחול מולד {name} {yearHeb(y)}?</>}
+            explain={<>המולד: <Sig>{fmtMolad(molad)}</Sig>, <Civil t={molad} />.</>}>
+            <Steps rows={rows} />
+          </GuessGate>
         </Engine>
       </>}
     />

@@ -5,6 +5,8 @@ import { Engine, Slide, Viz } from '../../components/Slide';
 import { Civil, GDate, Legend, Sig, Tag } from '../../components/text';
 import { WeekWheel, dayMark } from '../../components/WeekWheel';
 import { YearControl } from '../../components/YearControl';
+import { GuessGate } from '../../components/GuessGate';
+import { gateKey } from '../../content/gates';
 import { RULE_NAME, dayWord } from '../../lib/format';
 import { go } from '../../state/nav';
 import { setState, useStore } from '../../state/store';
@@ -45,6 +47,9 @@ export function Opening() {
             </label>
           </div>
         </Engine>
+        <GuessGate gateKey={gateKey('rh-day-start', y)} kind={{ type: 'day' }} answer={r.day % 7}
+          question={<>לפני שמתחילים: באיזה יום בשבוע יחול ראש השנה {yearHeb(y)}?</>}
+          explain="בסוף המסלול נדע לחשב את זה לבד, לכל שנה.">
         <Viz>
           <WeekWheel
             markers={[{ x: r.t, cls: 'moon', label: 'מולד' }]}
@@ -64,6 +69,7 @@ export function Opening() {
             {' · '}ראש השנה: <strong>{dayWord(r.day)}</strong> <GDate day={r.day} />
           </p>
         </div>
+        </GuessGate>
       </>}
     />
   );

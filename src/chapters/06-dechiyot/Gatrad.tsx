@@ -6,6 +6,8 @@ import { Steps } from '../../components/Steps';
 import { Chips, Civil, Legend, Num, Sig, Tag } from '../../components/text';
 import { WeekWheel, dayMark } from '../../components/WeekWheel';
 import { RULE_NAME, dayWord } from '../../lib/format';
+import { OurYear } from './OurYear';
+import { useStore } from '../../state/store';
 import { findYears, moladOf } from './shared';
 
 const okLen = (n: number, L: boolean) => (L ? n >= 383 && n <= 385 : n >= 353 && n <= 355);
@@ -15,7 +17,8 @@ const ck = (b: boolean) => (b ? '✓' : '✗');
 export function Gatrad() {
   const [m, setM] = useState({ d: 2, h: 9, p: 204 });
   const [L, setL] = useState(false);
-  const examples = useMemo(() => findYears(y => rh(y).rules.includes('gatrad'), 5600, 6100, 6), []);
+  const demo = useStore(s => s.demoYear);
+  const examples = useMemo(() => findYears(y => y !== demo && rh(y).rules.includes('gatrad'), 5600, 6100, 6), [demo]);
   const t = moladParts(m), PP = m.h * P_HOUR + m.p;
   const ap = m.d === 2 && !L && PP >= 9 * P_HOUR + 204 && m.h < 18;
   const no = rhFrom(t, L, false, { gatrad: true }), yes = rhFrom(t, L, false);
@@ -59,6 +62,7 @@ export function Gatrad() {
           ]} />
           <Chips label="שנים שבהן חלה גטר״ד:" items={examples} onPick={y => { setM(moladOf(y)); setL(isLeap(y)); }} render={yearHeb} />
         </Engine>
+        <OurYear which="gatrad" />
       </>}
     />
   );

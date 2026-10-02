@@ -6,6 +6,8 @@ import { Steps } from '../../components/Steps';
 import { Chips, Civil, Legend, Num, Sig, Tag } from '../../components/text';
 import { WeekWheel, dayMark } from '../../components/WeekWheel';
 import { RULE_NAME, dayWord } from '../../lib/format';
+import { OurYear } from './OurYear';
+import { useStore } from '../../state/store';
 import { findYears, moladOf } from './shared';
 
 const ck = (b: boolean) => (b ? '✓' : '✗');
@@ -13,7 +15,8 @@ const ck = (b: boolean) => (b ? '✓' : '✗');
 export function Betu() {
   const [m, setM] = useState({ d: 1, h: 15, p: 589 });
   const [PL, setPL] = useState(true);
-  const examples = useMemo(() => findYears(y => rh(y).rules.includes('betu'), 5400, 6400, 6), []);
+  const demo = useStore(s => s.demoYear);
+  const examples = useMemo(() => findYears(y => y !== demo && rh(y).rules.includes('betu'), 5400, 6400, 6), [demo]);
   const t = moladParts(m), PP = m.h * P_HOUR + m.p;
   const ap = m.d === 1 && PL && PP >= 15 * P_HOUR + 589 && m.h < 18;
   const ex = PL ? EX.meubar : EX.pashut, t0 = t - (PL ? 13 : 12) * P_MONTH, p0 = rhFrom(t0, PL, false);
@@ -59,6 +62,7 @@ export function Betu() {
           ]} />
           <Chips label="שנים שבהן חלה בטו תקפט:" items={examples} onPick={y => { setM(moladOf(y)); setPL(isLeap(y - 1)); }} render={yearHeb} />
         </Engine>
+        <OurYear which="betu" />
       </>}
     />
   );

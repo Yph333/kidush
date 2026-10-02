@@ -6,6 +6,7 @@ import { Chips, Legend, Tag } from '../../components/text';
 import { WeekWheel } from '../../components/WeekWheel';
 import { dayWord } from '../../lib/format';
 import { useStore } from '../../state/store';
+import { OurYear } from './OurYear';
 import { findYears } from './shared';
 
 const ADU = [0, 3, 5];
@@ -13,7 +14,7 @@ const ADU = [0, 3, 5];
 export function Adu() {
   const [d, setD] = useState(3);
   const demo = useStore(s => s.demoYear);
-  const examples = useMemo(() => findYears(y => { const r = rh(y); return r.rules.length === 1 && r.rules[0] === 'adu'; }, demo, demo + 60, 6), [demo]);
+  const examples = useMemo(() => findYears(y => { const r = rh(y); return r.rules.length === 1 && r.rules[0] === 'adu'; }, demo + 1, demo + 60, 6), [demo]);
   // Yom Kippur is 10 Tishrei (9 days later), Hoshana Rabba 21 Tishrei (20 days later)
   const yk = (d + 9) % 7, hr = (d + 20) % 7, bad = ADU.includes(d);
   const ykBad = yk === 5 || yk === 0, hrBad = hr === 6;
@@ -58,6 +59,7 @@ export function Adu() {
           ]} />
           <Chips label="שנים שבהן רק לא אד״ו דחה:" items={examples} onPick={y => setD(rh(y).moladDay % 7)} render={yearHeb} />
         </Engine>
+        <OurYear which="adu" />
       </>}
     />
   );

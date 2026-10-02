@@ -22,6 +22,13 @@ export interface AstroState {
   dSel: number | null;
 }
 
+/** A stored answer to a GuessGate. value null = "I don't know" or the teacher revealed it. */
+export interface GuessRecord {
+  value: string | number | boolean | null;
+  how: 'guess' | 'idk' | 'skip';
+  correct: boolean | null;
+}
+
 export interface State {
   demoYear: number;
   city: number;
@@ -31,6 +38,8 @@ export interface State {
   slide: string;
   /** slides seen, per demo year */
   seen: Record<number, string[]>;
+  /** GuessGate answers, keyed "<gate>@<year>" */
+  guesses: Record<string, GuessRecord>;
   notesOpen: boolean;
   mapOpen: boolean;
   glossaryOpen: string | null;
@@ -41,7 +50,7 @@ const LS_KEY = 'luach.v1';
 const MIN_YEAR = 2, MAX_YEAR = 9998;
 export const clampYear = (y: number): number => Math.max(MIN_YEAR, Math.min(MAX_YEAR, Math.round(y)));
 
-type Persisted = Pick<State, 'demoYear' | 'city' | 'mode' | 'theme' | 'seen'>;
+type Persisted = Pick<State, 'demoYear' | 'city' | 'mode' | 'theme' | 'seen' | 'guesses'>;
 
 function readLS(): Partial<Persisted> {
   try {
@@ -52,7 +61,7 @@ function readLS(): Partial<Persisted> {
 
 function writeLS(s: State): void {
   try {
-    const p: Persisted = { demoYear: s.demoYear, city: s.city, mode: s.mode, theme: s.theme, seen: s.seen };
+    const p: Persisted = { demoYear: s.demoYear, city: s.city, mode: s.mode, theme: s.theme, seen: s.seen, guesses: s.guesses };
     localStorage.setItem(LS_KEY, JSON.stringify(p));
   } catch { /* storage unavailable: state still works for this session */ }
 }
@@ -90,6 +99,7 @@ function initial(): State {
     theme: ls.theme ?? 'auto',
     slide: hs.slide,
     seen: ls.seen && typeof ls.seen === 'object' ? ls.seen : {},
+    guesses: ls.guesses && typeof ls.guesses === 'object' ? ls.guesses : {},
     notesOpen: false,
     mapOpen: false,
     glossaryOpen: null,
@@ -127,6 +137,14 @@ export function markSeen(path: string): void {
   const cur = state.seen[state.demoYear] ?? [];
   if (cur.includes(path)) return;
   setState(s => ({ seen: { ...s.seen, [s.demoYear]: [...cur, path] } }));
+}
+
+export function setGuess(key: string, rec: GuessRecord | null): void {
+  setState(s => {
+    const g = { ...s.guesses };
+    if (rec) g[key] = rec; else delete g[key];
+    return { guesses: g };
+  });
 }
 
 /** Test hook: reset to a known state. */
