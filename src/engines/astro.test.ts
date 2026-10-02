@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import vectors from '../../tests/vectors.json';
 import { moladTotal } from './calendar';
-import { CITIES, HOUR, hm, moladMs, odeh, phaseNear, sunriseOn, sunsetOn } from './astro';
+import { CITIES, HOUR, hm, moladMs, moonNode, odeh, phaseNear, seasons, sunriseOn, sunsetOn } from './astro';
 
 const A = vectors.astro;
 const MIN = 60000;
@@ -43,4 +43,20 @@ describe('Odeh, Jerusalem', () => {
       expect(Math.abs(r.lag! / MIN - v.lagMin)).toBeLessThanOrEqual(2);
     });
   }
+});
+
+describe('moon node and seasons', () => {
+  it('mean ascending node, Meeus example 47.a (1992-04-12 0h TD): 274.400656°', () => {
+    // TD − UT ≈ 59 s in 1992; Meeus uses JDE 2448724.5
+    const ms = Date.UTC(1992, 3, 12) - 59000;
+    expect(moonNode(ms)).toBeCloseTo(274.400656, 2);
+  });
+  it('the node regresses about 19.35° a year', () => {
+    const a = moonNode(Date.UTC(2026, 0, 1)), b = moonNode(Date.UTC(2027, 0, 1));
+    expect(((a - b + 360) % 360)).toBeCloseTo(19.35, 1);
+  });
+  it('2026 equinoxes and solstices (±10 min)', () => {
+    const want = ['2026-03-20T14:46Z', '2026-06-21T08:24Z', '2026-09-23T00:05Z', '2026-12-21T20:50Z'];
+    seasons(2026).forEach((t, i) => expect(Math.abs(t - Date.parse(want[i])) / 60000, want[i]).toBeLessThanOrEqual(10));
+  });
 });

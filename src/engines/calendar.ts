@@ -346,3 +346,32 @@ export function dechiyotDetail(y: number): DechiyotDetail {
     adu: { applies: adu, candidate: r.day - (adu ? 1 : 0) },
   };
 }
+
+// ---- absolute tekufot (Shmuel and Rav Adda), in parts from the epoch (same clock as moladTotal)
+
+/** Shmuel's year: 365 days 6 hours. */
+export const SHMUEL_YEAR = 365 * P_DAY + 6 * P_HOUR;
+/** Rav Adda's year: 365 days 5 hours 997 parts 48 rega'im (76 rega'im = 1 part). Fractional parts. */
+export const RAV_ADDA_YEAR = 365 * P_DAY + 5 * P_HOUR + 997 + 48 / 76;
+
+/** Molad Nisan of year 1 (the 7th month of a common year). */
+const MOLAD_NISAN_1 = moladTotal(1, 6);
+
+/**
+ * Tekufat Nisan, Shmuel: 7 days 9 hours 642 parts before molad Nisan of year 1, then + Shmuel's year each year.
+ * (Hilchot Kiddush HaChodesh 9 — exact halacha: TODO: verify. Checked against Birkat HaChama 5769.)
+ */
+export const tekufaNisanShmuel = (y: number): number => MOLAD_NISAN_1 - (7 * P_DAY + 9 * P_HOUR + 642) + (y - 1) * SHMUEL_YEAR;
+
+/**
+ * Tekufat Nisan, Rav Adda: 9 hours 642 parts before molad Nisan of year 1, then + Rav Adda's year each year.
+ * (Hilchot Kiddush HaChodesh 10 — exact halacha: TODO: verify.)
+ */
+export const tekufaNisanRavAdda = (y: number): number => MOLAD_NISAN_1 - (9 * P_HOUR + 642) + (y - 1) * RAV_ADDA_YEAR;
+
+/** The four tekufot of Hebrew year y: [Tishrei (before Nisan), Tevet, Nisan, Tammuz], each a quarter year apart. */
+export function tekufotAbsolute(y: number, which: 'shmuel' | 'ravAdda'): [number, number, number, number] {
+  const n = which === 'shmuel' ? tekufaNisanShmuel(y) : tekufaNisanRavAdda(y);
+  const q = (which === 'shmuel' ? SHMUEL_YEAR : RAV_ADDA_YEAR) / 4;
+  return [n - 2 * q, n - q, n, n + q];
+}

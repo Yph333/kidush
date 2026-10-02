@@ -292,3 +292,27 @@ export function yearGaps(y: number): { name: string; gap: number }[] {
   });
 }
 
+
+// ---- for the 3D scenes
+
+/** Longitude (deg) of the moon's mean ascending node ("the head"), Meeus 47.7. Moves backwards ~19.35°/year. */
+export function moonNode(ms: number): number {
+  const { T } = TofMs(ms);
+  return nrm(125.0445479 - 1934.1362891 * T + 0.0020754 * T * T + T ** 3 / 467441 - T ** 4 / 60616000);
+}
+
+/** Instant near `ms` when the sun's apparent longitude equals `target` (0 = March equinox, 90, 180, 270). */
+export function sunLongitudeTime(ms: number, target: number): number {
+  let t = ms;
+  for (let i = 0; i < 12; i++) {
+    const d = w180(sunEcl(TofMs(t).T).lam - target);
+    t -= (d / 0.98565) * DAYMS;
+    if (Math.abs(d) < 1e-6) break;
+  }
+  return t;
+}
+
+/** The four seasons of a Gregorian year: [March equinox, June solstice, September equinox, December solstice]. */
+export function seasons(year: number): [number, number, number, number] {
+  return [0, 90, 180, 270].map((lon, i) => sunLongitudeTime(Date.UTC(year, 2 + 3 * i, 21), lon)) as [number, number, number, number];
+}

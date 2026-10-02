@@ -3,7 +3,7 @@ import vectors from '../../tests/vectors.json';
 import {
   ALLOWED_LENGTHS, BAHRAD, EX, P_MONTH, currentYear, dayOfCivil, dechiyotDetail, fmtDur, fmtMolad, gDate, gq, hebDate, isLeap,
   keviut, moladByExcess, moladTotal, monthStart, monthsBefore, monthsBeforeSteps, monthsOf, nextBirkatHachama, parseYear,
-  pesachDay, rh, tekufotShmuel, weekParts, yearHeb, yearLen,
+  pesachDay, rh, tekufotShmuel, weekParts, yearHeb, yearLen, P_DAY, P_HOUR, P_WEEK, RAV_ADDA_YEAR, tekufaNisanShmuel, tekufaNisanRavAdda,
 } from './calendar';
 import { rambamD0 } from './rambam';
 
@@ -149,5 +149,37 @@ describe('dechiyotDetail', () => {
       const got = [d.zaken && 'zaken', d.gatrad.applies && 'gatrad', d.betu.applies && 'betu', d.adu.applies && 'adu'].filter(Boolean);
       expect(got).toEqual(v.dechiyot);
     }
+  });
+});
+
+describe('absolute tekufot', () => {
+  it('Shmuel: agrees with the hour-of-week function for every year 2–6000', () => {
+    for (let y = 2; y <= 6000; y += 7) {
+      const h = (((tekufaNisanShmuel(y) % P_WEEK) + P_WEEK) % P_WEEK) / P_HOUR;
+      expect(h, `year ${y}`).toBeCloseTo(tekufotShmuel(y).nisan, 9);
+    }
+  });
+  it('Shmuel 5769 (Birkat HaChama): start of Wednesday night, Tuesday 7 April 2009', () => {
+    const t = tekufaNisanShmuel(5769), day = Math.floor(t / P_DAY);
+    expect(t % P_DAY).toBe(0);           // hour 0 = 18:00
+    expect(day % 7).toBe(3);             // יום ד׳ (begins Tuesday evening)
+    expect(gDate(day).toISOString().slice(0, 10)).toBe('2009-04-08');
+  });
+  it("Rav Adda: 19 of his years are exactly 235 months", () => {
+    // exact, in rega'im (76 per part)
+    expect(19 * (365 * P_DAY * 76 + 5 * P_HOUR * 76 + 997 * 76 + 48)).toBe(235 * P_MONTH * 76);
+    expect(19 * RAV_ADDA_YEAR).toBeCloseTo(235 * P_MONTH, 5);
+  });
+  it('Rav Adda keeps a fixed place relative to the molad within the 19-year cycle', () => {
+    const d = (y: number) => tekufaNisanRavAdda(y) - moladTotal(y, isLeap(y) ? 7 : 6);
+    expect(d(5776)).toBeCloseTo(d(5776 + 19), 6);
+    expect(d(5701)).toBeCloseTo(d(5701 + 19 * 5), 6);
+  });
+  it('in our days Shmuel is ~2½ weeks after the equinox, Rav Adda about a week after (2026)', () => {
+    const date = (t: number) => gDate(Math.floor(t / P_DAY));
+    const s = date(tekufaNisanShmuel(5786)), r = date(tekufaNisanRavAdda(5786));
+    expect(s.toISOString().slice(0, 10)).toBe('2026-04-08');
+    expect(r.getTime()).toBeGreaterThan(Date.UTC(2026, 2, 22));
+    expect(r.getTime()).toBeLessThan(Date.UTC(2026, 2, 31));
   });
 });
