@@ -6,7 +6,8 @@ import { Scene3D } from '../../components/Scene3D/Scene3D';
 import { Engine, Slide, Viz } from '../../components/Slide';
 import { Num, Tag } from '../../components/text';
 import { SlideYear, useSlideYear } from '../../components/YearControl';
-import { type EarthSeasonsProps, KIND_COLOR, type SeasonMarker, type TekufaKind } from '../../scenes/earthSeasons';
+import type { EarthSeasonsProps, SeasonMarker } from '../../scenes/earthSeasons';
+import { KIND_COLOR, type TekufaKind } from '../../scenes/shared';
 
 const load = () => import('../../scenes/earthSeasons').then(m => m.default);
 const NAMES = ['תשרי', 'טבת', 'ניסן', 'תמוז'] as const;

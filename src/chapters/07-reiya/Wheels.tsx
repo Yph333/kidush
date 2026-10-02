@@ -7,7 +7,8 @@ import { Term } from '../../components/Glossary';
 import { Scene3D } from '../../components/Scene3D/Scene3D';
 import { Engine, Slide, Viz } from '../../components/Slide';
 import { DM, DMS, Num, Pos } from '../../components/text';
-import { BIG, SMALL, type WheelsProps, moonOnWheel } from '../../scenes/rambamWheels';
+import type { WheelsProps } from '../../scenes/rambamWheels';
+import { BIG, SMALL, moonOnWheel } from '../../scenes/shared';
 import { setAstro, setState } from '../../state/store';
 import { monthModel } from '../../lib/month';
 

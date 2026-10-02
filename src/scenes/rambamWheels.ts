@@ -5,6 +5,7 @@
 
 import type { SceneHandle, SceneModule } from '../components/Scene3D/types';
 import { COLORS, THREE, createStage, dirOf, line, ring, sphere } from './common';
+import { BIG, SMALL, moonOnWheel } from './shared';
 
 export interface WheelsProps {
   /** mean moon longitude (deg) */
@@ -16,15 +17,6 @@ export interface WheelsProps {
   subtract: boolean;
 }
 
-export const BIG = 10, SMALL = 2.6;
-
-/** Moon position for a course angle: from the far point of the small circle, moving against the big circle's motion. */
-export function moonOnWheel(meanLon: number, course: number): { cx: number; cz: number; mx: number; mz: number } {
-  const c = dirOf(meanLon, 0, BIG), u = c.clone().normalize(), v = dirOf(meanLon + 90);
-  const a = (course * Math.PI) / 180;
-  const m = c.clone().add(u.multiplyScalar(SMALL * Math.cos(a))).add(v.multiplyScalar(-SMALL * Math.sin(a)));
-  return { cx: c.x, cz: c.z, mx: m.x, mz: m.z };
-}
 
 const create = (host: HTMLElement, p0: WheelsProps): SceneHandle<WheelsProps> => {
   const st = createStage(host);

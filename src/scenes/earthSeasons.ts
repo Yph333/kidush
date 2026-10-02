@@ -3,8 +3,9 @@
 
 import type { SceneHandle, SceneModule } from '../components/Scene3D/types';
 import { COLORS, THREE, createStage, dirOf, ring, sphere } from './common';
+import { KIND_COLOR, type TekufaKind } from './shared';
+export type { TekufaKind };
 
-export type TekufaKind = 'true' | 'shmuel' | 'ravAdda';
 export interface SeasonMarker { sunLon: number; label: string; kind: TekufaKind }
 export interface EarthSeasonsProps {
   /** the sun's longitude now; the Earth is opposite (sunLon + 180) */
@@ -13,7 +14,6 @@ export interface EarthSeasonsProps {
 }
 
 const R = 12, TILT = 23.44;
-export const KIND_COLOR: Record<TekufaKind, number> = { true: COLORS.ok, shmuel: COLORS.shift, ravAdda: COLORS.leap };
 
 const create = (host: HTMLElement, p0: EarthSeasonsProps): SceneHandle<EarthSeasonsProps> => {
   const st = createStage(host);
