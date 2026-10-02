@@ -7,3 +7,4 @@ e2e/__screenshots__/
 *.log
 .DS_Store
 dist-e2e/
+tools/kosherjava/lib/
