@@ -1,0 +1,119 @@
+import { useEffect, useRef } from 'react';
+import { CITIES } from './engines/astro';
+import { SLIDES, slideByPath } from './chapters';
+import { GlossaryPanel } from './components/Glossary';
+import { ProgressMap } from './components/ProgressMap';
+import { TeacherNotesPanel } from './components/TeacherNotes';
+import { YearControl } from './components/YearControl';
+import { go, next, prev, startUrlSync } from './state/nav';
+import { type Theme, getState, markSeen, setState, useStore } from './state/store';
+
+const THEME_NEXT: Record<Theme, Theme> = { auto: 'dark', dark: 'light', light: 'auto' };
+const THEME_LABEL: Record<Theme, string> = { auto: 'ערכה: אוטומטית', dark: 'ערכה: כהה', light: 'ערכה: בהירה' };
+
+function toggleFullscreen() {
+  try {
+    if (document.fullscreenElement) void document.exitFullscreen();
+    else void document.documentElement.requestFullscreen();
+  } catch { /* not supported */ }
+}
+
+function isTyping(el: EventTarget | null): boolean {
+  const t = el as HTMLElement | null;
+  return !!t && (['INPUT', 'SELECT', 'TEXTAREA'].includes(t.tagName) || t.isContentEditable);
+}
+
+export function App() {
+  const slidePath = useStore(s => s.slide);
+  const mode = useStore(s => s.mode);
+  const theme = useStore(s => s.theme);
+  const demo = useStore(s => s.demoYear);
+  const city = useStore(s => s.city);
+  const notesOpen = useStore(s => s.notesOpen);
+  const mainRef = useRef<HTMLElement>(null);
+
+  useEffect(() => startUrlSync(), []);
+
+  const cur = slideByPath(slidePath) ?? SLIDES[0];
+
+  useEffect(() => {
+    markSeen(cur.path);
+    mainRef.current?.scrollTo?.({ top: 0 });
+    document.title = `${cur.title} · בונים לוח עברי`;
+  }, [cur.path, cur.title, demo]);
+
+  useEffect(() => {
+    const r = document.documentElement;
+    if (theme === 'auto') delete r.dataset.theme; else r.dataset.theme = theme;
+  }, [theme]);
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.altKey || e.ctrlKey || e.metaKey || isTyping(e.target)) return;
+      const s = getState();
+      switch (e.key) {
+        case 'ArrowLeft': case 'PageDown': e.preventDefault(); next(); break;
+        case 'ArrowRight': case 'PageUp': e.preventDefault(); prev(); break;
+        case 'Home': e.preventDefault(); go(0); break;
+        case 'End': e.preventDefault(); go(SLIDES.length - 1); break;
+        case 'n': case 'N': case 'מ': setState({ notesOpen: !s.notesOpen }); break;
+        case 'p': case 'P': case 'פ': setState({ mode: s.mode === 'present' ? 'explore' : 'present' }); break;
+        case 'f': case 'F': case 'כ': toggleFullscreen(); break;
+        case 'Escape': setState({ notesOpen: false, mapOpen: false, glossaryOpen: null }); break;
+      }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, []);
+
+  const Current = cur.Component;
+  const i = cur.index;
+
+  return (
+    <div className="app" data-mode={mode}>
+      <a className="skip" href="#deck">דילוג לתוכן</a>
+      <header className="top">
+        <button type="button" className="iconbtn map-btn" onClick={() => setState({ mapOpen: true })} aria-label="מפת השיעור">☰</button>
+        <div className="brand">בונים לוח עברי<small>פרק <span className="num">{cur.chapter.num}</span>: {cur.chapter.title}</small></div>
+        <div className="sp" />
+        <div className="top-ctl">
+          <YearControl value={demo} onChange={v => setState({ demoYear: v })} label="שנת הדגמה" />
+          <label className="fld city">מקום
+            <select value={city} onChange={e => setState({ city: +e.target.value })}>
+              {CITIES.map((c, k) => <option key={c.name} value={k}>{c.name}</option>)}
+            </select>
+          </label>
+        </div>
+        <div className="top-btns">
+          <button type="button" className="iconbtn" aria-pressed={mode === 'present'} title="מקש P"
+            onClick={() => setState({ mode: mode === 'present' ? 'explore' : 'present' })}>
+            {mode === 'present' ? 'מצב חקירה' : 'מצב מצגת'}
+          </button>
+          <button type="button" className="iconbtn" aria-pressed={notesOpen} title="מקש N" onClick={() => setState({ notesOpen: !notesOpen })}>הערות למורה</button>
+          <button type="button" className="iconbtn" onClick={() => setState({ glossaryOpen: '*' })}>מילון</button>
+          <button type="button" className="iconbtn" onClick={() => setState({ theme: THEME_NEXT[theme] })} aria-label={THEME_LABEL[theme]} title={THEME_LABEL[theme]}>☾ / ☀</button>
+          <button type="button" className="iconbtn fs-btn" onClick={toggleFullscreen} title="מקש F">מסך מלא</button>
+        </div>
+      </header>
+      <div className="body">
+        <ProgressMap />
+        <main id="deck" ref={mainRef} tabIndex={-1}>
+          <Current key={cur.path} />
+        </main>
+      </div>
+      <footer className="bot">
+        <button type="button" className="nb" onClick={prev} disabled={i === 0}>הקודם</button>
+        <div className="prog" role="group" aria-label="התקדמות">
+          {SLIDES.map((s, k) => (
+            <button key={s.path} type="button" aria-label={s.title} aria-current={k === i ? 'page' : undefined}
+              className={k < i ? 'on' : k === i ? 'cur' : ''} onClick={() => go(k)} />
+          ))}
+        </div>
+        <span className="pos"><span className="num">{i + 1}/{SLIDES.length}</span></span>
+        <button type="button" className="nb" onClick={next} disabled={i === SLIDES.length - 1}>הבא</button>
+      </footer>
+      <TeacherNotesPanel />
+      <GlossaryPanel />
+    </div>
+  );
+}
