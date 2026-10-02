@@ -6,6 +6,10 @@ import { Zmanim } from './02-yom/Zmanim';
 import { Gauge } from './02-yom/Gauge';
 import { Horizon } from './02-yom/Horizon';
 import { Annual } from './02-yom/Annual';
+import { Dome } from './02-yom/Dome';
+import { InclinedOrbit } from './03-chodesh/InclinedOrbit';
+import { Seasons } from './04-shana/Seasons';
+import { Wheels } from './07-reiya/Wheels';
 import { LunarMonth } from './03-chodesh/LunarMonth';
 import { MoonMonth } from './03-chodesh/MoonMonth';
 import { SkyAbove } from './03-chodesh/SkyAbove';
@@ -35,15 +39,18 @@ export const CHAPTERS: ChapterDef[] = [
     { id: 'mad', title: 'מד שקיעה', Component: Gauge },
     { id: 'gova', title: 'גובה ואופק', Component: Horizon },
     { id: 'shnati', title: 'לוח זמנים שנתי', Component: Annual },
+    { id: 'kipa', title: 'כיפת השמיים', Component: Dome },
   ] },
   { id: 'chodesh', num: 3, title: 'החודש', slides: [
     { id: 'levana', title: 'חודש הלבנה', Component: LunarMonth },
     { id: 'maslul', title: 'הירח במשך החודש', Component: MoonMonth },
     { id: 'shamayim', title: 'השמיים מעל הארץ', Component: SkyAbove },
+    { id: 'natui', title: 'מסלול הירח הנטוי', Component: InclinedOrbit },
   ] },
   { id: 'shana', num: 4, title: 'השנה', slides: [
     { id: 'katan', title: 'המחזור הקטן', Component: SmallCycle },
     { id: 'gadol', title: 'המחזור הגדול', Component: GreatCycle },
+    { id: 'tekufot', title: 'העונות והתקופות', Component: Seasons },
   ] },
   { id: 'luach', num: 5, title: 'הלוח הקבוע', slides: [
     { id: 'bahrad', title: 'בהר״ד: נקודת ההתחלה', Component: Bahrad },
@@ -61,6 +68,7 @@ export const CHAPTERS: ChapterDef[] = [
   { id: 'reiya', num: 7, title: 'ראייה מול חשבון', slides: [
     { id: 'memutza', title: 'מולד ממוצע ומולד אמיתי', Component: MeanTrue },
     { id: 'reiya', title: 'נראות הירח', Component: Visibility },
+    { id: 'galgalim', title: 'גלגלי הרמב״ם', Component: Wheels },
   ] },
   { id: 'kelim', num: 8, title: 'כלים', slides: [
     { id: 'machshevon', title: 'המחשבון המלא', Component: Calculator },

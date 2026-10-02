@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import vectors from '../../tests/vectors.json';
 import { monthStart, monthsOf } from './calendar';
-import { RB, type RambamResult, rambam, rambamD0, rMotion } from './rambam';
+import { RB, type RambamResult, moonEquation, rambam, rambamD0, rMotion } from './rambam';
 
 const V = vectors.rambamExample;
 // Night of Friday, 2 Iyar 4938
@@ -56,5 +56,25 @@ describe('mean motion', () => {
   });
   it('greedy decomposition', () => {
     expect(rMotion(RB.sun, 11397).parts).toEqual([[10000, 1], [1000, 1], [354, 1], [29, 1], [10, 1], [1, 4]]);
+  });
+});
+
+describe('moonEquation (teaching helper)', () => {
+  it('matches rambam() for the worked example: course 108 → 5° 1′, subtract', () => {
+    const e = moonEquation(S.crsR);
+    expect(e.eq).toBe(S.moonEq);
+    expect(e.sign).toBe(S.moonSignOp);
+    expect(e.row).toBe(10);
+  });
+  it('matches rambam() over many evenings', () => {
+    for (let k = 0; k < 400; k++) {
+      const r = rambam(dayIdx + k * 7);
+      const e = moonEquation(r.crsR);
+      expect(e.eq).toBe(r.moonEq);
+      expect(e.sign).toBe(r.moonSignOp);
+    }
+  });
+  it('is symmetric around 180°', () => {
+    for (const c of [10, 95, 108, 170]) expect(moonEquation(360 - c).eq).toBe(moonEquation(c).eq);
   });
 });

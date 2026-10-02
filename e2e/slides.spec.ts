@@ -20,6 +20,10 @@ for (const mode of MODES) {
         await page.goto(`/#/${path}?y=${YEAR}&city=0&mode=${mode}`);
         await page.evaluate(() => document.fonts.ready);
         await expect(page.locator('#slide-title')).toBeVisible();
+        if (await page.locator('.scene3d').count()) {
+          await page.locator('.scene-host canvas, .scene-2d svg').first().waitFor();
+          await page.waitForTimeout(300);
+        }
 
         const overflow = await page.evaluate(() => {
           const out: string[] = [];
@@ -172,4 +176,25 @@ test('horizon: a ridge in the east delays the visible sunrise', async ({ page })
   await expect(last).not.toHaveText(open);
   const m = (await last.innerText()).match(/זריחה\s*(-?[\d.]+)/);
   expect(Number(m![1])).toBeGreaterThan(5);
+});
+
+test.describe('3D scenes', () => {
+  for (const [path, views] of [['chodesh/natui', 3], ['yom/kipa', 3], ['shana/tekufot', 3], ['reiya/galgalim', 3]] as const) {
+    test(`${path}: renders, switches views, and has a 2D version`, async ({ page }) => {
+      const errors: string[] = [];
+      page.on('pageerror', e => errors.push(String(e)));
+      await page.goto(`/#/${path}?y=5787&city=0&mode=explore`);
+      const hasGL = await page.evaluate(() => { const c = document.createElement('canvas'); return !!(c.getContext('webgl2') || c.getContext('webgl')); });
+      if (hasGL) {
+        await expect(page.locator('.scene-host canvas')).toHaveCount(1);
+        const bar = page.getByRole('group', { name: 'מבטים' });
+        await expect(bar.getByRole('button')).toHaveCount(views);
+        await bar.getByRole('button').nth(1).click();
+        await expect(bar.getByRole('button').nth(1)).toHaveAttribute('aria-pressed', 'true');
+        await page.getByRole('button', { name: 'תצוגה דו־ממדית' }).click();
+      }
+      await expect(page.locator('.scene-2d svg')).toBeVisible();
+      expect(errors).toEqual([]);
+    });
+  }
 });

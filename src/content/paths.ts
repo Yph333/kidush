@@ -7,11 +7,14 @@ export const SLIDE_PATHS = [
   'yom/mad',
   'yom/gova',
   'yom/shnati',
+  'yom/kipa',
   'chodesh/levana',
   'chodesh/maslul',
   'chodesh/shamayim',
+  'chodesh/natui',
   'shana/katan',
   'shana/gadol',
+  'shana/tekufot',
   'luach/bahrad',
   'luach/odfim',
   'luach/sugim',
@@ -23,6 +26,7 @@ export const SLIDE_PATHS = [
   'dechiyot/argaz',
   'reiya/memutza',
   'reiya/reiya',
+  'reiya/galgalim',
   'kelim/machshevon',
 ] as const;
 

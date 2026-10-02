@@ -217,3 +217,13 @@ export function signPos(min: number): { sign: number; within: number } {
   const s = Math.floor(min / 1800);
   return { sign: s, within: min - s * 1800 };
 }
+
+/**
+ * The moon's equation for a corrected course (whole degrees), exactly as inside rambam(): fold to 0–180,
+ * interpolate the table, round to the minute; subtract below 180°, add above. For the teaching slides.
+ */
+export function moonEquation(course: number): { eq: number; sign: -1 | 0 | 1; folded: number; row: number } {
+  const c = ((Math.round(course) % 360) + 360) % 360;
+  const c2 = c > 180 ? 360 - c : c;
+  return { eq: Math.round(interp(R_MOON, c2)), sign: c < 180 ? -1 : c > 180 ? 1 : 0, folded: c2, row: Math.min(17, Math.floor(c2 / 10)) };
+}
