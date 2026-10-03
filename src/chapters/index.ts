@@ -9,6 +9,7 @@ import { Horizon } from './02-yom/Horizon';
 import { Annual } from './02-yom/Annual';
 import { Dome } from './02-yom/Dome';
 import { InclinedOrbit } from './03-chodesh/InclinedOrbit';
+import { Eclipses } from './03-chodesh/Eclipses';
 import { Seasons } from './04-shana/Seasons';
 import { Timeline } from './04-shana/Timeline';
 import { Wheels } from './07-reiya/Wheels';
@@ -52,6 +53,7 @@ export const CHAPTERS: ChapterDef[] = [
     { id: 'maslul', title: 'הירח במשך החודש', Component: MoonMonth },
     { id: 'shamayim', title: 'השמיים מעל הארץ', Component: SkyAbove },
     { id: 'natui', title: 'מסלול הירח הנטוי', Component: InclinedOrbit },
+    { id: 'likuyim', title: 'ליקויי חמה ולבנה', Component: Eclipses },
   ] },
   { id: 'shana', num: 4, title: 'השנה', slides: [
     { id: 'katan', title: 'המחזור הקטן', Component: SmallCycle },

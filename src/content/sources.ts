@@ -24,6 +24,7 @@ export const SOURCES: Record<SlidePath, SourceRef[]> = {
   'chodesh/maslul': [{ ref: 'J. Meeus, Astronomical Algorithms, פרקים 25, 47', note: 'המודל האסטרונומי המקוצר' }],
   'chodesh/shamayim': [{ ref: 'J. Meeus, Astronomical Algorithms, פרקים 13, 15', note: 'גובה ואזימוט, זריחה ושקיעה' }],
   'chodesh/natui': [{ ref: 'J. Meeus, Astronomical Algorithms, פרק 47', note: 'מקום הראש הממוצע' }, { ref: `${KH}, פרק טז`, note: 'מקום הראש ורוחב הירח' }],
+  'chodesh/likuyim': [{ ref: 'J. Meeus, Astronomical Algorithms, פרק 54', note: 'ליקויים: זמן, γ, סוג וגודל' }, { ref: 'NASA Five Millennium Canon', note: 'נבדק מול רשימת הליקויים' }],
   'shana/katan': [{ ref: `${KH} ו, י–יא`, note: 'מחזור של 19 שנה; השנים המעוברות' }],
   'shana/gadol': [{ ref: KITZUR, note: 'אורך התקופה' }, { ref: `${KH} ט, א–ג`, note: 'תקופת שמואל' }, { ref: 'ברכות נט ע״ב', note: 'ברכת החמה: כל כ״ח שנים, באורתא דתלת נגהי ארבע' }],
   'shana/tekufot': [{ ref: `${KH} ט, ג`, note: 'שמואל: ז׳ ימים ט׳ שעות תרמ״ב חלקים לפני מולד ניסן' }, { ref: `${KH} י, א; י, ג`, note: 'רב אדא: שנתו, וט׳ שעות תרמ״ב לפני מולד ניסן' }, { ref: 'J. Meeus, Astronomical Algorithms, פרק 27', note: 'שוויון והיפוך' }],

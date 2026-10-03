@@ -13,6 +13,7 @@ export const SLIDE_PATHS = [
   'chodesh/maslul',
   'chodesh/shamayim',
   'chodesh/natui',
+  'chodesh/likuyim',
   'shana/katan',
   'shana/gadol',
   'shana/tekufot',

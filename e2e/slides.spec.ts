@@ -179,7 +179,7 @@ test('horizon: a ridge in the east delays the visible sunrise', async ({ page })
 });
 
 test.describe('3D scenes', () => {
-  for (const [path, views] of [['chodesh/natui', 3], ['yom/kipa', 3], ['shana/tekufot', 3], ['reiya/galgalim', 3]] as const) {
+  for (const [path, views] of [['chodesh/natui', 3], ['chodesh/likuyim', 3], ['yom/kipa', 3], ['shana/tekufot', 3], ['reiya/galgalim', 3]] as const) {
     test(`${path}: renders, switches views, and has a 2D version`, async ({ page }) => {
       const errors: string[] = [];
       page.on('pageerror', e => errors.push(String(e)));
@@ -230,7 +230,7 @@ test('horizon phase B: the computed SRTM profile for Eilat makes sunset much ear
 });
 
 test.describe('3D scenes move', () => {
-  for (const path of ['chodesh/natui', 'yom/kipa', 'shana/tekufot', 'reiya/galgalim']) {
+  for (const path of ['chodesh/natui', 'chodesh/likuyim', 'yom/kipa', 'shana/tekufot', 'reiya/galgalim']) {
     test(`${path}: mouse drag rotates the view; play animates; auto-rotate spins`, async ({ page }, info) => {
       test.skip(info.project.name !== 'desktop');
       await page.goto(`/#/${path}?y=5787&city=0&mode=explore`);
