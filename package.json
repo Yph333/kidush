@@ -14,7 +14,8 @@
     "e2e": "playwright test",
     "oracle:zmanim": "java -cp tools/kosherjava/lib/zmanim-2.5.0.jar tools/kosherjava/Oracle.java > tests/zmanim-oracle.json",
     "horizons": "node tools/horizon/build-profiles.mjs",
-    "sources:rambam": "node tools/sources/fetch-rambam.mjs"
+    "sources:rambam": "node tools/sources/fetch-rambam.mjs",
+    "review": "node -e \"process.env.REVIEW=1;require('child_process').execSync('npx playwright test e2e/review.spec.ts --project=desktop',{stdio:'inherit',env:process.env})\""
   },
   "dependencies": {
     "react": "^19.3.0",
