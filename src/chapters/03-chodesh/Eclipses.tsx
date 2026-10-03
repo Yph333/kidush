@@ -1,7 +1,9 @@
 import { useMemo, useState } from 'react';
 import { gDate, moladTotal, rh } from '../../engines/calendar';
 import { D2R, HOUR, R2D, TofMs, localParts, moladMs, moonEcl, moonNode, nrm, sunEcl } from '../../engines/astro';
-import { ECLIPSE_SEASON_DAYS, type Eclipse, SAROS_DAYS, eclipsesBetween, visibilityAt } from '../../engines/eclipses';
+import { ECLIPSE_SEASON_DAYS, type Eclipse, SAROS_DAYS, eclipsesBetween, sarosOf, shadowAxis, visibilityAt } from '../../engines/eclipses';
+import { centralPath, pathRegions, regionsOf, visibilityGrid } from '../../lib/eclipseMap';
+import { FamilyTable, Panorama, SeasonsStrip, WorldMap, sarosFamily } from './eclipseViz';
 import { Term } from '../../components/Glossary';
 import { Scene3D } from '../../components/Scene3D/Scene3D';
 import { usePlay } from '../../components/Scene3D/usePlay';
@@ -85,6 +87,18 @@ export function Eclipses() {
     return ms;
   }, [e, demo]);
   const v = views[Math.min(sel, views.length - 1)];
+  // where on Earth, and the Saros family
+  const cells = useMemo(() => visibilityGrid(e), [e]);
+  const central = useMemo(() => centralPath(e), [e]);
+  const where = useMemo(() => regionsOf(cells), [cells]);
+  const along = useMemo(() => pathRegions(central), [central]);
+  const fam = useMemo(() => sarosFamily(e), [e]);
+  const [showFam, setShowFam] = useState(false);
+  const S = sarosOf(e);
+  const famDots = showFam && e.kind === 'solar'
+    ? fam.map(x => { const g = shadowAxis(x.ms); return { lat: g.lat, lon: g.lon, label: String(new Date(x.ms).getUTCFullYear()), current: x.k === e.k }; })
+    : undefined;
+  const join = (xs: string[]) => (xs.length <= 1 ? xs.join('') : `${xs.slice(0, -1).join(', ')} ו${xs[xs.length - 1]}`);
 
   return (
     <Slide
@@ -95,6 +109,11 @@ export function Eclipses() {
         <p><strong>מתי?</strong> ליקוי חמה יכול לקרות רק במולד, וליקוי לבנה רק במילוא. אבל לא בכל חודש: מסלול הירח נוטה, ולרוב הירח עובר מעל השמש (או מעל צל הארץ) או מתחתיה. ליקוי קורה רק כשהמולד או המילוא חלים ליד <Term k="rosh">הראש או הזנב</Term>.</p>
         <p><strong>איפה?</strong> בליקוי חמה צל הירח קטן, ונופל על פס צר על פני כדור הארץ. רק שם הליקוי מלא, ובאזור רחב סביבו הוא חלקי. ליקוי לבנה נראה מכל חצי כדור הארץ שבו לילה באותה שעה.</p>
         <p><strong>כל כמה זמן?</strong> השמש עוברת ליד צומת פעמיים בשנה, כל כ־<Num>{ECLIPSE_SEASON_DAYS.toFixed(1)}</Num> ימים (״עונת ליקויים״). בכל שנה יש <Num>2–5</Num> ליקויי חמה. אחרי <Num>18</Num> שנה ו־<Num>11</Num> ימים (מחזור ״סרוס״, <Num>{SAROS_DAYS.toFixed(1)}</Num> ימים) הליקויים חוזרים בסדר דומה.</p>
+        <p><strong>הסדר.</strong> הליקויים מסודרים בשתי דרכים:</p>
+        <ul className="order-list">
+          <li><strong>עונות:</strong> הליקויים באים בקבוצות. בכל עונה יש ליקוי חמה וליקוי לבנה, שבועיים זה מזה (ולפעמים שלושה ליקויים), והעונה הבאה מגיעה כחצי שנה אחרי.</li>
+          <li><strong>משפחות סרוס:</strong> כל ליקוי שייך למשפחה ממוספרת. כל <Num>18</Num> שנה ו־<Num>11</Num> ימים בא הבן הבא במשפחה. הוא דומה מאוד לקודמו, אבל הצל זז מעט צפונה או דרומה, ומשפחה שלמה נמשכת כ־<Num>1200–1400</Num> שנה.</li>
+        </ul>
         <Engine title="הליקוי שנבחר">
           <div className="ctl">
             <CityControl />
@@ -109,7 +128,14 @@ export function Eclipses() {
               v.visible ? <Tag tone="ok">{e.kind === 'solar' ? <>כן, כ־<Num>{Math.round(v.value * 100)}%</Num> מקוטר השמש</> : 'כן'}</Tag> : <Tag tone="bad">לא</Tag>],
             [e.kind === 'solar' ? 'המולד הממוצע של החודש' : 'המולד ועוד חצי חודש', <><Num>{hrs(Math.abs(molad - e.ms))}</Num> שעות {molad > e.ms ? 'אחרי' : 'לפני'} הליקוי</>],
             ['γ (מרחק ציר הצל ממרכז הארץ)', <Num>{e.gamma.toFixed(3)}</Num>],
+            ['משפחת סרוס', <>מספר <Num>{S.saros}</Num></>],
           ]} />
+          <div className="where">
+            <b>איפה רואים אותו?</b>
+            {e.kind === 'solar' && central.length > 0 && <p className="m0">ליקוי {e.type === 'total' ? 'מלא' : e.type === 'annular' ? 'טבעתי' : 'משולב'} בפס צר שעובר ב{join(along)}.</p>}
+            <p className="m0">{e.kind === 'solar' ? (central.length ? 'ליקוי חלקי' : 'נראה כליקוי חלקי') : 'נראה'} מ{join(where.land) || 'אזורים מעטים בלבד'}{where.sea.length ? <>, ומעל {join(where.sea)}</> : ''}.</p>
+            <p className="note">בערך, לפי רשת של <Num>4°</Num>.</p>
+          </div>
           <div className="tline">
             <input type="range" min={-36} max={36} step={0.25} value={dt / HOUR} onChange={x => setDt(+x.target.value * HOUR)} aria-label="זמן ביחס לשיא הליקוי" />
             <div className="tread"><Num>{`${dt >= 0 ? '+' : '−'}${Math.abs(dt / HOUR).toFixed(1)}`}</Num> שעות משיא הליקוי{pos.phase !== 'none' && <> · <Tag tone="moon">{pos.phase === 'solar' ? 'צל הירח על הארץ' : pos.phase === 'lunar-umbral' ? 'הירח בצל הארץ' : 'הירח בפלג הצל'}</Tag></>}</div>
@@ -127,6 +153,30 @@ export function Eclipses() {
             views={[{ id: 'oblique', label: 'מבט אלכסוני' }, { id: 'side', label: 'מהצד' }, { id: 'top', label: 'מלמעלה' }]}
             play={{ ...player, label: 'הפעל: הירח עובר ליד הצומת' }}
             fallback={<Track e={e} t={t} />} />
+        </Viz>
+        <Viz>
+          <p className="chart-title">איפה רואים את {name(e)} של <Num>{civ(e.ms)}</Num></p>
+          <WorldMap e={e} cells={cells} central={central} home={{ lat: p.lat, lon: p.lon, name: city.name }} family={famDots} />
+          <p className="note">
+            {e.kind === 'solar'
+              ? <>צהוב: האזור שבו הליקוי נראה כחלקי (ככל שכהה יותר, השמש מכוסה יותר) · קו אדום: פס הליקוי המלא או הטבעתי · כוכב: שיא הליקוי.</>
+              : <>תכלת: האזור שבו הירח מעל האופק בזמן הליקוי.</>}
+          </p>
+          {e.kind === 'solar' && <label className="chk"><input type="checkbox" checked={showFam} onChange={x => setShowFam(x.target.checked)} />הצגת בני משפחת הסרוס על המפה (שיא הליקוי של כל אחד)</label>}
+        </Viz>
+        <Viz>
+          <p className="chart-title">הסדר: עונות הליקויים</p>
+          <SeasonsStrip list={list} sel={Math.min(sel, list.length - 1)} onPick={i => { setSel(i); setDt(-36 * HOUR); }} />
+        </Viz>
+        <Viz className="table-wrap">
+          <p className="chart-title">הסדר: משפחת סרוס <Num>{S.saros}</Num>, כל <Num>18</Num> שנה ו־<Num>11</Num> ימים</p>
+          <FamilyTable fam={fam} e={e} />
+          <p className="note">{e.kind === 'solar' ? 'שימו לב: γ ורוחב שיא הליקוי משתנים בהדרגה מבן לבן. הצל נודד לאט מקוטב אחד לקוטב השני לאורך חיי המשפחה.' : 'γ משתנה בהדרגה מבן לבן, וכך גם גודל הליקוי.'}</p>
+        </Viz>
+        <Viz className="explore-only">
+          <p className="chart-title">כל ה{e.kind === 'solar' ? 'ליקויי חמה' : 'ליקויי לבנה'} בשנים <Num>1000–3000</Num>, לפי משפחות</p>
+          <Panorama e={e} />
+          <p className="note">כל שורה היא משפחה אחת: היא מתחילה בליקויים חלקיים (תכלת), עוברת לליקויים מלאים או טבעתיים, ומסתיימת שוב בחלקיים. המשפחות חופפות זו את זו, וכך נוצר הפס המשופע. הקו האנכי הוא הליקוי שנבחר.</p>
         </Viz>
         <Viz className="table-wrap">
           <table className="evt">

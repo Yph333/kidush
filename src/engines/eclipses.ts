@@ -5,7 +5,7 @@
 // the Earth's centre, in Earth radii), u (umbral cone radius), type and magnitude. Visibility from a place is
 // approximated separately (see visibilityAt).
 
-import { DAYMS, D2R, R2D, type Place, deltaT, moonTopoAlt, sky } from './astro';
+import { DAYMS, D2R, R2D, type Place, TofMs, deltaT, moonEcl, moonTopoAlt, sky, sunEcl, toEq } from './astro';
 
 export type SolarType = 'total' | 'annular' | 'hybrid' | 'partial';
 export type LunarType = 'total' | 'partial' | 'penumbral';
@@ -137,3 +137,78 @@ export function visibilityAt(e: Eclipse, c: Place): LocalView {
 export const SAROS_DAYS = 223 * 29.530588861;
 /** Eclipse season: half the draconic year (the sun returns to the same node). */
 export const ECLIPSE_SEASON_DAYS = 346.620075883 / 2;
+
+// ---- the order of eclipses: Saros and Inex
+
+/** Inex: 358 synodic months ≈ 29 years less 20 days. One inex later is the next Saros series (number + 1). */
+export const INEX_LUNATIONS = 358;
+export const SAROS_LUNATIONS = 223;
+
+function modInverse(a: number, m: number): number {
+  let [r0, r1, s0, s1] = [a % m, m, 1, 0];
+  while (r1) { const q = Math.floor(r0 / r1); [r0, r1] = [r1, r0 - q * r1]; [s0, s1] = [s1, s0 - q * s1]; }
+  return ((s0 % m) + m) % m;
+}
+const INV = modInverse(INEX_LUNATIONS % SAROS_LUNATIONS, SAROS_LUNATIONS);
+
+/** Anchors (NASA numbering): solar 2024-04-08 = Saros 139 (k = 300); lunar 2025-03-14 = Saros 123 (k = 311.5). */
+const ANCHOR = { solar: { k: 300, saros: 139 }, lunar: { k: 311.5, saros: 123 } };
+
+/**
+ * Saros series number and Inex offset of an eclipse: k − k₀ = 223·a + 358·b, with b taken in (−111, 112];
+ * Saros = Saros₀ + b. (Each Inex step moves to the next series; each Saros step stays in the series.)
+ */
+export function sarosOf(e: Pick<Eclipse, 'kind' | 'k'>): { saros: number; member: number; inex: number } {
+  const A = ANCHOR[e.kind], d = Math.round(e.k - A.k);
+  let b = (((d % SAROS_LUNATIONS) + SAROS_LUNATIONS) % SAROS_LUNATIONS) * INV % SAROS_LUNATIONS;
+  if (b > 111) b -= SAROS_LUNATIONS;
+  const a = (d - INEX_LUNATIONS * b) / SAROS_LUNATIONS;
+  return { saros: A.saros + b, member: a, inex: b };
+}
+
+// ---- where on Earth
+
+export interface GeoPoint { lat: number; lon: number }
+
+const RE = 6378.14, AU = 149597870.7;
+
+/** Geocentric equatorial position (km) and Greenwich sidereal angle at an instant. */
+function bodies(ms: number) {
+  const { jd, T } = TofMs(ms), eps = 23.439291 - 0.0130042 * T;
+  const s = sunEcl(T), m = moonEcl(T);
+  const v = (lam: number, beta: number, r: number) => {
+    const q = toEq(lam, beta, eps);
+    return [r * cs(q.dec) * cs(q.ra), r * cs(q.dec) * sn(q.ra), r * sn(q.dec)] as const;
+  };
+  const gmst = ((280.46061837 + 360.98564736629 * (jd - 2451545)) % 360 + 360) % 360;
+  return { sun: v(s.lam, 0, s.R * AU), moon: v(m.lam, m.beta, m.dist), gmst };
+}
+
+const toGeo = (x: number, y: number, z: number, gmst: number): GeoPoint => {
+  const r = Math.hypot(x, y, z), lon = ((Math.atan2(y, x) * R2D - gmst + 540) % 360) - 180;
+  return { lat: Math.asin(z / r) * R2D, lon };
+};
+
+/**
+ * Where the shadow axis (sun → moon, continued) meets the Earth (spherical Earth). `hit` is false when the axis
+ * misses (partial eclipse): then the point is on the Earth's limb nearest the axis.
+ */
+export function shadowAxis(ms: number): GeoPoint & { hit: boolean } {
+  const { sun, moon, gmst } = bodies(ms);
+  let d = [moon[0] - sun[0], moon[1] - sun[1], moon[2] - sun[2]];
+  const L = Math.hypot(...d); d = d.map(x => x / L);
+  const b = moon[0] * d[0] + moon[1] * d[1] + moon[2] * d[2], c = moon[0] ** 2 + moon[1] ** 2 + moon[2] ** 2 - RE * RE;
+  const disc = b * b - c;
+  if (disc >= 0) {
+    const t = -b - Math.sqrt(disc);
+    return { ...toGeo(moon[0] + d[0] * t, moon[1] + d[1] * t, moon[2] + d[2] * t, gmst), hit: true };
+  }
+  const t = -b;
+  return { ...toGeo(moon[0] + d[0] * t, moon[1] + d[1] * t, moon[2] + d[2] * t, gmst), hit: false };
+}
+
+/** The point on Earth with the moon at the zenith (lunar eclipses are seen from the hemisphere around it). */
+export function subLunar(ms: number): GeoPoint {
+  const { moon, gmst } = bodies(ms);
+  return toGeo(moon[0], moon[1], moon[2], gmst);
+}

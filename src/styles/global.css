@@ -481,3 +481,8 @@ svg.full, .viz .full { width: 100%; }
 .tcard .rtable td, .tcard .rtable th { padding: .15rem .4rem; }
 .tcard .table-wrap { max-height: 16rem; overflow: auto; }
 .tcard-x { margin-top: .5rem; font-size: .88rem; }
+
+.order-list { margin: 0 0 .8rem; padding-inline-start: 1.2rem; max-width: 38em; }
+.order-list li { margin-bottom: .3rem; }
+.where { margin-top: .8rem; padding: .6rem .8rem; background: var(--bg); border-radius: 10px; }
+.where b { display: block; margin-bottom: .2rem; }

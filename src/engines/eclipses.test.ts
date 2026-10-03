@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { CITIES } from './astro';
-import { ECLIPSE_SEASON_DAYS, SAROS_DAYS, eclipseAt, eclipsesBetween, visibilityAt } from './eclipses';
+import { ECLIPSE_SEASON_DAYS, SAROS_DAYS, eclipseAt, eclipsesBetween, sarosOf, shadowAxis, subLunar, visibilityAt } from './eclipses';
 
 const J = CITIES[0];
 const day = (ms: number) => new Date(ms).toISOString().slice(0, 10);
@@ -79,4 +79,51 @@ describe('seen from Jerusalem', () => {
   it('2022-10-25 partial solar: visible in Jerusalem', () => expect(visibilityAt(find('2022-10-25', 'solar'), J).visible).toBe(true));
   it('2025-09-07 total lunar: visible in Jerusalem (evening)', () => expect(visibilityAt(find('2025-09-07', 'lunar'), J).visible).toBe(true));
   it('2025-03-14 total lunar: not visible in Jerusalem (daytime)', () => expect(visibilityAt(find('2025-03-14', 'lunar'), J).visible).toBe(false));
+});
+
+describe('Saros numbers (NASA)', () => {
+  const solar: [string, number][] = [
+    ['2023-10-14', 134], ['2024-04-08', 139], ['2024-10-02', 144], ['2025-03-29', 149], ['2025-09-21', 154],
+    ['2026-02-17', 121], ['2026-08-12', 126], ['2027-08-02', 136],
+  ];
+  for (const [d, s] of solar) it(`solar ${d}: Saros ${s}`, () => expect(sarosOf(find(d, 'solar')).saros).toBe(s));
+  const lunar: [string, number][] = [['2024-09-18', 118], ['2025-03-14', 123], ['2025-09-07', 128], ['2026-03-03', 133], ['2026-08-28', 138]];
+  for (const [d, s] of lunar) it(`lunar ${d}: Saros ${s}`, () => expect(sarosOf(find(d, 'lunar')).saros).toBe(s));
+  it('one Saros later: same series, next member', () => {
+    const e = find('2024-04-08', 'solar'), f = eclipseAt(e.k + 223)!;
+    expect(sarosOf(f).saros).toBe(139);
+    expect(sarosOf(f).member).toBe(sarosOf(e).member + 1);
+  });
+});
+
+describe('where on Earth', () => {
+  it('2024-04-08: greatest eclipse in northern Mexico (≈ 25.3°N 104.1°W)', () => {
+    const e = find('2024-04-08', 'solar'), p = shadowAxis(e.ms);
+    expect(p.hit).toBe(true);
+    expect(Math.abs(p.lat - 25.3)).toBeLessThan(1.5);
+    expect(Math.abs(p.lon + 104.1)).toBeLessThan(1.5);
+  });
+  it('2027-08-02: greatest eclipse in Egypt near Luxor (≈ 25.5°N 33.2°E)', () => {
+    const p = shadowAxis(find('2027-08-02', 'solar').ms);
+    expect(Math.abs(p.lat - 25.5)).toBeLessThan(1.5);
+    expect(Math.abs(p.lon - 33.2)).toBeLessThan(1.5);
+  });
+  it('2026-08-12: greatest eclipse near Iceland (≈ 65.2°N 25.2°W)', () => {
+    const p = shadowAxis(find('2026-08-12', 'solar').ms);
+    expect(Math.abs(p.lat - 65.2)).toBeLessThan(2);
+    expect(Math.abs(p.lon + 25.2)).toBeLessThan(2);
+  });
+  it('a partial eclipse: the axis misses the Earth', () => expect(shadowAxis(find('2025-03-29', 'solar').ms).hit).toBe(false));
+  it('2025-03-14 lunar: the moon was over the Pacific / the Americas (night side)', () => {
+    const p = subLunar(find('2025-03-14', 'lunar').ms);
+    expect(p.lon).toBeLessThan(-60);
+    expect(p.lon).toBeGreaterThan(-140);
+  });
+});
+
+describe('anchors', () => {
+  it('the Saros anchors are the eclipses they name', () => {
+    expect(find('2024-04-08', 'solar').k).toBe(300);
+    expect(find('2025-03-14', 'lunar').k).toBe(311.5);
+  });
 });
