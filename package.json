@@ -12,7 +12,9 @@
     "test:watch": "vitest",
     "typecheck": "tsc -p .",
     "e2e": "playwright test",
-    "oracle:zmanim": "java -cp tools/kosherjava/lib/zmanim-2.5.0.jar tools/kosherjava/Oracle.java > tests/zmanim-oracle.json"
+    "oracle:zmanim": "java -cp tools/kosherjava/lib/zmanim-2.5.0.jar tools/kosherjava/Oracle.java > tests/zmanim-oracle.json",
+    "horizons": "node tools/horizon/build-profiles.mjs",
+    "sources:rambam": "node tools/sources/fetch-rambam.mjs"
   },
   "dependencies": {
     "react": "^19.3.0",

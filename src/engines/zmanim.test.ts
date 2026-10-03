@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import oracle from '../../tests/zmanim-oracle.json';
+import horizons from '../content/horizons.json';
 import { ZMANIM, ZMAN_BY_ID } from '../content/zmanimOpinions';
 import {
   H0_STANDARD, dip, horizonAlt, hourAngle, localHM, refraction, solarNoon, sunAltAz, sunAt, sunPosition, visibleSun, zman,
@@ -125,5 +126,26 @@ describe('horizon profile', () => {
   it('without a profile, visible = elevation-adjusted', () => {
     const q = { lat: 31.778, lon: 35.235, elevation: 750 };
     expect(visibleSun(2026, 2, 20, q, false).ms).toBe(sunAt(2026, 2, 20, q, H0_STANDARD - dip(750), false).ms);
+  });
+});
+
+describe('SRTM horizon profiles (src/content/horizons.json)', () => {
+  const H = horizons.cities as Record<string, { lat: number; lon: number; ground: number; profile: number[][] }>;
+  const prof = (name: string) => H[name].profile.map(([az, alt]) => ({ az, alt }));
+  it('every city has a full 360° profile at 2° steps', () => {
+    for (const c of Object.values(H)) expect(c.profile).toHaveLength(180);
+  });
+  it('Jerusalem ground is about 750 m (VERIFICATION.md)', () => {
+    expect(Math.abs(H['ירושלים'].ground - 750)).toBeLessThan(25);
+  });
+  it('Eilat: the western mountains make the visible sunset much earlier than the mishor', () => {
+    const c = H['אילת'], p = { lat: c.lat, lon: c.lon, elevation: c.ground, horizon: prof('אילת') };
+    const mishor = sunAt(2026, 2, 20, p, H0_STANDARD, false).ms!;
+    expect((mishor - visibleSun(2026, 2, 20, p, false).ms!) / MIN).toBeGreaterThan(15);
+  });
+  it('Jerusalem: the Mount of Olives delays the visible sunrise', () => {
+    const c = H['ירושלים'], p = { lat: c.lat, lon: c.lon, elevation: c.ground, horizon: prof('ירושלים') };
+    const elev = sunAt(2026, 2, 20, p, H0_STANDARD - dip(c.ground), true).ms!;
+    expect((visibleSun(2026, 2, 20, p, true).ms! - elev) / MIN).toBeGreaterThan(5);
   });
 });

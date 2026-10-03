@@ -5,6 +5,7 @@ import {
 import { Engine, Slide, Viz } from '../../components/Slide';
 import { Steps } from '../../components/Steps';
 import { Num, Tag } from '../../components/text';
+import HORIZONS from '../../content/horizons.json';
 import { CityControl, DateControl, NotARuling, useZDay } from './shared';
 
 const MIN = 60000;
@@ -19,14 +20,14 @@ const PRESETS: { name: string; east: Vals; west: Vals }[] = [
 ];
 
 /** Skyline seen facing east (north on the left) or west (south on the left), with the sun's path near the horizon. */
-function Skyline({ azs, alts, p, y, m, d, rising }: { azs: number[]; alts: Vals; p: ZPlace; y: number; m: number; d: number; rising: boolean }) {
+function Skyline({ azs, prof, p, y, m, d, rising }: { azs: number[]; prof: HorizonPoint[]; p: ZPlace; y: number; m: number; d: number; rising: boolean }) {
   const W = 360, H = 170, pad = 24;
-  const a0 = azs[0] - 10, a1 = azs[azs.length - 1] + 10, lo = -2, hi = 6;
+  const a0 = azs[0] - 10, a1 = azs[azs.length - 1] + 10, lo = -2;
+  const hi = Math.max(6, Math.ceil(Math.max(0, ...prof.filter(q => q.az >= a0 && q.az <= a1).map(q => q.alt)) + 1));
   // facing east: north (smaller az) on the left; facing west: south (smaller az) on the left
   const X = (az: number) => pad + ((az - a0) / (a1 - a0)) * (W - 2 * pad);
   const Y = (alt: number) => H - pad - ((alt - lo) / (hi - lo)) * (H - 2 * pad);
   const sea = -dip(p.elevation ?? 0);
-  const prof = toProfile(azs, alts);
   const sky = Array.from({ length: 41 }, (_, i) => a0 + (i / 40) * (a1 - a0)).map(az => `${X(az).toFixed(1)},${Y(Math.max(lo, Math.max(sea, horizonAlt(prof, az) ?? sea))).toFixed(1)}`);
   const ev = sunAt(y, m, d, p, H0_STANDARD, rising).ms;
   const path: string[] = [];
@@ -69,14 +70,22 @@ function ProfileInputs({ label, azs, vals, onChange }: { label: string; azs: num
   );
 }
 
+type HorizonCity = { lat: number; lon: number; ground: number; profile: number[][] };
+const SRTM = HORIZONS.cities as Record<string, HorizonCity>;
+
 export function Horizon() {
   const { y, m, d, p: base, city } = useZDay();
+  const srtmCity = SRTM[city.name];
+  const [mode, setMode] = useState<'manual' | 'srtm'>('manual');
+  const useSrtm = mode === 'srtm' && !!srtmCity;
   const [elev, setElev] = useState<number | null>(null);
-  const h = elev ?? base.elevation ?? 0;
+  const h = elev ?? (useSrtm ? srtmCity.ground : base.elevation ?? 0);
   const [east, setEast] = useState(PRESETS[0].east);
   const [west, setWest] = useState(PRESETS[0].west);
   const p: ZPlace = { ...base, elevation: h };
-  const profile = [...toProfile(EAST, east), ...toProfile(WEST, west)];
+  const profile: HorizonPoint[] = useSrtm
+    ? srtmCity.profile.map(([az, alt]) => ({ az, alt }))
+    : [...toProfile(EAST, east), ...toProfile(WEST, west)];
 
   const dp = dip(h);
   const ev = (rising: boolean) => ({
@@ -114,19 +123,30 @@ export function Horizon() {
         </Engine>
         <NotARuling />
       </>}
-      more={<p>שלב א׳: מזינים ביד את גובה קו האופק בכמה כיוונים, והמנוע משלים ביניהם. בשלב ב׳ (אבן דרך 5) יחושבו פרופילי אופק לערים מרכזיות מנתוני גובה פתוחים.</p>}
+      more={<p>שלב א׳: מזינים ביד את גובה קו האופק בכמה כיוונים, והמנוע משלים ביניהם. שלב ב׳: פרופיל שחושב מראש מנתוני גובה פתוחים (SRTM), לנקודת מרכז העיר. {HORIZONS.method} נתוני SRTM כוללים בחלקם גם בניינים גבוהים, ולכן בערים צפופות הפרופיל משוער בלבד.</p>}
       stage={<>
-        <Engine title="פרופיל האופק" sub="שלב א׳: הזנה ידנית">
-          <div className="chips">
-            <span>מוכנים:</span>
-            {PRESETS.map(pr => <button key={pr.name} type="button" onClick={() => { setEast(pr.east); setWest(pr.west); }}>{pr.name}</button>)}
+        <Engine title="פרופיל האופק">
+          <div className="seg" role="group" aria-label="מקור הפרופיל">
+            <button type="button" aria-pressed={!useSrtm} onClick={() => { setMode('manual'); setElev(null); }}>שלב א׳: הזנה ידנית</button>
+            <button type="button" aria-pressed={useSrtm} disabled={!srtmCity} onClick={() => { setMode('srtm'); setElev(null); }}>שלב ב׳: מחושב מנתוני גובה</button>
           </div>
-          <ProfileInputs label="מזרח" azs={EAST} vals={east} onChange={setEast} />
-          <ProfileInputs label="מערב" azs={WEST} vals={west} onChange={setWest} />
+          {useSrtm ? (
+            <p className="note">
+              {city.name}: גובה הקרקע בנקודה <Num>{srtmCity.ground}</Num> מ׳; קו האופק הגבוה ביותר
+              {' '}<Num>{Math.max(...srtmCity.profile.map(q => q[1])).toFixed(1)}°</Num>. מקור: {HORIZONS.source}, נבנה {HORIZONS.built}.
+            </p>
+          ) : <>
+            <div className="chips">
+              <span>מוכנים:</span>
+              {PRESETS.map(pr => <button key={pr.name} type="button" onClick={() => { setEast(pr.east); setWest(pr.west); }}>{pr.name}</button>)}
+            </div>
+            <ProfileInputs label="מזרח" azs={EAST} vals={east} onChange={setEast} />
+            <ProfileInputs label="מערב" azs={WEST} vals={west} onChange={setWest} />
+          </>}
         </Engine>
         <div className="vpair">
-          <Viz><p className="chart-title">מבט מזרחה: זריחה ב{city.name}</p><Skyline azs={EAST} alts={east} p={p} y={y} m={m} d={d} rising /></Viz>
-          <Viz><p className="chart-title">מבט מערבה: שקיעה</p><Skyline azs={WEST} alts={west} p={p} y={y} m={m} d={d} rising={false} /></Viz>
+          <Viz><p className="chart-title">מבט מזרחה: זריחה ב{city.name}</p><Skyline azs={EAST} prof={profile} p={p} y={y} m={m} d={d} rising /></Viz>
+          <Viz><p className="chart-title">מבט מערבה: שקיעה</p><Skyline azs={WEST} prof={profile} p={p} y={y} m={m} d={d} rising={false} /></Viz>
         </div>
         <p className="note">הקו המקווקו: מסלול מרכז השמש. העיגול: הרגע שבו שפת השמש נוגעת בקו האופק. {profile.length === 0 && <Tag tone="moon">באופק פתוח הזריחה הנראית שווה לזריחה לפי הגובה</Tag>}</p>
       </>}

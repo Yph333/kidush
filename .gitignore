@@ -8,3 +8,4 @@ e2e/__screenshots__/
 .DS_Store
 dist-e2e/
 tools/kosherjava/lib/
+tools/horizon/cache/

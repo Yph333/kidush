@@ -220,3 +220,11 @@ test('Rambam tables: the worked example highlights the right rows', async ({ pag
   await expect(card('קיצי הראייה').locator('tr.hl')).toContainText('11°');
   await expect(card('קיצי הראייה')).toContainText('11° 11′');
 });
+
+test('horizon phase B: the computed SRTM profile for Eilat makes sunset much earlier', async ({ page }) => {
+  await page.goto('/#/yom/gova?y=5787&city=5&mode=explore');
+  await page.getByRole('button', { name: /שלב ב׳/ }).click();
+  await expect(page.getByRole('button', { name: /שלב ב׳/ })).toHaveAttribute('aria-pressed', 'true');
+  const m = (await page.locator('.step.final .ss').innerText()).match(/שקיעה\s*(-?[\d.]+)/);
+  expect(Number(m![1])).toBeLessThan(-15);
+});
