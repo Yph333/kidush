@@ -5,6 +5,7 @@ import { R_MOON, interp, moonEquation, rambam, rambamD0 } from '../../engines/ra
 import { useAstro } from '../../components/astro/useAstro';
 import { Term } from '../../components/Glossary';
 import { Scene3D } from '../../components/Scene3D/Scene3D';
+import { usePlay } from '../../components/Scene3D/usePlay';
 import { Engine, Slide, Viz } from '../../components/Slide';
 import { DM, DMS, Num, Pos } from '../../components/text';
 import type { WheelsProps } from '../../scenes/rambamWheels';
@@ -42,6 +43,7 @@ export function Wheels() {
   const o = M.ev[sel];
   const R = useMemo(() => (o ? rambam(dayOfMs(o.ss + 60000, c)) : null), [o, c]);
   const course = manual ?? R?.crsR ?? 0;
+  const player = usePlay(dt => setManual(prev => ((prev ?? course) + dt * 30) % 360));
   const E = moonEquation(course);
   const props = useMemo<WheelsProps>(() => ({ meanLon: (R?.moonAdj ?? 0) / 3600, course, eqMin: E.eq, subtract: E.sign < 0 }), [R, course, E.eq, E.sign]);
   const hd = R ? hebDate(R.N + rambamD0()) : null;
@@ -70,7 +72,7 @@ export function Wheels() {
           </div>
           {hd && <p className="m0">הערב הנבחר (משקף ״נראות הירח״): ליל {gq(hd.d)} {hd.name}. המסלול הנכון: <Num>{R!.crsR}°</Num>.</p>}
           <label className="fld">או סובבו בעצמכם: המסלול <Num>{course}°</Num>
-            <input type="range" min={0} max={359} value={course} onChange={e => setManual(+e.target.value)} aria-label="המסלול במעלות" />
+            <input type="range" min={0} max={359} value={Math.round(course)} onChange={e => setManual(+e.target.value)} aria-label="המסלול במעלות" />
           </label>
           {manual !== null && <button type="button" className="linkbtn" onClick={() => setManual(null)}>חזרה לערב הנבחר</button>}
         </Engine>
@@ -97,6 +99,7 @@ export function Wheels() {
       stage={
         <Viz>
           <Scene3D load={load} props={props} label="הגלגל הגדול והגלגל הקטן של הירח לפי הרמב״ם"
+            play={{ ...player, label: 'הפעל: הירח על הגלגל הקטן' }}
             views={[{ id: 'oblique', label: 'מבט אלכסוני' }, { id: 'top', label: 'מלמעלה' }, { id: 'close', label: 'קרוב לגלגל הקטן' }]}
             fallback={<TopView p={props} />} />
           <p className="note">ציור סכמטי: הגלגל הקטן מוגדל כדי שייראה. הזווית שבציור גדולה מהאמיתית; המספר שבתווית הוא ערך הטבלה של הרמב״ם.</p>

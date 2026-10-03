@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react';
-import { TofMs, dayOfMs, moonEcl, moonNode, nrm, sunEcl } from '../../engines/astro';
+import { HOUR, TofMs, dayOfMs, moonEcl, moonNode, nrm, sunEcl } from '../../engines/astro';
+import { setAstro } from '../../state/store';
 import { rambam } from '../../engines/rambam';
 import { AstroControls } from '../../components/astro/AstroControls';
 import { useAstro } from '../../components/astro/useAstro';
@@ -38,7 +39,7 @@ function Unrolled({ p }: { p: MoonOrbitProps }) {
 
 export function InclinedOrbit() {
   const v = useAstro();
-  const { M, t, c } = v;
+  const { M, t, c, a } = v;
   const [ex, setEx] = useState(3);
   const { T } = TofMs(t);
   const sun = sunEcl(T), moon = moonEcl(T);
@@ -77,6 +78,7 @@ export function InclinedOrbit() {
       stage={
         <Viz>
           <Scene3D load={load} props={props} label="מסלול הירח הנטוי ביחס למסלול השמש, עם קו הצמתים"
+            play={{ playing: a.playing, label: 'הפעל: הירח במסלולו', toggle: () => setAstro(a.playing ? { playing: false } : { playing: true, t: t >= M.B - HOUR ? M.A : t }) }}
             views={[{ id: 'oblique', label: 'מבט אלכסוני' }, { id: 'top', label: 'מלמעלה' }, { id: 'edge', label: 'מהצד, לאורך המישור' }]}
             fallback={<Unrolled p={props} />} />
           <p className="note">{M.name}: אדום, הקטעים ליד הצמתים שבהם מולד יכול להיות ליקוי. הנטייה מוגדלת בציור כדי שתיראה.</p>

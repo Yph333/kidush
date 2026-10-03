@@ -3,6 +3,7 @@ import { gDate, tekufotAbsolute, yearHeb } from '../../engines/calendar';
 import { HOUR, TofMs, localParts, moladMs, seasons, sunEcl } from '../../engines/astro';
 import { Term } from '../../components/Glossary';
 import { Scene3D } from '../../components/Scene3D/Scene3D';
+import { usePlay } from '../../components/Scene3D/usePlay';
 import { Engine, Slide, Viz } from '../../components/Slide';
 import { Num, Tag } from '../../components/text';
 import { SlideYear, useSlideYear } from '../../components/YearControl';
@@ -62,6 +63,7 @@ export function Seasons() {
   }, [rows, now]);
 
   const tlo = rows[0].tru - 20 * 24 * HOUR, thi = rows[3].ra + 40 * 24 * HOUR;
+  const player = usePlay(dt => setT(prev => { const v = (prev ?? now) + dt * 20 * 24 * HOUR; return v > thi ? tlo : v; }));
 
   return (
     <Slide
@@ -77,6 +79,7 @@ export function Seasons() {
       stage={<>
         <Viz>
           <Scene3D load={load} props={props} label="כדור הארץ במסלולו סביב השמש, עם ציר נוטה והתקופות"
+            play={{ ...player, label: 'הפעל: שנה במסלול' }}
             views={[{ id: 'oblique', label: 'מבט אלכסוני' }, { id: 'top', label: 'מלמעלה' }, { id: 'earth', label: 'קרוב לכדור הארץ' }]}
             fallback={<Orbit2D p={props} />} />
           <p className="note">ירוק: התקופה האמיתית. אדום: שמואל. תכלת: רב אדא. המרחקים לא בקנה מידה.</p>

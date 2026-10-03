@@ -2,7 +2,7 @@
 // the equinox / solstices to compare), and circles of equal altitude for the zmanim (below the horizon too).
 
 import type { SceneHandle, SceneModule } from '../components/Scene3D/types';
-import { COLORS, THREE, createStage, disc, line, lineLoop, sphere } from './common';
+import { COLORS, THREE, createStage, disc, line, lineLoop, sphere, clearGroup } from './common';
 
 export interface SkyPath { key: string; label: string; color: number; points: { alt: number; az: number }[] }
 export interface SkyDomeProps {
@@ -49,7 +49,7 @@ const create = (host: HTMLElement, p0: SkyDomeProps): SceneHandle<SkyDomeProps> 
 
   let p = p0;
   const build = () => {
-    dyn.clear();
+    clearGroup(dyn);
     // altitude circles
     for (const c of p.circles) {
       const pts = Array.from({ length: 128 }, (_, i) => hor(c.alt, (i / 128) * 360));
@@ -77,6 +77,7 @@ const create = (host: HTMLElement, p0: SkyDomeProps): SceneHandle<SkyDomeProps> 
       else if (id === 'south') st.look([0, 4, -26], [0, 3, 0]);  // camera to the north (−z), looking south
       else st.look([18, 14, 18], [0, 2, 0]);
     },
+    setAutoRotate: st.setAutoRotate,
     dispose: st.dispose,
   };
 };

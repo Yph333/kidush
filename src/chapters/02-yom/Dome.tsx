@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react';
 import { seasons } from '../../engines/astro';
 import { H0_STANDARD, localHM, solarNoon, sunAltAz, sunAt } from '../../engines/zmanim';
 import { Scene3D } from '../../components/Scene3D/Scene3D';
+import { usePlay } from '../../components/Scene3D/usePlay';
 import { Engine, Slide, Viz } from '../../components/Slide';
 import { Num } from '../../components/text';
 import type { SkyDomeProps, SkyPath } from '../../scenes/skyDome';
@@ -53,6 +54,7 @@ export function Dome() {
   const span = Math.round((today.set - today.rise) / MIN) + 120;
   const kk = k === null ? Math.round(span / 2) : Math.min(span, k);
   const t = today.rise - 60 * MIN + kk * MIN;
+  const player = usePlay(dt => setK(prev => { const v = (prev ?? Math.round(span / 2)) + dt * 90; return v > span ? 0 : v; }));
 
   const seasonPaths = useMemo(() => {
     const [eq, summer, , winter] = seasons(y).map(ms => new Date(ms));
@@ -95,7 +97,7 @@ export function Dome() {
             ))}
           </div>
           <div className="tline">
-            <input type="range" min={0} max={span} value={kk} onChange={e => setK(+e.target.value)} aria-label="השעה" />
+            <input type="range" min={0} max={span} value={Math.round(kk)} onChange={e => setK(+e.target.value)} aria-label="השעה" />
             <div className="tread"><Num>{localHM(t)}</Num>: השמש בגובה <Num>{s.alt.toFixed(1)}°</Num>, כיוון <Num>{Math.round(s.az)}°</Num><small>{city.name}</small></div>
           </div>
         </Engine>
@@ -104,6 +106,7 @@ export function Dome() {
       stage={
         <Viz>
           <Scene3D load={load} props={props} label={`כיפת השמיים מעל ${city.name} ומסלולי השמש`}
+            play={{ ...player, label: 'הפעל: השמש במהלך היום' }}
             views={[{ id: 'oblique', label: 'מבט אלכסוני' }, { id: 'south', label: 'מבט דרומה' }, { id: 'top', label: 'מלמעלה' }]}
             fallback={<Flat p={props} />} />
         </Viz>

@@ -26,6 +26,8 @@ export interface Stage {
   label: (text: string, cls?: string) => CSS2DObject;
   /** set camera position (and target) and re-render */
   look: (pos: [number, number, number], target?: [number, number, number]) => void;
+  /** slowly orbit the camera around the target */
+  setAutoRotate: (on: boolean) => void;
   dispose: () => void;
 }
 
@@ -44,9 +46,11 @@ export function createStage(host: HTMLElement, opts: { fov?: number; near?: numb
 
   const scene = new THREE.Scene();
   const camera = new THREE.PerspectiveCamera(opts.fov ?? 45, w / h, opts.near ?? 0.1, opts.far ?? 1000);
-  const controls = new OrbitControls(camera, labels.domElement);
+  // Drag/zoom must reach the canvas: the label layer above it ignores pointer events (see .scene-labels).
+  const controls = new OrbitControls(camera, renderer.domElement);
   controls.enableDamping = false;
   controls.enablePan = false;
+  controls.autoRotateSpeed = 1.2;
 
   const render = () => { renderer.render(scene, camera); labels.render(scene, camera); };
   controls.addEventListener('change', render);
@@ -82,7 +86,17 @@ export function createStage(host: HTMLElement, opts: { fov?: number; near?: numb
     render();
   };
 
+  // A render loop runs only while the camera auto-rotates; otherwise frames are drawn on demand.
+  let raf = 0;
+  const tick = () => { controls.update(); render(); raf = requestAnimationFrame(tick); };
+  const setAutoRotate = (on: boolean) => {
+    controls.autoRotate = on;
+    cancelAnimationFrame(raf);
+    if (on) raf = requestAnimationFrame(tick);
+  };
+
   const dispose = () => {
+    cancelAnimationFrame(raf);
     ro.disconnect();
     controls.dispose();
     scene.traverse(o => {
@@ -97,7 +111,7 @@ export function createStage(host: HTMLElement, opts: { fov?: number; near?: numb
     labels.domElement.remove();
   };
 
-  return { scene, camera, controls, render, label, look, dispose };
+  return { scene, camera, controls, render, label, look, setAutoRotate, dispose };
 }
 
 /** Ecliptic / horizontal convention used by all scenes: y is up; longitude λ → (cos λ, 0, −sin λ). */
@@ -145,4 +159,18 @@ export function disc(r: number, color: number, opacity: number): THREE.Mesh {
   const m = new THREE.Mesh(new THREE.CircleGeometry(r, 96), new THREE.MeshBasicMaterial({ color, transparent: true, opacity, side: THREE.DoubleSide, depthWrite: false }));
   m.rotation.x = -Math.PI / 2;
   return m;
+}
+
+/** Empty a group that is rebuilt on every update, freeing its GPU buffers and HTML labels. */
+export function clearGroup(g: THREE.Object3D): void {
+  g.traverse(o => {
+    const m = o as THREE.Mesh;
+    if (o !== g) {
+      m.geometry?.dispose?.();
+      const mat = m.material as THREE.Material | THREE.Material[] | undefined;
+      if (Array.isArray(mat)) mat.forEach(x => x.dispose()); else mat?.dispose?.();
+      if (o instanceof CSS2DObject) o.element.remove();
+    }
+  });
+  g.clear();
 }

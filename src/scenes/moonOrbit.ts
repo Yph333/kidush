@@ -2,7 +2,7 @@
 // (head and tail) regressing over ~18.6 years, the sun's direction, the moon and its latitude.
 
 import type { SceneHandle, SceneModule } from '../components/Scene3D/types';
-import { COLORS, THREE, createStage, dirOf, disc, line, lineLoop, ring, sphere } from './common';
+import { COLORS, THREE, createStage, dirOf, disc, line, lineLoop, ring, sphere, clearGroup } from './common';
 
 export interface MoonOrbitProps {
   sunLon: number;
@@ -66,9 +66,9 @@ const create = (host: HTMLElement, p0: MoonOrbitProps): SceneHandle<MoonOrbitPro
 
   let p = p0;
   const build = () => {
-    moonGroup.clear();
-    latLine.clear();
-    sunRay.clear();
+    clearGroup(moonGroup);
+    clearGroup(latLine);
+    clearGroup(sunRay);
     const inc = INC * p.exaggerate;
     const n = dirOf(p.node);
     // moon orbit: rotate the ecliptic circle about the node axis
@@ -118,6 +118,7 @@ const create = (host: HTMLElement, p0: MoonOrbitProps): SceneHandle<MoonOrbitPro
       else if (id === 'edge') { const v = dirOf(p.node + 90, 0, 30); st.look([v.x, 1.5, v.z]); }
       else st.look([16, 12, 20]);
     },
+    setAutoRotate: st.setAutoRotate,
     dispose: st.dispose,
   };
 };

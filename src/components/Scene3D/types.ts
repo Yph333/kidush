@@ -5,6 +5,7 @@ export interface SceneView { id: string; label: string }
 export interface SceneHandle<P> {
   update(p: P): void;
   setView(id: string): void;
+  setAutoRotate(on: boolean): void;
   dispose(): void;
 }
 

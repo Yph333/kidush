@@ -14,7 +14,7 @@ export function webglAvailable(): boolean {
   return glCache;
 }
 
-export function Scene3D<P>({ load, props, views, fallback, label, height = 440 }: {
+export function Scene3D<P>({ load, props, views, fallback, label, height = 440, play }: {
   load: () => Promise<SceneModule<P>>;
   /** must be referentially stable between renders when unchanged (useMemo) */
   props: P;
@@ -23,11 +23,14 @@ export function Scene3D<P>({ load, props, views, fallback, label, height = 440 }
   fallback: ReactNode;
   label: string;
   height?: number;
+  /** play/pause control for the scene's own animation (shown in 3D and 2D) */
+  play?: { playing: boolean; toggle: () => void; label?: string };
 }) {
   const [hasGL] = useState(webglAvailable);
   const [mode, setMode] = useState<'3d' | '2d'>(hasGL ? '3d' : '2d');
   const [status, setStatus] = useState<'loading' | 'ready' | 'error'>('loading');
   const [view, setView] = useState(views[0]?.id);
+  const [spin, setSpin] = useState(false);
   const host = useRef<HTMLDivElement>(null);
   const handle = useRef<SceneHandle<P> | null>(null);
   const latest = useRef(props);
@@ -42,6 +45,7 @@ export function Scene3D<P>({ load, props, views, fallback, label, height = 440 }
       try {
         handle.current = m.create(host.current, latest.current);
         if (view) handle.current.setView(view);
+        handle.current.setAutoRotate(spin);
         setStatus('ready');
       } catch {
         setStatus('error');
@@ -57,6 +61,11 @@ export function Scene3D<P>({ load, props, views, fallback, label, height = 440 }
   return (
     <div className="scene3d">
       <div className="scene-bar">
+        {play && (
+          <button type="button" className="btn pri play-btn" aria-pressed={play.playing} onClick={play.toggle}>
+            {play.playing ? '❚❚ עצור' : `▶ ${play.label ?? 'הפעל'}`}
+          </button>
+        )}
         {mode === '3d' && views.length > 1 && (
           <div className="seg" role="group" aria-label="מבטים">
             {views.map(v => (
@@ -65,6 +74,11 @@ export function Scene3D<P>({ load, props, views, fallback, label, height = 440 }
           </div>
         )}
         <span className="sp" />
+        {mode === '3d' && (
+          <button type="button" className="btn" aria-pressed={spin} onClick={() => { setSpin(!spin); handle.current?.setAutoRotate(!spin); }}>
+            {spin ? 'עצירת הסיבוב' : 'סיבוב אוטומטי'}
+          </button>
+        )}
         {hasGL && (
           <button type="button" className="btn" onClick={() => setMode(mode === '3d' ? '2d' : '3d')}>
             {mode === '3d' ? 'תצוגה דו־ממדית' : 'תצוגה תלת־ממדית'}

@@ -2,7 +2,7 @@
 // and Shmuel's and Rav Adda's tekufot for the chosen year, marked where the Earth is at each moment.
 
 import type { SceneHandle, SceneModule } from '../components/Scene3D/types';
-import { COLORS, THREE, createStage, dirOf, ring, sphere } from './common';
+import { COLORS, THREE, createStage, dirOf, ring, sphere, clearGroup } from './common';
 import { KIND_COLOR, type TekufaKind } from './shared';
 export type { TekufaKind };
 
@@ -49,7 +49,7 @@ const create = (host: HTMLElement, p0: EarthSeasonsProps): SceneHandle<EarthSeas
 
   let p = p0;
   const build = () => {
-    dyn.clear();
+    clearGroup(dyn);
     const e = dirOf(p.sunLon + 180, 0, R);
     earthGroup.position.copy(e);
     earthL.position.copy(e.clone().add(new THREE.Vector3(0, 1.8, 0)));
@@ -74,6 +74,7 @@ const create = (host: HTMLElement, p0: EarthSeasonsProps): SceneHandle<EarthSeas
       else if (id === 'earth') { const e = dirOf(p.sunLon + 180, 0, R); st.look([e.x * 1.55, 3, e.z * 1.55], [e.x, 0, e.z]); }
       else st.look([20, 16, 22]);
     },
+    setAutoRotate: st.setAutoRotate,
     dispose: st.dispose,
   };
 };

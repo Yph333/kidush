@@ -228,3 +228,44 @@ test('horizon phase B: the computed SRTM profile for Eilat makes sunset much ear
   const m = (await page.locator('.step.final .ss').innerText()).match(/שקיעה\s*(-?[\d.]+)/);
   expect(Number(m![1])).toBeLessThan(-15);
 });
+
+test.describe('3D scenes move', () => {
+  for (const path of ['chodesh/natui', 'yom/kipa', 'shana/tekufot', 'reiya/galgalim']) {
+    test(`${path}: mouse drag rotates the view; play animates; auto-rotate spins`, async ({ page }, info) => {
+      test.skip(info.project.name !== 'desktop');
+      await page.goto(`/#/${path}?y=5787&city=0&mode=explore`);
+      const canvas = page.locator('.scene-host canvas');
+      await expect(canvas).toHaveCount(1);
+      await page.waitForTimeout(500);
+      const shot = () => canvas.screenshot();
+
+      // drag with the mouse
+      const a = await shot();
+      const box = (await canvas.boundingBox())!;
+      await page.mouse.move(box.x + box.width * 0.4, box.y + box.height * 0.6);
+      await page.mouse.down();
+      await page.mouse.move(box.x + box.width * 0.7, box.y + box.height * 0.4, { steps: 12 });
+      await page.mouse.up();
+      await page.waitForTimeout(200);
+      const b = await shot();
+      expect(b.equals(a), 'view changed after dragging').toBe(false);
+
+      // play
+      const play = page.locator('.play-btn');
+      await play.click();
+      await expect(play).toHaveAttribute('aria-pressed', 'true');
+      await page.waitForTimeout(800);
+      const c = await shot();
+      await play.click();
+      await expect(play).toHaveAttribute('aria-pressed', 'false');
+      expect(c.equals(b), 'scene changed while playing').toBe(false);
+
+      // auto-rotate
+      await page.getByRole('button', { name: 'סיבוב אוטומטי' }).click();
+      await page.waitForTimeout(600);
+      const d = await shot();
+      await page.getByRole('button', { name: 'עצירת הסיבוב' }).click();
+      expect(d.equals(c), 'camera spun').toBe(false);
+    });
+  }
+});

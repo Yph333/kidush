@@ -4,7 +4,7 @@
 // The drawing is schematic (small circle enlarged); the correction shown is the Rambam's table value.
 
 import type { SceneHandle, SceneModule } from '../components/Scene3D/types';
-import { COLORS, THREE, createStage, dirOf, line, ring, sphere } from './common';
+import { COLORS, THREE, createStage, dirOf, line, ring, sphere, clearGroup } from './common';
 import { BIG, SMALL, moonOnWheel } from './shared';
 
 export interface WheelsProps {
@@ -40,7 +40,7 @@ const create = (host: HTMLElement, p0: WheelsProps): SceneHandle<WheelsProps> =>
 
   let p = p0;
   const build = () => {
-    dyn.clear();
+    clearGroup(dyn);
     const g = moonOnWheel(p.meanLon, p.course);
     const C = new THREE.Vector3(g.cx, 0, g.cz), Mv = new THREE.Vector3(g.mx, 0, g.mz);
     const small = ring(SMALL, COLORS.moon, { opacity: 0.95 });
@@ -74,6 +74,7 @@ const create = (host: HTMLElement, p0: WheelsProps): SceneHandle<WheelsProps> =>
       else if (id === 'close') { const c = dirOf(p.meanLon, 0, BIG); st.look([c.x * 1.1, 9, c.z * 1.1], [c.x, 0, c.z]); }
       else st.look([14, 18, 20]);
     },
+    setAutoRotate: st.setAutoRotate,
     dispose: st.dispose,
   };
 };
