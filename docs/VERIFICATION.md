@@ -56,7 +56,8 @@ Expected chain (all match the Rambam's text):
   decomposition). Using daily motion × N drifts by a few seconds and breaks the example.
 
 ### Open points to confirm in the Hebrew original
-- 17:12 — the translation gives "add ⅙" for both Capricorn/Gemini and Pisces/Aries. Implemented as written.
+- 17:12 — RESOLVED (Hebrew, Wikisource Vilna text, checked 2026-10-04): דגים/טלה ⅙, דלי/שור ⅕, גדי/תאומים ⅙,
+  קשת/סרטן 0, עקרב/אריה −⅕, מאזנים/בתולה −⅓. Matches R_FOURTH for all 12 signs.
 - 15:3 — doubled distance ranges are whole degrees; fractional values are rounded to the nearest degree.
 - 16:20 uses the moon at 18° 40′ while 15:9 and 17:13 use 18° 36′. Both give latitude 3° 53′.
   Good classroom discussion point; the engine uses 18° 36′.

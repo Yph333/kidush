@@ -359,13 +359,13 @@ const MOLAD_NISAN_1 = moladTotal(1, 6);
 
 /**
  * Tekufat Nisan, Shmuel: 7 days 9 hours 642 parts before molad Nisan of year 1, then + Shmuel's year each year.
- * (Hilchot Kiddush HaChodesh 9 — exact halacha: TODO: verify. Checked against Birkat HaChama 5769.)
+ * (Hilchot Kiddush HaChodesh 9:3, "ז״ט תרמ״ב". Also checked against Birkat HaChama 5769.)
  */
 export const tekufaNisanShmuel = (y: number): number => MOLAD_NISAN_1 - (7 * P_DAY + 9 * P_HOUR + 642) + (y - 1) * SHMUEL_YEAR;
 
 /**
  * Tekufat Nisan, Rav Adda: 9 hours 642 parts before molad Nisan of year 1, then + Rav Adda's year each year.
- * (Hilchot Kiddush HaChodesh 10 — exact halacha: TODO: verify.)
+ * (Hilchot Kiddush HaChodesh 10:1 for the year, 10:3 "ט׳ תרמ״ב" for the start, every first year of a cycle.)
  */
 export const tekufaNisanRavAdda = (y: number): number => MOLAD_NISAN_1 - (9 * P_HOUR + 642) + (y - 1) * RAV_ADDA_YEAR;
 

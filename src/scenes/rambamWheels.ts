@@ -1,4 +1,4 @@
-// Scene 5.3 — "a small wheel inside a large wheel" (Kiddush HaChodesh 14:1, exact halacha TODO: verify):
+// Scene 5.3 — "a small wheel inside a large wheel" (Kiddush HaChodesh 14:1):
 // the moon rides on a small circle whose centre goes round the large one. The angle between the line to the
 // centre of the small circle (mean moon) and the line to the moon (true moon) is the correction.
 // The drawing is schematic (small circle enlarged); the correction shown is the Rambam's table value.

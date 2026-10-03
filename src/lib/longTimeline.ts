@@ -38,7 +38,8 @@ export function yearSeries(from: number, count: number, step = 1): YearPoint[] {
  * Outside Israel, the request for rain starts at Maariv of the 60th day from Shmuel's tekufat Tishrei,
  * counting the Hebrew day of the tekufa (days begin in the evening) as day 1 — i.e. the evening that begins
  * Hebrew day (tekufa day + 59).
- * (Counting convention: TODO: verify against Shulchan Aruch OC 117.)
+ * (Shulchan Aruch OC 117:1: "בתפלת ערבית של יום ס׳ אחרי תקופת תשרי". The counting gives 4 Dec, or 5 Dec
+ * before a civil leap year — the dates in use today; see longTimeline.test.ts.)
  * Returns the civil date of that evening for Hebrew year y (tekufat Tishrei before Nisan of y).
  */
 export function talUmatarEvening(y: number): Date {
