@@ -4,6 +4,7 @@ import { Units } from './01-yesodot/Units';
 import { Sun } from './02-yom/Sun';
 import { Zmanim } from './02-yom/Zmanim';
 import { Gauge } from './02-yom/Gauge';
+import { RabbeinuTam } from './02-yom/RabbeinuTam';
 import { Horizon } from './02-yom/Horizon';
 import { Annual } from './02-yom/Annual';
 import { Dome } from './02-yom/Dome';
@@ -41,6 +42,7 @@ export const CHAPTERS: ChapterDef[] = [
     { id: 'shemesh', title: 'למה השמש זורחת בזמנים שונים', Component: Sun },
     { id: 'zmanim', title: 'זמני היום כשיטות', Component: Zmanim },
     { id: 'mad', title: 'מד שקיעה', Component: Gauge },
+    { id: 'rabenutam', title: 'השקיעה במקומו של רבנו תם', Component: RabbeinuTam },
     { id: 'gova', title: 'גובה ואופק', Component: Horizon },
     { id: 'shnati', title: 'לוח זמנים שנתי', Component: Annual },
     { id: 'kipa', title: 'כיפת השמיים', Component: Dome },

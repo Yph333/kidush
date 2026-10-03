@@ -45,8 +45,8 @@ export const ZMANIM: ZmanOpinion[] = [
   // עלות השחר
   { id: 'alot_16_1', group: 'alot', name: '16.1°', def: below('rise', 16.1), definition: 'השמש 16.1° מתחת לאופק לפני הזריחה.', source: TODO, note: 'בירושלים, בניסן ובתשרי, זה כ־72 דקות לפני הזריחה.' },
   { id: 'alot_19_75', group: 'alot', name: '19.75°', def: below('rise', 19.75), definition: 'השמש 19.75° מתחת לאופק לפני הזריחה.', source: TODO, note: 'בירושלים, בניסן ובתשרי, זה כ־90 דקות לפני הזריחה.' },
-  { id: 'alot_72', group: 'alot', name: '72 דקות', def: off(rise(), -72), definition: '72 דקות קבועות לפני הזריחה המישורית.', source: TODO },
-  { id: 'alot_90', group: 'alot', name: '90 דקות', def: off(rise(), -90), definition: '90 דקות קבועות לפני הזריחה המישורית.', source: TODO },
+  { id: 'alot_72', group: 'alot', name: '72 דקות', def: off(rise(), -72), definition: '72 דקות קבועות לפני הזריחה המישורית.', source: 'פסחים צד ע״א: ד׳ מילין (ר׳ יהודה); 72 דקות לפי מיל של 18 דקות' },
+  { id: 'alot_90', group: 'alot', name: '90 דקות', def: off(rise(), -90), definition: '90 דקות קבועות לפני הזריחה המישורית.', source: 'פסחים צג ע״ב: ה׳ מילין (ר׳ יוחנן); 90 דקות לפי מיל של 18 דקות' },
   // משיכיר
   { id: 'misheyakir_10_2', group: 'misheyakir', name: '10.2°', def: below('rise', 10.2), definition: 'השמש 10.2° מתחת לאופק לפני הזריחה.', source: TODO },
   { id: 'misheyakir_11', group: 'misheyakir', name: '11°', def: below('rise', 11), definition: 'השמש 11° מתחת לאופק לפני הזריחה.', source: TODO },
@@ -86,7 +86,7 @@ export const ZMANIM: ZmanOpinion[] = [
   { id: 'tzeit_18_min', group: 'tzeit', name: '18 דקות', def: off(set(), 18), definition: '18 דקות קבועות אחרי השקיעה המישורית.', source: TODO },
   { id: 'tzeit_20_min', group: 'tzeit', name: '20 דקות', def: off(set(), 20), definition: '20 דקות קבועות אחרי השקיעה המישורית.', source: TODO },
   { id: 'tzeit_24_min', group: 'tzeit', name: '24 דקות', def: off(set(), 24), definition: '24 דקות קבועות אחרי השקיעה המישורית.', source: TODO },
-  { id: 'tzeit_rt_72', group: 'tzeit', name: 'רבנו תם, 72 דקות', def: off(set(), 72), definition: '72 דקות קבועות אחרי השקיעה המישורית.', source: TODO },
+  { id: 'tzeit_rt_72', group: 'tzeit', name: 'רבנו תם, 72 דקות', def: off(set(), 72), definition: '72 דקות קבועות אחרי השקיעה המישורית.', source: 'תוספות שבת לה ע״א ד״ה תרי: משקיעת החמה עד צאת הכוכבים ד׳ מילין, ור״ת: מסוף השקיעה. 72 דקות לפי מיל של 18 דקות' },
   { id: 'tzeit_rt_16_1', group: 'tzeit', name: 'רבנו תם, 16.1°', def: below('set', 16.1), definition: 'השמש 16.1° מתחת לאופק אחרי השקיעה.', source: TODO },
 ];
 

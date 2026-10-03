@@ -57,7 +57,7 @@ export function Annual() {
     <Slide
       wide
       className="has-print"
-      kicker="היום · 5"
+      kicker="היום · 6"
       title={<>לוח זמנים שנתי · {yearHeb(demo)}</>}
       text={<>
         <p>כל השנה בטבלה אחת, לפי השיטות שבחרתם בשקף ״זמני היום״ ולפי המקום שנבחר. אפשר להוריד כקובץ CSV או להדפיס.</p>

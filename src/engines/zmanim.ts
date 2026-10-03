@@ -227,3 +227,40 @@ export function localHMS(ms: number): string {
 }
 
 export { ilOffset };
+
+// ---- any time zone (for places outside Israel)
+
+/** UTC offset (hours) of an IANA time zone at an instant, from the browser/Node time-zone database. */
+export function tzOffsetHours(ms: number, tz: string): number {
+  const f = new Intl.DateTimeFormat('en-US', { timeZone: tz, hourCycle: 'h23', year: 'numeric', month: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric', second: 'numeric' });
+  const p = Object.fromEntries(f.formatToParts(new Date(Math.floor(ms / 1000) * 1000)).map(x => [x.type, x.value]));
+  const asUTC = Date.UTC(+p.year, +p.month - 1, +p.day, +p.hour % 24, +p.minute, +p.second);
+  return Math.round((asUTC - Math.floor(ms / 1000) * 1000) / 60000) / 60;
+}
+
+/** "HH:MM" in the given time zone (Israel when omitted). */
+export function localHMin(ms: number, tz?: string): string {
+  if (!tz) return localHM(ms);
+  const t = Math.round(ms / 60000) * 60000, d = new Date(t + tzOffsetHours(t, tz) * 3600000);
+  return `${String(d.getUTCHours()).padStart(2, '0')}:${String(d.getUTCMinutes()).padStart(2, '0')}`;
+}
+
+// ---- the stages of sunset
+
+/** Geometric altitude of the sun's centre when its lower limb touches the sea horizon: +16′ − 34′ refraction. */
+export const H0_LOWER_LIMB = (16 - 34) / 60;
+
+export interface SunsetStages {
+  /** lower limb touches the horizon */
+  touch: number | null;
+  /** upper limb disappears (standard sunset) */
+  set: number | null;
+  /** sun's centre at these depressions (degrees below the horizon) */
+  depth: Record<number, number | null>;
+}
+
+export function sunsetStages(y: number, m: number, d: number, p: ZPlace, depths: number[]): SunsetStages {
+  const depth: Record<number, number | null> = {};
+  for (const x of depths) depth[x] = sunAt(y, m, d, p, -x, false).ms;
+  return { touch: sunAt(y, m, d, p, H0_LOWER_LIMB, false).ms, set: sunAt(y, m, d, p, H0_STANDARD, false).ms, depth };
+}

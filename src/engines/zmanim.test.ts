@@ -3,7 +3,8 @@ import oracle from '../../tests/zmanim-oracle.json';
 import horizons from '../content/horizons.json';
 import { ZMANIM, ZMAN_BY_ID } from '../content/zmanimOpinions';
 import {
-  H0_STANDARD, dip, horizonAlt, hourAngle, localHM, refraction, solarNoon, sunAltAz, sunAt, sunPosition, visibleSun, zman,
+  H0_STANDARD, dip, horizonAlt, hourAngle, ilOffset, localHM, localHMin, refraction, solarNoon, sunAltAz, sunAt, sunPosition, sunsetStages,
+  tzOffsetHours, visibleSun, zman,
 } from './zmanim';
 
 const MIN = 60000;
@@ -147,5 +148,28 @@ describe('SRTM horizon profiles (src/content/horizons.json)', () => {
     const c = H['ירושלים'], p = { lat: c.lat, lon: c.lon, elevation: c.ground, horizon: prof('ירושלים') };
     const elev = sunAt(2026, 2, 20, p, H0_STANDARD - dip(c.ground), true).ms!;
     expect((visibleSun(2026, 2, 20, p, true).ms! - elev) / MIN).toBeGreaterThan(5);
+  });
+});
+
+describe('time zones and sunset stages', () => {
+  it('tzOffsetHours: Paris +1 in winter, +2 in summer; Jerusalem agrees with ilOffset in 2026', () => {
+    expect(tzOffsetHours(Date.UTC(2026, 0, 15, 12), 'Europe/Paris')).toBe(1);
+    expect(tzOffsetHours(Date.UTC(2026, 6, 15, 12), 'Europe/Paris')).toBe(2);
+    for (const m of [0, 3, 6, 9, 11]) {
+      const t = Date.UTC(2026, m, 10, 12);
+      expect(tzOffsetHours(t, 'Asia/Jerusalem')).toBe(ilOffset(t));
+    }
+    expect(localHMin(Date.UTC(2026, 6, 15, 19, 0), 'Europe/Paris')).toBe('21:00');
+  });
+  it('the sun sets more slowly in northern France than in Jerusalem', () => {
+    const J = { lat: 31.778, lon: 35.235 }, R = { lat: 48.5193, lon: 4.2927 };
+    const dur = (p: { lat: number; lon: number }) => { const s = sunsetStages(2026, 2, 20, p, [8.5, 16.1]); return { disk: (s.set! - s.touch!) / MIN, d16: (s.depth[16.1]! - s.set!) / MIN }; };
+    const j = dur(J), r = dur(R);
+    expect(j.disk).toBeGreaterThan(2); expect(j.disk).toBeLessThan(3);           // ~2.4 min
+    expect(r.disk).toBeGreaterThan(3); expect(r.disk).toBeLessThan(4);           // ~3.4 min
+    expect(r.d16).toBeGreaterThan(j.d16 + 20);                                    // much longer twilight
+  });
+  it('around the June solstice the sun never reaches 18° below the horizon at Ramerupt', () => {
+    expect(sunsetStages(2026, 5, 21, { lat: 48.5193, lon: 4.2927 }, [18.5]).depth[18.5]).toBeNull();
   });
 });

@@ -5,6 +5,7 @@ export const SLIDE_PATHS = [
   'yom/shemesh',
   'yom/zmanim',
   'yom/mad',
+  'yom/rabenutam',
   'yom/gova',
   'yom/shnati',
   'yom/kipa',

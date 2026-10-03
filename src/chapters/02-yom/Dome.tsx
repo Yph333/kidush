@@ -84,7 +84,7 @@ export function Dome() {
   return (
     <Slide
       wide
-      kicker="היום · 6"
+      kicker="היום · 7"
       title="כיפת השמיים"
       text={<>
         <p>עומדים במרכז הכיפה. השמש עולה במזרח, מטפסת בקשת לכיוון דרום, ושוקעת במערב.</p>

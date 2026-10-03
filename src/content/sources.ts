@@ -16,6 +16,7 @@ export const SOURCES: Record<SlidePath, SourceRef[]> = {
   'yom/shemesh': [{ ref: 'J. Meeus, Astronomical Algorithms, פרקים 25, 28', note: 'נטיית השמש ומשוואת הזמן' }, { ref: 'NOAA Solar Calculator', note: 'אותו מודל משמש את KosherJava' }],
   'yom/zmanim': [{ ref: 'src/content/zmanimOpinions.ts', note: 'מקור לכל שיטה בנפרד; ייחוסים שלא אומתו מסומנים TODO: verify' }],
   'yom/mad': [{ ref: 'J. Meeus, Astronomical Algorithms, פרק 13', note: 'גובה השמש' }],
+  'yom/rabenutam': [{ ref: 'תוספות, שבת לה ע״א, ד״ה תרי', note: 'ד׳ מילין משקיעה עד צאת הכוכבים; תחילת שקיעה וסוף שקיעה' }, { ref: 'פסחים צד ע״א', note: 'ד׳ מילין לר׳ יהודה' }],
   'yom/gova': [{ ref: 'J. Meeus, Astronomical Algorithms, פרק 16', note: 'שבירת אור (Bennett)' }, { ref: 'שקיעת האופק ≈ 1.76′·√h', note: 'נוסחה ניווטית מקובלת' }],
   'yom/kipa': [{ ref: 'J. Meeus, Astronomical Algorithms, פרק 13' }],
   'yom/shnati': [{ ref: 'src/content/zmanimOpinions.ts' }],
