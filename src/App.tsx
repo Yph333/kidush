@@ -48,20 +48,16 @@ export function App() {
     if (theme === 'auto') delete r.dataset.theme; else r.dataset.theme = theme;
   }, [theme]);
 
-  // cursor light: --mx/--my drive the background glow, --cx/--cy the lit edge of the card under the pointer
+  // moonlight that follows the cursor: --mx/--my drive a faint glow behind the page
   useEffect(() => {
     if (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) return;
     const root = appRef.current;
-    let raf = 0, card: HTMLElement | null = null, ev: PointerEvent | null = null;
+    let raf = 0, ev: PointerEvent | null = null;
     const paint = () => {
       raf = 0;
       if (!root || !ev) return;
       root.style.setProperty('--mx', `${ev.clientX}px`);
       root.style.setProperty('--my', `${ev.clientY}px`);
-      const c = (ev.target as Element | null)?.closest?.<HTMLElement>('.viz:not(.plain), .engine') ?? null;
-      if (card && card !== c) { card.style.removeProperty('--cx'); card.style.removeProperty('--cy'); }
-      card = c;
-      if (c) { const r = c.getBoundingClientRect(); c.style.setProperty('--cx', `${ev.clientX - r.left}px`); c.style.setProperty('--cy', `${ev.clientY - r.top}px`); }
     };
     const onMove = (e: PointerEvent) => { if (e.pointerType !== 'mouse') return; ev = e; if (!raf) raf = requestAnimationFrame(paint); };
     window.addEventListener('pointermove', onMove, { passive: true });
