@@ -22,7 +22,7 @@ function TopView({ p }: { p: WheelsProps }) {
   const X = (x: number) => c + x * S, Y = (z: number) => c + z * S;
   return (
     <svg viewBox="0 0 400 400" direction="ltr" role="img" aria-label="הגלגל הגדול והגלגל הקטן, מלמעלה">
-      <rect width="400" height="400" fill="#0b1226" />
+      <rect width="400" height="400" fill="var(--space)" />
       <circle cx={c} cy={c} r={BIG * S} fill="none" stroke="#88c5d8" />
       <circle cx={X(g.cx)} cy={Y(g.cz)} r={SMALL * S} fill="none" stroke="#e7c76f" />
       <line x1={c} y1={c} x2={X(g.cx * 1.3)} y2={Y(g.cz * 1.3)} stroke="#88c5d8" strokeDasharray="5 4" />

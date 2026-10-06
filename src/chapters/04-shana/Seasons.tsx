@@ -24,7 +24,7 @@ function Orbit2D({ p }: { p: EarthSeasonsProps }) {
   const [ex, ey] = P(p.sunLon);
   return (
     <svg viewBox="0 0 400 400" direction="ltr" role="img" aria-label="מסלול כדור הארץ מלמעלה, עם התקופות">
-      <rect width="400" height="400" fill="#0b1226" />
+      <rect width="400" height="400" fill="var(--space)" />
       <circle cx={c} cy={c} r={R} fill="none" stroke="#7d88a8" />
       <circle cx={c} cy={c} r="16" fill="#f4c33f" />
       {p.markers.map((m, i) => { const [x, y] = P(m.sunLon); const [lx, ly] = P(m.sunLon, R + (m.kind === 'true' ? 20 : m.kind === 'shmuel' ? 34 : 48)); return (

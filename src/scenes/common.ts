@@ -7,7 +7,7 @@ import { CSS2DObject, CSS2DRenderer } from 'three/addons/renderers/CSS2DRenderer
 export { THREE };
 
 export const COLORS = {
-  bg: 0x0b1226,
+  bg: 0x070a14,
   ink: 0xe8ecf6,
   muted: 0x7d88a8,
   moon: 0xe7c76f,

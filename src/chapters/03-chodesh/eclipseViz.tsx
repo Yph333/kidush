@@ -24,7 +24,7 @@ export function WorldMap({ e, cells, central, home, family }: {
   const [hx, hy] = xy(home.lon, home.lat);
   return (
     <svg viewBox={`0 0 ${W} ${H}`} direction="ltr" role="img" aria-label="מפת העולם: איפה רואים את הליקוי">
-      <rect width={W} height={H} fill="#0e1a33" />
+      <rect width={W} height={H} fill="var(--space)" />
       {[-60, -30, 0, 30, 60].map(lat => { const [, y] = xy(0, lat); return <line key={lat} x1="0" x2={W} y1={y} y2={y} stroke="#33405f" strokeWidth={lat ? 0.5 : 1} />; })}
       <path d={landD} fill="#3a4a3a" stroke="#6b7d6b" strokeWidth="0.5" />
       {cells.map(c => {
@@ -34,11 +34,11 @@ export function WorldMap({ e, cells, central, home, family }: {
       })}
       {central.map((s, i) => <polyline key={i} points={s.map(([lo, la]) => xy(lo, la).join(',')).join(' ')} fill="none" stroke="#ef8f76" strokeWidth="3" />)}
       {family?.map(f => { const [x, y] = xy(f.lon, f.lat); return (
-        <g key={f.label}><circle cx={x} cy={y} r={f.current ? 6 : 4} fill={f.current ? '#ef8f76' : '#e7c76f'} stroke="#0e1a33" />
+        <g key={f.label}><circle cx={x} cy={y} r={f.current ? 6 : 4} fill={f.current ? '#ef8f76' : '#e7c76f'} stroke="var(--space)" />
           <text x={x + 7} y={y + 4} fill="#e8ecf6" fontSize="10">{f.label}</text></g>
       ); })}
       {g && !family && (() => { const [x, y] = xy(g.lon, g.lat); return <path d={`M${x} ${y - 8}l2.4 5.6 6 .4-4.6 3.8 1.5 5.8-5.3-3.2-5.3 3.2 1.5-5.8-4.6-3.8 6-.4z`} fill="#ef8f76" stroke="#fff" strokeWidth=".8" />; })()}
-      <circle cx={hx} cy={hy} r="4" fill="#fff" stroke="#0e1a33" /><text x={hx + 6} y={hy - 6} fill="#fff" fontSize="11" fontWeight="700">{home.name}</text>
+      <circle cx={hx} cy={hy} r="4" fill="#fff" stroke="var(--space)" /><text x={hx + 6} y={hy - 6} fill="#fff" fontSize="11" fontWeight="700">{home.name}</text>
     </svg>
   );
 }

@@ -28,7 +28,7 @@ function Flat({ p }: { p: SkyDomeProps }) {
   return (
     <svg viewBox={`0 0 ${W} ${H}`} direction="ltr" role="img" aria-label="מסלול השמש: גובה מול כיוון, במבט דרומה">
       <rect x="0" y={y0} width={W} height={H - y0} fill="#1E2A1F" />
-      <rect x="0" y="0" width={W} height={y0} fill="#0b1226" />
+      <rect x="0" y="0" width={W} height={y0} fill="var(--space)" />
       {p.circles.map(c => (
         <g key={c.label}>
           <line x1="0" x2={W} y1={Y(c.alt)} y2={Y(c.alt)} stroke={c.alt < 0 ? '#88c5d8' : '#7fce9c'} strokeDasharray={c.alt < 0 ? '5 4' : undefined} opacity=".8" />

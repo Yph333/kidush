@@ -43,7 +43,7 @@ function Track({ e, t }: { e: Eclipse; t: number }) {
   const [mx, my] = rel(t);
   return (
     <svg viewBox={`0 0 ${W} ${H}`} direction="ltr" role="img" aria-label="מסלול הירח ליד השמש או ליד צל הארץ">
-      <rect width={W} height={H} fill="#0b1226" />
+      <rect width={W} height={H} fill="var(--space)" />
       <line x1="0" x2={W} y1={cy} y2={cy} stroke="#88c5d8" strokeOpacity=".4" />
       {e.kind === 'solar'
         ? <circle cx={cx} cy={cy} r={0.266 * k} className="sunf" />

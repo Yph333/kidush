@@ -31,6 +31,7 @@ export function App() {
   const city = useStore(s => s.city);
   const notesOpen = useStore(s => s.notesOpen);
   const mainRef = useRef<HTMLElement>(null);
+  const appRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => startUrlSync(), []);
 
@@ -46,6 +47,26 @@ export function App() {
     const r = document.documentElement;
     if (theme === 'auto') delete r.dataset.theme; else r.dataset.theme = theme;
   }, [theme]);
+
+  // cursor light: --mx/--my drive the background glow, --cx/--cy the lit edge of the card under the pointer
+  useEffect(() => {
+    if (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) return;
+    const root = appRef.current;
+    let raf = 0, card: HTMLElement | null = null, ev: PointerEvent | null = null;
+    const paint = () => {
+      raf = 0;
+      if (!root || !ev) return;
+      root.style.setProperty('--mx', `${ev.clientX}px`);
+      root.style.setProperty('--my', `${ev.clientY}px`);
+      const c = (ev.target as Element | null)?.closest?.<HTMLElement>('.viz:not(.plain), .engine') ?? null;
+      if (card && card !== c) { card.style.removeProperty('--cx'); card.style.removeProperty('--cy'); }
+      card = c;
+      if (c) { const r = c.getBoundingClientRect(); c.style.setProperty('--cx', `${ev.clientX - r.left}px`); c.style.setProperty('--cy', `${ev.clientY - r.top}px`); }
+    };
+    const onMove = (e: PointerEvent) => { if (e.pointerType !== 'mouse') return; ev = e; if (!raf) raf = requestAnimationFrame(paint); };
+    window.addEventListener('pointermove', onMove, { passive: true });
+    return () => { window.removeEventListener('pointermove', onMove); cancelAnimationFrame(raf); };
+  }, []);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -70,7 +91,7 @@ export function App() {
   const i = cur.index;
 
   return (
-    <div className="app" data-mode={mode}>
+    <div className="app" data-mode={mode} ref={appRef}>
       <a className="skip" href="#deck">דילוג לתוכן</a>
       <header className="top">
         <button type="button" className="iconbtn map-btn" onClick={() => setState({ mapOpen: true })} aria-label="מפת השיעור">☰</button>
