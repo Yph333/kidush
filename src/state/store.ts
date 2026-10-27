@@ -46,6 +46,8 @@ export interface State {
   guidesDone: string[];
   notesOpen: boolean;
   mapOpen: boolean;
+  /** wide screens: the lesson map column folded away (remembered) */
+  mapHidden: boolean;
   glossaryOpen: string | null;
   astro: AstroState;
 }
@@ -54,7 +56,7 @@ const LS_KEY = 'luach.v1';
 const MIN_YEAR = 2, MAX_YEAR = 9998;
 export const clampYear = (y: number): number => Math.max(MIN_YEAR, Math.min(MAX_YEAR, Math.round(y)));
 
-type Persisted = Pick<State, 'demoYear' | 'city' | 'mode' | 'seen' | 'guesses' | 'guidesDone' | 'zPick'>;
+type Persisted = Pick<State, 'demoYear' | 'city' | 'mode' | 'seen' | 'guesses' | 'guidesDone' | 'zPick' | 'mapHidden'>;
 
 function readLS(): Partial<Persisted> {
   try {
@@ -65,7 +67,7 @@ function readLS(): Partial<Persisted> {
 
 function writeLS(s: State): void {
   try {
-    const p: Persisted = { demoYear: s.demoYear, city: s.city, mode: s.mode, seen: s.seen, guesses: s.guesses, guidesDone: s.guidesDone, zPick: s.zPick };
+    const p: Persisted = { demoYear: s.demoYear, city: s.city, mode: s.mode, seen: s.seen, guesses: s.guesses, guidesDone: s.guidesDone, zPick: s.zPick, mapHidden: s.mapHidden };
     localStorage.setItem(LS_KEY, JSON.stringify(p));
   } catch { /* storage unavailable: state still works for this session */ }
 }
@@ -108,6 +110,7 @@ function initial(): State {
     zPick: ls.zPick && typeof ls.zPick === 'object' ? ls.zPick : {},
     notesOpen: false,
     mapOpen: false,
+    mapHidden: ls.mapHidden === true,
     glossaryOpen: null,
     astro: { base: null, y: demoYear, mi: 0, t: null, speed: 6 * 3600000, playing: false, dSel: null },
   };
