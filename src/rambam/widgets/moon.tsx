@@ -117,7 +117,7 @@ export function OrbitScene({ dayIdx, hl }: { dayIdx: number; hl?: boolean }) {
 
 /** About the time of sighting on the evening that begins Hebrew day `dayIdx`: the civil day before, 16:30 UTC
  *  (in Jerusalem about a third of an hour after sunset in spring; close enough to place the bodies). */
-function eveningMs(dayIdx: number): number {
+export function eveningMs(dayIdx: number): number {
   return gDate(dayIdx).getTime() - 86400000 + 16.5 * 3600000;
 }
 

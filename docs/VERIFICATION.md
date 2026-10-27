@@ -64,6 +64,21 @@ Expected chain (all match the Rambam's text):
 - 15:3 — doubled distance ranges are whole degrees; fractional values are rounded to the nearest degree.
 - 16:20 uses the moon at 18° 40′ while 15:9 and 17:13 use 18° 36′. Both give latitude 3° 53′.
   Good classroom discussion point; the engine uses 18° 36′.
+- 9:5–7 (`src/engines/rambamCh9.test.ts`): 4930, Shmuel: Nisan Thursday night 6 h; Tammuz Thursday 1½ h (day);
+  Tishrei Thursday 9 h; Tevet Friday night 4½ h; next Nisan start of Friday. Day of the month: 8·11 + 7 = 95 → 5 →
+  Monday → +3 → 8 Nisan, which is also the exact day from the absolute tekufa.
+- 9:6 — OPEN (content owner): in a leap year "תתחיל למנות מראש חדש אדר שני" read literally gives a day of Adar II on the
+  right weekday, four weeks before the exact tekufa (e.g. 4932: count → 27 Adar II). The engine reports the literal count
+  and the exact date side by side; the 9:6 page flags it.
+- 10:1–5: Rav Adda's constants are computed in rega'im (exact); 19 years = 235 months exactly; the way of 10:5 agrees with
+  the absolute tekufa to the rega. The tekufa can precede molad Nisan by up to about two weeks; the engine reads which
+  side from the absolute tekufa (the Rambam's remainder alone does not say).
+- 19:8, 19:11 (`src/engines/beitdin.test.ts`): 5° → 2°, 23° → 9°; 2 Iyar 4938: about 18° north, latitude about 4° south,
+  14° north.
+- 18:9: the fixed calendar always has 5–8 full months a year (within the Rambam's 4–8).
+- Text notes (Vilna text on Wikisource): 13:9 כ״ח vs כ״ה; 15:8 ק״פ vs ק״ח; 11:9 "ב מעלות" (the fetch script strips
+  `{{...}}` templates, which may have dropped letters); 16:14 opens with a sentence that belongs at the end of 16:19;
+  17:15 "(אז) [אי]".
 
 ## 4. Zmanim (to be added in milestone 3)
 - Oracle: KosherJava Zmanim (open source). Tolerance ±1 min for identical definitions.

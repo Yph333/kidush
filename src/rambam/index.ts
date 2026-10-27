@@ -5,6 +5,11 @@ import type { GuideDef } from '../content/guides/types';
 import { GUIDE_14_1, H14_1 } from './ch14/H1';
 import { GUIDE_14_2, GUIDE_14_3, GUIDE_14_4, H14_2, H14_3, H14_4 } from './ch14/H2to4';
 import { GUIDE_14_5, GUIDE_14_6, H14_5, H14_6 } from './ch14/H5to6';
+import { CH1 } from './ch1';
+import { CH2 } from './ch2';
+import { CH3 } from './ch3';
+import { CH4 } from './ch4';
+import { CH5 } from './ch5';
 import { CH6 } from './ch6';
 import { CH7 } from './ch7';
 import { CH8 } from './ch8';
@@ -16,8 +21,15 @@ import { CH13 } from './ch13';
 import { CH15 } from './ch15';
 import { CH16 } from './ch16';
 import { CH17 } from './ch17';
+import { CH18 } from './ch18';
+import { CH19 } from './ch19';
 
 export const RAMBAM_CHAPTERS: ChapterDef[] = [
+  CH1.chapter,
+  CH2.chapter,
+  CH3.chapter,
+  CH4.chapter,
+  CH5.chapter,
   CH6.chapter,
   CH7.chapter,
   CH8.chapter,
@@ -37,10 +49,17 @@ export const RAMBAM_CHAPTERS: ChapterDef[] = [
   CH15.chapter,
   CH16.chapter,
   CH17.chapter,
+  CH18.chapter,
+  CH19.chapter,
 ];
 
 /** Every halacha's guide, for checks (marks must be phrases of the text). */
 export const RAMBAM_GUIDES: { ch: number; h: string; guide: GuideDef }[] = [
+  ...CH1.guides,
+  ...CH2.guides,
+  ...CH3.guides,
+  ...CH4.guides,
+  ...CH5.guides,
   ...CH6.guides,
   ...CH7.guides,
   ...CH8.guides,
@@ -58,4 +77,6 @@ export const RAMBAM_GUIDES: { ch: number; h: string; guide: GuideDef }[] = [
   ...CH15.guides,
   ...CH16.guides,
   ...CH17.guides,
+  ...CH18.guides,
+  ...CH19.guides,
 ];

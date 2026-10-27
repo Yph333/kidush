@@ -317,3 +317,28 @@ svg.full, .viz .full { width: 100%; }
 .hours4 figure.hl { outline: 2px solid var(--c-accent, #6cb6ff); }
 .hours4 figcaption { font-size: var(--fs-sm); color: var(--c-text-2); }
 @media (max-width: 520px) { .hours4 { grid-template-columns: repeat(2, 1fr); } }
+
+/* Rambam ch. 1–5, 18–19 */
+.points { margin: 0; padding-inline-start: 1.4em; display: grid; gap: var(--sp-2); }
+.points li { padding: var(--sp-1) var(--sp-2); border-radius: 6px; }
+.points li.hl, .legend-list li.hl { background: var(--c-moon-soft, #e7c76f22); outline: 2px solid var(--c-accent, #6cb6ff); }
+.twoways { display: grid; grid-template-columns: 1fr 1fr; gap: var(--sp-3); }
+.twoways > div { border: 1px solid var(--c-line, #33405f); border-radius: 8px; padding: var(--sp-2) var(--sp-3); }
+.twoways > div.hl { outline: 2px solid var(--c-accent, #6cb6ff); }
+.twoways h4 { margin: 0 0 var(--sp-1); }
+@media (max-width: 520px) { .twoways { grid-template-columns: 1fr; } }
+.legend-list { list-style: none; padding: 0; margin: var(--sp-2) 0 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: var(--sp-1); }
+.legend-list li { padding: 2px var(--sp-2); border-radius: 6px; }
+.walk { margin-block: var(--sp-2); padding: var(--sp-2); border-radius: 8px; }
+.walk.hl { outline: 2px solid var(--c-accent, #6cb6ff); }
+.walk h4 { margin: 0 0 var(--sp-1); }
+.walk-days { display: flex; flex-wrap: wrap; gap: 4px; }
+.walk-days span { display: inline-flex; flex-direction: column; align-items: center; min-width: 2.2rem; padding: 2px 4px; border-radius: 6px; font-family: var(--font-serif); }
+.walk-days span.w { background: #7fce9c33; }
+.walk-days span.x { background: #ef8f7633; opacity: .8; }
+.walk-days span small { font-size: .65rem; color: var(--c-shift, #ef8f76); }
+.walk-days .fest { background: #e7c76f44; font-family: inherit; }
+.judges { display: inline-flex; gap: 3px; margin-inline-start: var(--sp-2); vertical-align: middle; }
+.judges i { width: 12px; height: 12px; border-radius: 50%; display: inline-block; }
+.judges i.y { background: #7fce9c; }
+.judges i.n { background: #ef8f76; }
