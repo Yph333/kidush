@@ -6,6 +6,8 @@ export interface SceneHandle<P> {
   update(p: P): void;
   setView(id: string): void;
   setAutoRotate(on: boolean): void;
+  /** photographic (true) or schematic (false) bodies; scenes without photographic bodies omit it */
+  setRealism?(on: boolean): void;
   dispose(): void;
 }
 

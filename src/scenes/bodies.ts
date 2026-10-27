@@ -18,6 +18,8 @@ export interface Body {
   setRealism(on: boolean): void;
   /** where the Sun is (world space) — only bodies with a day/night side use it */
   setSun?(world: THREE.Vector3): void;
+  /** tint the surface (the Moon in the Earth's shadow turns copper) */
+  setTint?(color: number, emissive?: number): void;
 }
 
 /* ---------- textures: loaded once, shared by every scene, never disposed (small, reused) ---------- */
@@ -52,7 +54,12 @@ export function moonBody(r: number): Body {
   );
   real.rotation.y = -Math.PI / 2;   // the near side (longitude 0, the map's centre) now faces +z: object.lookAt(earth) turns it to the Earth
   const flat = new THREE.Mesh(new THREE.SphereGeometry(r, 48, 32), new THREE.MeshStandardMaterial({ color: 0xdddddd, roughness: 0.9 }));
-  return twoLooks(real, flat);
+  const mats = [real.material, flat.material];
+  return {
+    ...twoLooks(real, flat),
+    // the photographic map is multiplied by the colour, so white = untinted
+    setTint: (color, emissive = 0) => mats.forEach((m, i) => { m.color.set(i === 0 && color === 0xdddddd ? 0xffffff : color); m.emissive.set(emissive); }),
+  };
 }
 
 /* ---------- the Earth: day map where the Sun shines, city lights on the night side, oceans glint,

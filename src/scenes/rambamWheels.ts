@@ -4,6 +4,7 @@
 // The drawing is schematic (small circle enlarged); the correction shown is the Rambam's table value.
 
 import type { SceneHandle, SceneModule } from '../components/Scene3D/types';
+import { earthBody, moonBody, onTextureLoad } from './bodies';
 import { COLORS, THREE, createStage, dirOf, line, ring, sphere, clearGroup } from './common';
 import { BIG, SMALL, moonOnWheel } from './shared';
 
@@ -25,7 +26,7 @@ const create = (host: HTMLElement, p0: WheelsProps): SceneHandle<WheelsProps> =>
   scene.add(ring(BIG, COLORS.leap, { opacity: 0.9 }));
   const bigL = label('הגלגל הגדול', 'leap small');
   scene.add(bigL);
-  const earth = sphere(0.7, COLORS.earth);
+  const earthB = earthBody(0.7), earth = earthB.object;
   scene.add(earth);
   const eL = label('ארץ', 'small');
   eL.position.set(0, -1.2, 0);
@@ -33,11 +34,12 @@ const create = (host: HTMLElement, p0: WheelsProps): SceneHandle<WheelsProps> =>
 
   const dyn = new THREE.Group();
   scene.add(dyn);
-  const moon = sphere(0.4, 0xdddddd);
+  const moonB = moonBody(0.4), moon = moonB.object;
   scene.add(moon);
   const labels = { small: label('הגלגל הקטן', 'moon small'), mean: label('אמצע הירח', 'leap small'), tru: label('מקום הירח האמיתי', 'moon small'), eq: label('', 'shift') };
   Object.values(labels).forEach(l => scene.add(l));
 
+  const offTex = onTextureLoad(st.render);
   let p = p0;
   const build = () => {
     clearGroup(dyn);
@@ -55,6 +57,7 @@ const create = (host: HTMLElement, p0: WheelsProps): SceneHandle<WheelsProps> =>
     dyn.add(line([new THREE.Vector3(), C.clone().multiplyScalar(1.35)], COLORS.leap, { dashed: true }));
     dyn.add(line([new THREE.Vector3(), Mv.clone().multiplyScalar(1.35 * BIG / Mv.length())], COLORS.moon));
     moon.position.copy(Mv);
+    moon.lookAt(earth.position);
     // labels
     bigL.position.copy(dirOf(p.meanLon + 180, 0, BIG * 1.08));
     labels.small.position.copy(C.clone().add(dirOf(p.meanLon - 90, 0, SMALL + 0.9)));
@@ -75,7 +78,8 @@ const create = (host: HTMLElement, p0: WheelsProps): SceneHandle<WheelsProps> =>
       else st.look([14, 18, 20]);
     },
     setAutoRotate: st.setAutoRotate,
-    dispose: st.dispose,
+    setRealism(on) { [earthB, moonB].forEach(b => b.setRealism(on)); st.render(); },
+    dispose() { offTex(); st.dispose(); },
   };
 };
 

@@ -2,6 +2,7 @@
 // (head and tail) regressing over ~18.6 years, the sun's direction, the moon and its latitude.
 
 import type { SceneHandle, SceneModule } from '../components/Scene3D/types';
+import { earthBody, moonBody, onTextureLoad, sunBody } from './bodies';
 import { COLORS, THREE, createStage, dirOf, disc, line, lineLoop, ring, sphere, clearGroup } from './common';
 
 export interface MoonOrbitProps {
@@ -33,7 +34,7 @@ const create = (host: HTMLElement, p0: MoonOrbitProps): SceneHandle<MoonOrbitPro
   scene.add(ecl);
 
   // earth
-  const earth = sphere(0.9, COLORS.earth);
+  const earthB = earthBody(0.9), earth = earthB.object;
   scene.add(earth);
   const earthL = label('ארץ', 'small');
   earthL.position.set(0, -1.5, 0);
@@ -42,7 +43,7 @@ const create = (host: HTMLElement, p0: MoonOrbitProps): SceneHandle<MoonOrbitPro
   // the moon's plane (rebuilt on update)
   const moonGroup = new THREE.Group();
   scene.add(moonGroup);
-  const moon = sphere(0.45, 0xdddddd);
+  const moonB = moonBody(0.45), moon = moonB.object;
   scene.add(moon);
   const moonL = label('ירח', 'moon');
   scene.add(moonL);
@@ -50,7 +51,7 @@ const create = (host: HTMLElement, p0: MoonOrbitProps): SceneHandle<MoonOrbitPro
   scene.add(latLine);
 
   // sun far away
-  const sun = sphere(1.2, COLORS.sun, true);
+  const sunB = sunBody(1.2), sun = sunB.object;
   scene.add(sun);
   const sunL = label('שמש', 'moon');
   scene.add(sunL);
@@ -64,6 +65,7 @@ const create = (host: HTMLElement, p0: MoonOrbitProps): SceneHandle<MoonOrbitPro
   const rHeadDot = sphere(0.18, COLORS.ok, true);
   scene.add(rHead, rHeadDot);
 
+  const offTex = onTextureLoad(st.render);
   let p = p0;
   const build = () => {
     clearGroup(moonGroup);
@@ -92,6 +94,7 @@ const create = (host: HTMLElement, p0: MoonOrbitProps): SceneHandle<MoonOrbitPro
     // moon
     const mpos = dirOf(p.moonLon, p.moonLat * p.exaggerate, R);
     moon.position.copy(mpos);
+    moon.lookAt(earth.position);
     moonL.position.copy(mpos.clone().add(new THREE.Vector3(0, 0.9, 0)));
     latLine.add(line([dirOf(p.moonLon, 0, R), mpos], COLORS.moon, { dashed: true }));
     // sun direction
@@ -99,6 +102,7 @@ const create = (host: HTMLElement, p0: MoonOrbitProps): SceneHandle<MoonOrbitPro
     sun.position.copy(sd);
     sunL.position.copy(sd.clone().add(new THREE.Vector3(0, 1.8, 0)));
     sunLight.position.copy(sd);
+    earthB.setSun!(sd);
     sunRay.add(line([new THREE.Vector3(), dirOf(p.sunLon, 0, R)], COLORS.sun, { dashed: true, opacity: 0.6 }));
     // Rambam's head
     const show = p.rambamHead !== null;
@@ -119,7 +123,8 @@ const create = (host: HTMLElement, p0: MoonOrbitProps): SceneHandle<MoonOrbitPro
       else st.look([16, 12, 20]);
     },
     setAutoRotate: st.setAutoRotate,
-    dispose: st.dispose,
+    setRealism(on) { [sunB, earthB, moonB].forEach(b => b.setRealism(on)); st.render(); },
+    dispose() { offTex(); st.dispose(); },
   };
 };
 

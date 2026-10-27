@@ -3,7 +3,8 @@
 // the Earth. Schematic sizes and distances; the moon's latitude is exaggerated so the "miss" is visible.
 
 import type { SceneHandle, SceneModule } from '../components/Scene3D/types';
-import { COLORS, THREE, clearGroup, createStage, dirOf, disc, line, lineLoop, sphere } from './common';
+import { earthBody, moonBody, onTextureLoad, sunBody } from './bodies';
+import { COLORS, THREE, clearGroup, createStage, dirOf, disc, line, lineLoop } from './common';
 
 export type EclipsePhase = 'none' | 'lunar-penumbral' | 'lunar-umbral' | 'solar';
 
@@ -34,15 +35,15 @@ const create = (host: HTMLElement, p0: EclipseSceneProps): SceneHandle<EclipseSc
   const light = new THREE.DirectionalLight(0xffffff, 2.4);
   scene.add(light);
 
-  const earth = sphere(EARTH, COLORS.earth);
+  const earthB = earthBody(EARTH), earth = earthB.object;
   scene.add(earth);
   const earthL = label('ארץ', 'small');
   scene.add(earthL);
-  const sun = sphere(2.2, COLORS.sun, true);
+  const sunB = sunBody(2.2), sun = sunB.object;
   scene.add(sun);
   const sunL = label('שמש', 'moon');
   scene.add(sunL);
-  const moon = new THREE.Mesh(new THREE.SphereGeometry(MOON, 40, 24), new THREE.MeshStandardMaterial({ color: 0xdddddd, roughness: 0.9 }));
+  const moonB = moonBody(MOON), moon = moonB.object;
   scene.add(moon);
   const moonL = label('ירח', 'moon');
   scene.add(moonL);
@@ -55,6 +56,7 @@ const create = (host: HTMLElement, p0: EclipseSceneProps): SceneHandle<EclipseSc
   const head = label('ראש', 'shift'), tail = label('זנב', 'shift');
   scene.add(shadowL, head, tail);
 
+  const offTex = onTextureLoad(st.render);
   let p = p0;
   const build = () => {
     clearGroup(dyn);
@@ -62,6 +64,7 @@ const create = (host: HTMLElement, p0: EclipseSceneProps): SceneHandle<EclipseSc
     sun.position.copy(toSun.clone().multiplyScalar(26));
     sunL.position.copy(sun.position.clone().add(new THREE.Vector3(0, 3, 0)));
     light.position.copy(toSun.clone().multiplyScalar(30));
+    earthB.setSun!(sun.position);
     earthL.position.set(0, -EARTH - 0.6, 0);
 
     // the Earth's shadow: dark umbra narrowing, faint penumbra widening (schematic)
@@ -80,9 +83,8 @@ const create = (host: HTMLElement, p0: EclipseSceneProps): SceneHandle<EclipseSc
     const mpos = dirOf(p.moonLon, p.moonLat * p.exaggerate, R);
     moon.position.copy(mpos);
     moonL.position.copy(mpos.clone().add(new THREE.Vector3(0, 0.8, 0)));
-    const mat = moon.material as THREE.MeshStandardMaterial;
-    mat.color.set(p.phase === 'lunar-umbral' ? 0xb4552e : p.phase === 'lunar-penumbral' ? 0x9a9a9a : 0xdddddd);
-    mat.emissive.set(p.phase === 'lunar-umbral' ? 0x3a1206 : 0x000000);
+    moon.lookAt(0, 0, 0);
+    moonB.setTint!(p.phase === 'lunar-umbral' ? 0xb4552e : p.phase === 'lunar-penumbral' ? 0x9a9a9a : 0xdddddd, p.phase === 'lunar-umbral' ? 0x3a1206 : 0x000000);
 
     // solar eclipse: the moon's shadow reaches the Earth
     if (p.phase === 'solar') {
@@ -103,7 +105,8 @@ const create = (host: HTMLElement, p0: EclipseSceneProps): SceneHandle<EclipseSc
       else { const v = dirOf(p.sunLon + 150, 0, 18); st.look([v.x, 9, v.z]); }
     },
     setAutoRotate: st.setAutoRotate,
-    dispose: st.dispose,
+    setRealism(on) { [sunB, earthB, moonB].forEach(b => b.setRealism(on)); st.render(); },
+    dispose() { offTex(); st.dispose(); },
   };
 };
 

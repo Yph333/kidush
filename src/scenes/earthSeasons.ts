@@ -2,6 +2,7 @@
 // and Shmuel's and Rav Adda's tekufot for the chosen year, marked where the Earth is at each moment.
 
 import type { SceneHandle, SceneModule } from '../components/Scene3D/types';
+import { earthBody, onTextureLoad, sunBody } from './bodies';
 import { COLORS, THREE, createStage, dirOf, ring, sphere, clearGroup } from './common';
 import { KIND_COLOR, type TekufaKind } from './shared';
 export type { TekufaKind };
@@ -21,7 +22,7 @@ const create = (host: HTMLElement, p0: EarthSeasonsProps): SceneHandle<EarthSeas
   scene.add(new THREE.AmbientLight(0xffffff, 0.12));
   const light = new THREE.PointLight(0xffffff, 900, 0, 2);
   scene.add(light);
-  const sun = sphere(1.6, COLORS.sun, true);
+  const sunB = sunBody(1.6), sun = sunB.object;
   scene.add(sun);
   const sunL = label('שמש', 'moon');
   sunL.position.set(0, 2.4, 0);
@@ -35,7 +36,8 @@ const create = (host: HTMLElement, p0: EarthSeasonsProps): SceneHandle<EarthSeas
   const body = new THREE.Group();
   body.quaternion.copy(tiltQ);
   earthGroup.add(body);
-  const earth = sphere(0.9, COLORS.earth);
+  const earthB = earthBody(0.9), earth = earthB.object;
+  earthB.setSun!(new THREE.Vector3(0, 0, 0));   // the Sun is at the centre
   body.add(earth);
   const axis = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.03, 2.8, 8), new THREE.MeshBasicMaterial({ color: COLORS.ink }));
   body.add(axis);
@@ -47,6 +49,7 @@ const create = (host: HTMLElement, p0: EarthSeasonsProps): SceneHandle<EarthSeas
   const dyn = new THREE.Group();
   scene.add(dyn);
 
+  const offTex = onTextureLoad(st.render);
   let p = p0;
   const build = () => {
     clearGroup(dyn);
@@ -75,7 +78,8 @@ const create = (host: HTMLElement, p0: EarthSeasonsProps): SceneHandle<EarthSeas
       else st.look([20, 16, 22]);
     },
     setAutoRotate: st.setAutoRotate,
-    dispose: st.dispose,
+    setRealism(on) { [sunB, earthB].forEach(b => b.setRealism(on)); st.render(); },
+    dispose() { offTex(); st.dispose(); },
   };
 };
 

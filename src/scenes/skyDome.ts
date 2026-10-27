@@ -2,7 +2,8 @@
 // the equinox / solstices to compare), and circles of equal altitude for the zmanim (below the horizon too).
 
 import type { SceneHandle, SceneModule } from '../components/Scene3D/types';
-import { COLORS, THREE, createStage, disc, line, lineLoop, sphere, clearGroup } from './common';
+import { onTextureLoad, sunBody } from './bodies';
+import { COLORS, THREE, createStage, disc, line, lineLoop, clearGroup } from './common';
 
 export interface SkyPath { key: string; label: string; color: number; points: { alt: number; az: number }[] }
 export interface SkyDomeProps {
@@ -42,11 +43,12 @@ const create = (host: HTMLElement, p0: SkyDomeProps): SceneHandle<SkyDomeProps> 
 
   const dyn = new THREE.Group();
   scene.add(dyn);
-  const sun = sphere(0.45, COLORS.sun, true);
+  const sunB = sunBody(0.45, { glow: 5 }), sun = sunB.object;
   scene.add(sun);
   const sunL = label('שמש', 'moon');
   scene.add(sunL);
 
+  const offTex = onTextureLoad(st.render);
   let p = p0;
   const build = () => {
     clearGroup(dyn);
@@ -78,7 +80,8 @@ const create = (host: HTMLElement, p0: SkyDomeProps): SceneHandle<SkyDomeProps> 
       else st.look([18, 14, 18], [0, 2, 0]);
     },
     setAutoRotate: st.setAutoRotate,
-    dispose: st.dispose,
+    setRealism(on) { [sunB].forEach(b => b.setRealism(on)); st.render(); },
+    dispose() { offTex(); st.dispose(); },
   };
 };
 

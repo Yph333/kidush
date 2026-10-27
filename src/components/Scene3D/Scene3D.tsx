@@ -31,6 +31,9 @@ export function Scene3D<P>({ load, props, views, fallback, label, height = 440, 
   const [status, setStatus] = useState<'loading' | 'ready' | 'error'>('loading');
   const [view, setView] = useState(views[0]?.id);
   const [spin, setSpin] = useState(false);
+  // photographic bodies (on) or the schematic look; only scenes that have photographic bodies offer the switch
+  const [real, setReal] = useState(true);
+  const [canReal, setCanReal] = useState(false);
   const host = useRef<HTMLDivElement>(null);
   const handle = useRef<SceneHandle<P> | null>(null);
   const latest = useRef(props);
@@ -46,6 +49,8 @@ export function Scene3D<P>({ load, props, views, fallback, label, height = 440, 
         handle.current = m.create(host.current, latest.current);
         if (view) handle.current.setView(view);
         handle.current.setAutoRotate(spin);
+        handle.current.setRealism?.(real);
+        setCanReal(!!handle.current.setRealism);
         setStatus('ready');
       } catch {
         setStatus('error');
@@ -74,6 +79,11 @@ export function Scene3D<P>({ load, props, views, fallback, label, height = 440, 
           </div>
         )}
         <span className="sp" />
+        {mode === '3d' && canReal && (
+          <button type="button" className="btn" aria-pressed={real} onClick={() => { setReal(!real); handle.current?.setRealism?.(!real); }}>
+            מראה מציאותי
+          </button>
+        )}
         {mode === '3d' && (
           <button type="button" className="btn" aria-pressed={spin} onClick={() => { setSpin(!spin); handle.current?.setAutoRotate(!spin); }}>
             {spin ? 'עצירת הסיבוב' : 'סיבוב אוטומטי'}
