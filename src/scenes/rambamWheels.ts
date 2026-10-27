@@ -75,7 +75,7 @@ const create = (host: HTMLElement, p0: WheelsProps): SceneHandle<WheelsProps> =>
     setView(id) {
       if (id === 'top') st.look([0, 32, 0.01]);
       else if (id === 'close') { const c = dirOf(p.meanLon, 0, BIG); st.look([c.x * 1.1, 9, c.z * 1.1], [c.x, 0, c.z]); }
-      else st.look([14, 18, 20]);
+      else { const c = dirOf(p.meanLon, 0, BIG * 0.3); st.look([c.x + 11.5, 14.5, c.z + 16.5], [c.x, 0, c.z]); }   // aim between the Earth and the small wheel, so both fill the frame
     },
     setAutoRotate: st.setAutoRotate,
     setRealism(on) { [earthB, moonB].forEach(b => b.setRealism(on)); st.render(); },
