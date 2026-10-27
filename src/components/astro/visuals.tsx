@@ -4,6 +4,7 @@ import { type ReactNode, useId } from 'react';
 import { gem, hebDate, yearHeb } from '../../engines/calendar';
 import { D2R, R2D, type Place, type Sky, TofMs, dayOfMs, hm, nrm, sky, sunEcl } from '../../engines/astro';
 import type { MonthModel } from '../../lib/month';
+import { starColor, visibleStars } from '../../lib/starSky';
 
 /** Moon disc with lit fraction k, rotated so the lit limb points at `rot` degrees. */
 export function MoonGlyph({ cx, cy, r, k, rot, dash }: { cx: number; cy: number; r: number; k: number; rot: number; dash?: boolean }) {
@@ -106,7 +107,6 @@ function skyCols(h: number): [string, string] {
   }
   return [z[1], z[2]];
 }
-const STARS = Array.from({ length: 70 }, (_, i) => [((Math.sin(i * 12.9898) * 43758.5453) % 1 + 1) % 1, ((Math.sin(i * 78.233) * 12345.678) % 1 + 1) % 1, (i % 3) + 1]);
 const sn = (a: number) => Math.sin(a * D2R), cs = (a: number) => Math.cos(a * D2R);
 const FONT = "'IBM Plex Sans Hebrew',Arial";
 
@@ -127,16 +127,23 @@ export function SkyPanorama({ ms, c }: { ms: number; c: Place & { name: string }
   let ground = `M0 ${y0}`;
   for (let x = 0; x <= W; x += 30) ground += `L${x} ${y0 - 4 - 3 * Math.sin(x / 37) - 2 * Math.sin(x / 11)}`;
   ground += `L${W} ${y0}Z`;
+  const stars = visibleStars(ms, c, sa).filter(s => s.az >= 30 && s.az <= 330 && s.alt <= 72);
+  const glowA = sa > 10 || sa < -14 ? 0 : sa > 0 ? (10 - sa) / 10 * 0.55 : 0.55 * (1 + sa / 14);
+  const glowC = sa > -2 ? '#FFB36B' : sa > -6 ? '#F07A55' : '#8A5AA6';
+  const gx = Math.max(-W * 0.2, Math.min(W * 1.2, ((((sk.sun.az - 30) % 360) + 360) % 360) / 300 * W));
   const ph = sa > 0 ? 'יום' : sa > -6 ? 'דמדומים אזרחיים' : sa > -12 ? 'דמדומים ימיים' : 'לילה';
   return (
     <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label={`השמיים מעל ${c.name}, מבט דרומה`}>
       <defs>
         <linearGradient id={id} x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor={top} /><stop offset="1" stopColor={bot} /></linearGradient>
+        <radialGradient id={id + 'h'} cx="0.5" cy="1" r="1"><stop offset="0" stopColor={glowC} stopOpacity={glowA} /><stop offset="1" stopColor={glowC} stopOpacity="0" /></radialGradient>
         <radialGradient id={id + 'g'}><stop offset="0" stopColor="#FFE9A0" stopOpacity=".9" /><stop offset="1" stopColor="#FFE9A0" stopOpacity="0" /></radialGradient>
       </defs>
       <rect width={W} height={y0} fill={`url(#${id})`} />
-      {sa < -7 && STARS.map(([a, b, r], i) => (
-        <circle key={i} cx={(a * W).toFixed(0)} cy={(b * (y0 - 20)).toFixed(0)} r={r * 0.6} fill="#fff" opacity={(Math.min(1, (-7 - sa) / 7) * 0.8).toFixed(2)} />
+      {glowA > 0 && <ellipse cx={gx} cy={y0} rx={W * 0.55} ry={y0 * 0.75} fill={`url(#${id}h)`} />}
+      {/* the real stars above this place now, as many as the twilight allows (HYG; see lib/starSky) */}
+      {stars.map((st, i) => (
+        <circle key={i} cx={X(st.az).toFixed(1)} cy={Y(st.alt).toFixed(1)} r={Math.max(0.55, 2.4 - 0.42 * st.mag).toFixed(2)} fill={starColor(st.bv)} opacity={st.vis.toFixed(2)} />
       ))}
       {[10, 20, 30, 45, 60].map(a => (
         <g key={a}>

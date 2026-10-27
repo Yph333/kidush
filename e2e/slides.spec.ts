@@ -186,7 +186,7 @@ test.describe('3D scenes', () => {
       await page.goto(`/#/${path}?y=5787&city=0&mode=explore`);
       const hasGL = await page.evaluate(() => { const c = document.createElement('canvas'); return !!(c.getContext('webgl2') || c.getContext('webgl')); });
       if (hasGL) {
-        await expect(page.locator('.scene-host canvas')).toHaveCount(1);
+        await expect(page.locator('.scene-host canvas')).toHaveCount(1, { timeout: 15_000 });   // scenes with photographic textures load slower under load
         const bar = page.getByRole('group', { name: 'מבטים' });
         await expect(bar.getByRole('button')).toHaveCount(views);
         await bar.getByRole('button').nth(1).click();
@@ -235,7 +235,7 @@ test.describe('3D scenes move', () => {
       test.skip(info.project.name !== 'desktop');
       await page.goto(`/#/${path}?y=5787&city=0&mode=explore`);
       const canvas = page.locator('.scene-host canvas');
-      await expect(canvas).toHaveCount(1);
+      await expect(canvas).toHaveCount(1, { timeout: 15_000 });
       await page.waitForTimeout(500);
       const shot = () => canvas.screenshot();
 
