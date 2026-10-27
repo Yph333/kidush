@@ -22,6 +22,7 @@ export const SLIDE_PATHS = [
   'luach/odfim',
   'luach/sugim',
   'luach/keviut',
+  'dechiyot/lama',
   'dechiyot/adu',
   'dechiyot/zaken',
   'dechiyot/gatrad',

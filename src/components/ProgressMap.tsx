@@ -15,6 +15,7 @@ export function ProgressMap() {
   const open = useStore(s => s.mapOpen);
   const seen = seenAll[demo] ?? [];
   const guesses = useStore(s => s.guesses);
+  const guidesDone = useStore(s => s.guidesDone);
   const answered = (id: string) => gateKey(id, demo) in guesses;
   const facts = FACTS.filter(f => (f.gate ? answered(f.gate) : seen.includes(f.slide)));
   const recs = YEAR_GATES.map(g => guesses[gateKey(g.id, demo)]);
@@ -41,6 +42,7 @@ export function ProgressMap() {
                         onClick={() => go(path)}>
                         <span className="mk" aria-hidden="true">{here ? '●' : done ? '✓' : '○'}</span>
                         {s.title}
+                        {guidesDone.includes(path) && <span className="guide-tag" title="ההסבר המודרך נקרא עד הסוף">הסבר ✓</span>}
                         {here && <span className="here-tag">אתה כאן</span>}
                       </button>
                     </li>

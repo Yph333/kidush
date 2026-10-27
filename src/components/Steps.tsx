@@ -9,7 +9,8 @@ export interface StepRow {
   c?: 'final' | 'bad' | 'good' | '';
 }
 
-export function Steps({ rows, label }: { rows: StepRow[]; label?: string }) {
+/** focus: index of a row to highlight (from a guided explanation) */
+export function Steps({ rows, label, focus }: { rows: StepRow[]; label?: string; focus?: number }) {
   // Infinity = everything shown
   const [shown, setShown] = useState(Infinity);
   const nextRef = useRef<HTMLButtonElement>(null);
@@ -32,7 +33,7 @@ export function Steps({ rows, label }: { rows: StepRow[]; label?: string }) {
       </div>
       <ol>
         {rows.map((r, i) => (
-          <li key={i} className={`step ${r.c ?? ''} ${i >= shown ? 'hid' : ''}`} aria-hidden={i >= shown || undefined}>
+          <li key={i} className={`step ${r.c ?? ''} ${i >= shown ? 'hid' : ''} ${i === focus ? 'focus' : ''}`} aria-hidden={i >= shown || undefined}>
             <span className="sn"><span className="num">{i + 1}</span></span>
             <div className="sl">{r.l}</div>
             <div><div className="sv">{r.v}</div>{r.s && <div className="ss">{r.s}</div>}</div>

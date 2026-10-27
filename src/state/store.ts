@@ -42,6 +42,8 @@ export interface State {
   zPick: Record<string, string>;
   /** GuessGate answers, keyed "<gate>@<year>" */
   guesses: Record<string, GuessRecord>;
+  /** slides whose guided explanation was read to the end */
+  guidesDone: string[];
   notesOpen: boolean;
   mapOpen: boolean;
   glossaryOpen: string | null;
@@ -52,7 +54,7 @@ const LS_KEY = 'luach.v1';
 const MIN_YEAR = 2, MAX_YEAR = 9998;
 export const clampYear = (y: number): number => Math.max(MIN_YEAR, Math.min(MAX_YEAR, Math.round(y)));
 
-type Persisted = Pick<State, 'demoYear' | 'city' | 'mode' | 'seen' | 'guesses' | 'zPick'>;
+type Persisted = Pick<State, 'demoYear' | 'city' | 'mode' | 'seen' | 'guesses' | 'guidesDone' | 'zPick'>;
 
 function readLS(): Partial<Persisted> {
   try {
@@ -63,7 +65,7 @@ function readLS(): Partial<Persisted> {
 
 function writeLS(s: State): void {
   try {
-    const p: Persisted = { demoYear: s.demoYear, city: s.city, mode: s.mode, seen: s.seen, guesses: s.guesses, zPick: s.zPick };
+    const p: Persisted = { demoYear: s.demoYear, city: s.city, mode: s.mode, seen: s.seen, guesses: s.guesses, guidesDone: s.guidesDone, zPick: s.zPick };
     localStorage.setItem(LS_KEY, JSON.stringify(p));
   } catch { /* storage unavailable: state still works for this session */ }
 }
@@ -101,6 +103,7 @@ function initial(): State {
     slide: hs.slide,
     seen: ls.seen && typeof ls.seen === 'object' ? ls.seen : {},
     guesses: ls.guesses && typeof ls.guesses === 'object' ? ls.guesses : {},
+    guidesDone: Array.isArray(ls.guidesDone) ? ls.guidesDone : [],
     zDate: `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`,
     zPick: ls.zPick && typeof ls.zPick === 'object' ? ls.zPick : {},
     notesOpen: false,
@@ -148,6 +151,12 @@ export function setGuess(key: string, rec: GuessRecord | null): void {
     if (rec) g[key] = rec; else delete g[key];
     return { guesses: g };
   });
+}
+
+/** Mark a slide's guided explanation as read to the end. */
+export function markGuideDone(path: string): void {
+  if (state.guidesDone.includes(path)) return;
+  setState(s => ({ guidesDone: [...s.guidesDone, path] }));
 }
 
 /** Test hook: reset to a known state. */
