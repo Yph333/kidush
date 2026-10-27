@@ -9,7 +9,7 @@ import { Wheels14, type WheelsHl } from './Wheels14';
 type F = 'two' | 'small' | 'course' | 'big' | 'mean' | 'daily' | 'why';
 
 const GUIDE: GuideDef<F> = {
-  draft: true,
+  draft: false,
   steps: [
     {
       title: 'שני מהלכים',

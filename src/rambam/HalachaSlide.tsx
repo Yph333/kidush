@@ -1,4 +1,4 @@
-// One halacha of the Rambam track: the text (right), the visual (left), and between them the guided explanation.
+// One halacha of the Rambam track: the guided explanation and the text (right), the visual (left).
 // Each guide step lights up the words it explains in the text, and the part of the visual they describe.
 
 import { Fragment, type ReactNode } from 'react';
@@ -39,9 +39,10 @@ export function HalachaSlide<F extends string>({ ch, h, title, guide, before, ta
         <p className="kicker">הלכות קידוש החודש · פרק {chapterHeb(ch)}, הלכה {h}׳</p>
         <h2 id="slide-title">{title}</h2>
         {before && <details className="before"><summary>לפני שמתחילים: מה צריך לדעת</summary>{before}</details>}
+        {/* the guide comes first and (on desktop) stays at the top: the text below can be long, and each step quotes its words */}
+        <Guide g={g} />
         <RambamText text={halachaText(ch, h)} marks={marks}
           cite={<>רמב״ם, הלכות קידוש החודש {chapterHeb(ch)}, {h}׳ · דפוס וורשא־ווילנא{url && <> (<a href={url} target="_blank" rel="noreferrer">ויקיטקסט</a>)</>}</>} />
-        <Guide g={g} />
         <div className="takeaway"><b>מה לקחת מההלכה</b>{takeaway}</div>
       </div>
       <div className="stage">{stage(g.focus)}</div>

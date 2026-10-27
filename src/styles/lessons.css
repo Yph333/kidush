@@ -260,8 +260,12 @@ svg.full, .viz .full { width: 100%; }
 .takeaway b { display: block; color: var(--c-moon); font-size: var(--fs-sm); margin-bottom: var(--sp-1); }
 .takeaway p { margin: 0; }
 @media (min-width: 921px) {
-  /* the text column scrolls; the visual stays in view. The guide is not sticky here (it would cover the text) */
+  /* the visual stays in view while the text column scrolls; the guide is sticky at the top of its column, as on every slide */
   .slide.halacha-slide > .stage { position: sticky; top: var(--sp-4); align-self: start; }
-  .slide.halacha-slide > .text .guide { position: static; max-height: none; overflow: visible; }
 }
 @media print { .rt-mark { background: none; box-shadow: none; text-decoration: underline; } }
+.turns { margin: var(--sp-4) 0 0; display: flex; align-items: center; gap: var(--sp-4); flex-wrap: wrap; }
+.turns svg { width: 9rem; flex: none; }
+.turns-n { fill: var(--c-text); font-size: 30px; font-weight: 700; }
+.turns-t { fill: var(--c-text-3); font-size: 12px; }
+.turns figcaption { flex: 1; min-width: 12rem; color: var(--c-text-2); }

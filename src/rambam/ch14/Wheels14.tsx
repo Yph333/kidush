@@ -53,8 +53,10 @@ function TopView({ meanLon, course, hl }: { meanLon: number; course: number; hl:
   );
 }
 
-export function Wheels14({ hl, emphasis }: { hl: WheelsHl; emphasis?: 'days' }) {
-  const [N, setN] = useState(0);
+/** `at`: days from the epoch, set by the page (halacha 4); without it the reader steps the days here. */
+export function Wheels14({ hl, emphasis, at }: { hl: WheelsHl; emphasis?: 'days'; at?: number }) {
+  const [own, setN] = useState(0);
+  const N = at ?? own;
   const player = usePlay(dt => setN(n => n + dt * 2));          // two days a second
   const day = Math.floor(N), m = meanAt(N);
   const meanLon = m.moon / 3600, course = m.course / 3600;
@@ -65,12 +67,12 @@ export function Wheels14({ hl, emphasis }: { hl: WheelsHl; emphasis?: 'days' }) 
     <>
       <Viz>
         <Scene3D load={load} props={props} label="הגלגל הגדול והגלגל הקטן של הירח לפי הרמב״ם, פרק י״ד"
-          play={{ ...player, label: 'הפעל: יום אחר יום' }}
+          play={at === undefined ? { ...player, label: 'הפעל: יום אחר יום' } : undefined}
           views={[{ id: 'oblique', label: 'מבט אלכסוני' }, { id: 'top', label: 'מלמעלה' }, { id: 'close', label: 'קרוב לגלגל הקטן' }]}
           fallback={<TopView meanLon={meanLon} course={course} hl={hl} />} />
         <p className="note">ציור סכמטי: הגלגל הקטן מוגדל כדי שייראה.</p>
       </Viz>
-      <Engine title="יום אחר יום מהעיקר" sub="ליל ה׳, ג׳ ניסן ד׳תתקל״ח" className={emphasis === 'days' ? 'guide-focus' : ''}>
+      {at === undefined && <Engine title="יום אחר יום מהעיקר" sub="ליל ה׳, ג׳ ניסן ד׳תתקל״ח" className={emphasis === 'days' ? 'guide-focus' : ''}>
         <div className="ctl">
           <button type="button" className="btn" onClick={() => go(day - 1)} disabled={day === 0}>יום אחורה</button>
           <button type="button" className="btn pri" onClick={() => go(day + 1)}>יום קדימה</button>
@@ -82,7 +84,7 @@ export function Wheels14({ hl, emphasis }: { hl: WheelsHl; emphasis?: 'days' }) 
           <div><small>אמצע הירח</small><b><SignPos sec={exact.moon} /></b></div>
           <div><small>אמצע המסלול</small><b><DMS sec={exact.course} /></b></div>
         </div>
-      </Engine>
+      </Engine>}
     </>
   );
 }
