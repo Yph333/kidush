@@ -85,3 +85,22 @@ describe('chapter 14 numbers quoted in the guides', () => {
   });
   it('2357 days = 2 × 1000 + 354 + 3', () => expect(rMotion(RB.moon, 2357).parts).toEqual([[1000, 2], [354, 1], [1, 3]]));
 });
+
+describe('chapter 14:5–6', () => {
+  it('seasonRow agrees with season() for every degree, and the words follow the table', async () => {
+    const { seasonRow, SEASON_WORDS } = await import('./ch14/Seasons14');
+    const { SEASON_TABLE, season } = await import('../engines/rambam');
+    for (let d = 0; d < 360; d += 0.5) expect(SEASON_TABLE[seasonRow(d)][2], `${d}°`).toBe(season(d));
+    expect(SEASON_WORDS).toHaveLength(SEASON_TABLE.length);
+  });
+  it("the example's sun, 35° 38′ 33″ (15:8), is in the +15 row", () => {
+    const R = rambam(rambamD0() + 29);
+    expect(R.sunMean).toBe(35 * 3600 + 38 * 60 + 33);
+    expect(R.season).toBe(15);
+  });
+  it('Gemini to Leo is +30 (owner decision, see VERIFICATION 14:5)', async () => {
+    const { season } = await import('../engines/rambam');
+    expect(season(60)).toBe(30);
+    expect(season(119.9)).toBe(30);
+  });
+});

@@ -13,7 +13,7 @@ import { Wheels14 } from './Wheels14';
 type F2 = 'ten' | 'shearit' | 'precise' | 'monthYear' | 'how';
 
 const GUIDE2: GuideDef<F2> = {
-  draft: true,
+  draft: false,
   steps: [
     {
       title: 'עשרה ימים',
@@ -82,7 +82,7 @@ export function H14_2() {
 type F3 = 'daily' | 'ten' | 'long' | 'month' | 'compare';
 
 const GUIDE3: GuideDef<F3> = {
-  draft: true,
+  draft: false,
   steps: [
     {
       title: 'מהלך אמצע המסלול ביום',
@@ -153,7 +153,7 @@ export function H14_3() {
 type F4 = 'year' | 'root' | 'rootCrs' | 'method' | 'example' | 'sun' | 'try';
 
 const GUIDE4: GuideDef<F4> = {
-  draft: true,
+  draft: false,
   steps: [
     {
       title: 'שנה סדורה של אמצע המסלול',
