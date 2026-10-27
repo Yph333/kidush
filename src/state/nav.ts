@@ -1,6 +1,6 @@
 // Hash routing: #/<chapter>/<slide>?y=<demo year>&city=<i>&mode=<present|explore>
 
-import { SLIDES, slideByPath } from '../chapters';
+import { SLIDES, slideByPath, trackSlides } from '../chapters';
 import { type State, buildHash, getState, parseHash, setState, subscribe } from './store';
 
 export function currentIndex(): number {
@@ -17,8 +17,14 @@ export function go(pathOrIndex: string | number): void {
   history.pushState(null, '', buildHash(getState()));
 }
 
-export const next = () => go(currentIndex() + 1);
-export const prev = () => go(currentIndex() - 1);
+/** Step inside the current track (topics or Rambam). */
+function step(d: 1 | -1): void {
+  const cur = slideByPath(getState().slide) ?? SLIDES[0];
+  const list = trackSlides(cur.track), k = list.indexOf(cur) + d;
+  if (k >= 0 && k < list.length) go(list[k].path);
+}
+export const next = () => step(1);
+export const prev = () => step(-1);
 
 /** Keep the URL in step with y / city / mode (replaceState), and follow back/forward. */
 export function startUrlSync(): () => void {

@@ -1,4 +1,5 @@
-import type { ChapterDef, FlatSlide } from './types';
+import type { ChapterDef, FlatSlide, Track } from './types';
+import { RAMBAM_CHAPTERS } from '../rambam';
 import { Home } from './01-yesodot/Home';
 import { Units } from './01-yesodot/Units';
 import { Sun } from './02-yom/Sun';
@@ -89,8 +90,13 @@ export const CHAPTERS: ChapterDef[] = [
   ] },
 ];
 
-export const SLIDES: FlatSlide[] = CHAPTERS.flatMap(ch => ch.slides.map(s => ({ ...s, chapter: ch, path: `${ch.id}/${s.id}` })))
+export const SLIDES: FlatSlide[] = [...CHAPTERS, ...RAMBAM_CHAPTERS]
+  .flatMap(ch => ch.slides.map(s => ({ ...s, chapter: ch, track: ch.track ?? 'topics', path: `${ch.id}/${s.id}` })))
   .map((s, index) => ({ ...s, index }));
+
+/** The slides of one track, in order: "previous" and "next" stay inside the track. */
+export const trackSlides = (t: Track): FlatSlide[] => SLIDES.filter(s => s.track === t);
+export const trackChapters = (t: Track): ChapterDef[] => (t === 'rambam' ? RAMBAM_CHAPTERS : CHAPTERS);
 
 const BY_PATH = new Map(SLIDES.map(s => [s.path, s]));
 export const slideByPath = (p: string): FlatSlide | undefined => BY_PATH.get(p);

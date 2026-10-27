@@ -4,7 +4,7 @@
 
 import { type KeyboardEvent, useEffect, useRef, useState } from 'react';
 import type { GuideDef } from '../content/guides/types';
-import { SLIDES, slideByPath } from '../chapters';
+import { slideByPath, trackSlides } from '../chapters';
 import { next as nextSlide } from '../state/nav';
 import { markGuideDone, useStore } from '../state/store';
 import { Num, Tag } from './text';
@@ -34,7 +34,7 @@ export function Guide<F extends string>({ g }: { g: GuideState<F> }) {
   const nextRef = useRef<HTMLButtonElement>(null);
   const { def, i, set, open, setOpen } = g;
   const n = def.steps.length, step = def.steps[i], last = i === n - 1;
-  const cur = slideByPath(path), after = cur ? SLIDES[cur.index + 1] : undefined;
+  const cur = slideByPath(path), list = cur ? trackSlides(cur.track) : [], after = cur ? list[list.indexOf(cur) + 1] : undefined;
 
   useEffect(() => { if (open && last) markGuideDone(path); }, [open, last, path]);
 
@@ -83,6 +83,8 @@ export function Guide<F extends string>({ g }: { g: GuideState<F> }) {
       </div>
       <div className="guide-body" aria-live="polite">
         <h3>{step.title}</h3>
+        {/* Rambam track: the words this step explains, so they are in view next to the explanation */}
+        {step.mark?.length ? <p className="guide-quote">״{step.mark.join(' … ')}״</p> : null}
         {step.body}
       </div>
       <div className="guide-nav">

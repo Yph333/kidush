@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { CITIES } from './engines/astro';
-import { SLIDES, slideByPath } from './chapters';
+import { SLIDES, slideByPath, trackSlides } from './chapters';
 import { GlossaryPanel } from './components/Glossary';
 import { ProgressMap } from './components/ProgressMap';
 import { TeacherNotesPanel } from './components/TeacherNotes';
@@ -64,7 +64,7 @@ export function App() {
         case 'ArrowLeft': case 'PageDown': e.preventDefault(); next(); break;
         case 'ArrowRight': case 'PageUp': e.preventDefault(); prev(); break;
         case 'Home': e.preventDefault(); go(0); break;
-        case 'End': e.preventDefault(); go(SLIDES.length - 1); break;
+        case 'End': { e.preventDefault(); const t = trackSlides((slideByPath(s.slide) ?? SLIDES[0]).track); go(t[t.length - 1].path); break; }
         case 'n': case 'N': case 'מ': setState({ notesOpen: !s.notesOpen }); break;
         case 'p': case 'P': case 'פ': setState({ mode: s.mode === 'present' ? 'explore' : 'present' }); break;
         case 'f': case 'F': case 'כ': toggleFullscreen(); break;
@@ -77,13 +77,15 @@ export function App() {
 
   const Current = cur.Component;
   const i = cur.index;
+  // the bottom bar shows the current track only
+  const list = trackSlides(cur.track), ti = list.indexOf(cur);
 
   return (
     <div className="app" data-mode={mode} data-home={i === 0 ? '' : undefined} ref={appRef}>
       <a className="skip" href="#deck">דילוג לתוכן</a>
       <header className="top">
         <button type="button" className="iconbtn map-btn" onClick={() => setState({ mapOpen: true })} aria-label="מפת השיעור">☰</button>
-        <button type="button" className="brand" onClick={() => go(0)} aria-label="בונים לוח עברי: למסך הראשי">בונים לוח עברי{i > 0 && <small>פרק <span className="num">{cur.chapter.num}</span>: {cur.chapter.title}</small>}</button>
+        <button type="button" className="brand" onClick={() => go(0)} aria-label="בונים לוח עברי: למסך הראשי">בונים לוח עברי{i > 0 && <small>{cur.track === 'rambam' ? cur.chapter.title : <>פרק <span className="num">{cur.chapter.num}</span>: {cur.chapter.title}</>}</small>}</button>
         <div className="sp" />
         <div className="top-ctl">
           <YearControl value={demo} onChange={v => setState({ demoYear: v })} label="שנת הדגמה" />
@@ -110,15 +112,15 @@ export function App() {
         </main>
       </div>
       <footer className="bot">
-        <button type="button" className="nb" onClick={prev} disabled={i === 0}>הקודם</button>
+        <button type="button" className="nb" onClick={prev} disabled={ti === 0}>הקודם</button>
         <div className="prog" role="group" aria-label="התקדמות">
-          {SLIDES.map((s, k) => (
-            <button key={s.path} type="button" aria-label={s.title} aria-current={k === i ? 'page' : undefined}
-              className={k < i ? 'on' : k === i ? 'cur' : ''} onClick={() => go(k)} />
+          {list.map((s, k) => (
+            <button key={s.path} type="button" aria-label={s.title} aria-current={k === ti ? 'page' : undefined}
+              className={k < ti ? 'on' : k === ti ? 'cur' : ''} onClick={() => go(s.path)} />
           ))}
         </div>
-        <span className="pos"><span className="num">{i + 1}/{SLIDES.length}</span></span>
-        <button type="button" className="nb next" onClick={next} disabled={i === SLIDES.length - 1}>הבא</button>
+        <span className="pos"><span className="num">{ti + 1}/{list.length}</span></span>
+        <button type="button" className="nb next" onClick={next} disabled={ti === list.length - 1}>הבא</button>
       </footer>
       <TeacherNotesPanel />
       <GlossaryPanel />

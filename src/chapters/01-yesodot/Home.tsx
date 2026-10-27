@@ -4,7 +4,9 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { P_DAY, fmtMolad, rh, yearHeb } from '../../engines/calendar';
 import { CITIES, TofMs, moonEcl, sunEcl } from '../../engines/astro';
-import { CHAPTERS, SLIDES, slideByPath } from '..';
+import { CHAPTERS, SLIDES, slideByPath, trackSlides } from '..';
+import { RAMBAM_CHAPTERS } from '../../rambam';
+import { HEB_NUM, chapterHeb } from '../../rambam/text';
 import { Engine, Viz } from '../../components/Slide';
 import { Civil, GDate, Legend, Num, Sig, Tag } from '../../components/text';
 import { WeekWheel, dayMark } from '../../components/WeekWheel';
@@ -72,6 +74,7 @@ export function Home() {
   const lastPath = [...seen].reverse().find(p => p !== HOME && slideByPath(p));
   const last = lastPath ? slideByPath(lastPath) : undefined;
   const first = SLIDES[1];
+  const firstHalacha = trackSlides('rambam')[0];
 
   return (
     <div className="home">
@@ -88,6 +91,24 @@ export function Home() {
           </div>
         </div>
         <HeroVisual />
+      </section>
+
+      <section className="home-sec" aria-labelledby="tracks-h">
+        <h2 id="tracks-h">שתי דרכים ללמוד</h2>
+        <div className="tracks">
+          <button type="button" className="topic track-card" onClick={() => go(first.path)}>
+            <span className="topic-t">לפי נושאים</span>
+            <span className="track-d">מהשעה והחלק, דרך המולד והדחיות, ועד הראייה. כל נושא בשקף, עם מנוע חישוב משלו.</span>
+            <span className="track-go">להתחיל: {first.title}</span>
+          </button>
+          {firstHalacha && (
+            <button type="button" className="topic track-card" onClick={() => go(firstHalacha.path)}>
+              <span className="topic-t">הלכה הלכה ברמב״ם</span>
+              <span className="track-d">הלכות קידוש החודש: הטקסט של הרמב״ם, ההסבר וההדמיה יחד. בכל צעד נדלקות המילים שמוסברות.</span>
+              <span className="track-go">להתחיל: פרק {chapterHeb(firstHalacha.chapter.num)}, {firstHalacha.title}</span>
+            </button>
+          )}
+        </div>
       </section>
 
       <section className="home-sec" aria-labelledby="topics-h">
@@ -110,6 +131,22 @@ export function Home() {
                     <span className="num">{done}/{slides.length}</span>
                   </span>
                 </button>
+              </li>
+            );
+          })}
+        </ol>
+      </section>
+
+      <section className="home-sec" aria-labelledby="rambam-h">
+        <h2 id="rambam-h">הלכות קידוש החודש</h2>
+        <ol className="rambam-chs">
+          {HEB_NUM.slice(1).map((_, k) => {
+            const n = k + 1, ch = RAMBAM_CHAPTERS.find(c => c.num === n);
+            return (
+              <li key={n}>
+                {ch
+                  ? <button type="button" className="tool" onClick={() => go(`${ch.id}/${ch.slides[0].id}`)}>פרק {chapterHeb(n)}<small><Num>{ch.slides.length}</Num> {ch.slides.length === 1 ? 'הלכה' : 'הלכות'}</small></button>
+                  : <span className="tool soon" aria-disabled="true">פרק {chapterHeb(n)}<small>בקרוב</small></span>}
               </li>
             );
           })}

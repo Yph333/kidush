@@ -38,3 +38,8 @@ export const SLIDE_PATHS = [
 ] as const;
 
 export type SlidePath = (typeof SLIDE_PATHS)[number];
+
+/** Rambam track slides, in order (kept equal to RAMBAM_CHAPTERS by a test). Plain data, so e2e can import it. */
+export const RAMBAM_PATHS = [
+  'rambam/14/1',
+] as const;
