@@ -108,7 +108,7 @@ function skyCols(h: number): [string, string] {
 }
 const STARS = Array.from({ length: 70 }, (_, i) => [((Math.sin(i * 12.9898) * 43758.5453) % 1 + 1) % 1, ((Math.sin(i * 78.233) * 12345.678) % 1 + 1) % 1, (i % 3) + 1]);
 const sn = (a: number) => Math.sin(a * D2R), cs = (a: number) => Math.cos(a * D2R);
-const FONT = 'Assistant,Arial';
+const FONT = "'IBM Plex Sans Hebrew',Arial";
 
 export function SkyPanorama({ ms, c }: { ms: number; c: Place & { name: string } }) {
   const id = 's' + useId().replace(/[^a-zA-Z0-9]/g, '');

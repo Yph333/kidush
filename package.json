@@ -18,6 +18,8 @@
     "review": "node -e \"process.env.REVIEW=1;require('child_process').execSync('npx playwright test e2e/review.spec.ts --project=desktop',{stdio:'inherit',env:process.env})\""
   },
   "dependencies": {
+    "@fontsource/frank-ruhl-libre": "^5.3.0",
+    "@fontsource/ibm-plex-sans-hebrew": "^5.3.0",
     "d3-geo": "^3.1.1",
     "react": "^19.3.0",
     "react-dom": "^19.3.0",
