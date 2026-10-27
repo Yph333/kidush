@@ -375,3 +375,27 @@ export function tekufotAbsolute(y: number, which: 'shmuel' | 'ravAdda'): [number
   const q = (which === 'shmuel' ? SHMUEL_YEAR : RAV_ADDA_YEAR) / 4;
   return [n - 2 * q, n - q, n, n + q];
 }
+
+// ---- adding remainders the Rambam's way (Kiddush HaChodesh 6:9): parts carry into hours, hours into days,
+//      and whole weeks are dropped. Returns every intermediate, for the slides that show the carrying.
+
+export interface DhpSum {
+  /** the two summands */
+  a: DHP; b: DHP;
+  /** parts: raw sum, carried hours, what is left */
+  pRaw: number; pCarry: number; p: number;
+  /** hours: raw sum (with the carry), carried days, what is left */
+  hRaw: number; hCarry: number; h: number;
+  /** days: raw sum (with the carry), whole weeks dropped, what is left (0–6) */
+  dRaw: number; weeks: number; d: number;
+}
+
+export function addDHP(a: DHP, b: DHP): DhpSum {
+  const pRaw = a.p + b.p, pCarry = Math.floor(pRaw / P_HOUR), p = pRaw % P_HOUR;
+  const hRaw = a.h + b.h + pCarry, hCarry = Math.floor(hRaw / 24), h = hRaw % 24;
+  const dRaw = a.d + b.d + hCarry, weeks = Math.floor(dRaw / 7), d = dRaw % 7;
+  return { a, b, pRaw, pCarry, p, hRaw, hCarry, h, dRaw, weeks, d };
+}
+
+/** The Rambam counts weekdays from 1 (א = Sunday); this module from 0. A molad "on day 1" is { d: 0 }. */
+export const dhpOf = (t: number): DHP => splitParts(wk(t));

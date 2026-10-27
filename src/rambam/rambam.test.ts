@@ -3,7 +3,7 @@ import '../chapters';
 import { describe, expect, it } from 'vitest';
 import { RB, rMotion, rambam, rambamD0, secOf } from '../engines/rambam';
 import KH from '../content/rambamKH.json';
-import { GUIDE_MAX_STEPS, GUIDE_MIN_STEPS } from '../content/guides/types';
+import { GUIDE_MAX_STEPS, HALACHA_MIN_STEPS } from '../content/guides/types';
 import { RAMBAM_PATHS } from '../content/paths';
 import { RAMBAM_CHAPTERS, RAMBAM_GUIDES } from '.';
 import { chapterHeb, halachaText, markRanges, toDisplay } from './text';
@@ -45,8 +45,8 @@ describe('Rambam track', () => {
   for (const { ch, h, guide } of RAMBAM_GUIDES) {
     describe(`${ch}:${h}`, () => {
       const text = halachaText(ch, h);
-      it(`has ${GUIDE_MIN_STEPS}–${GUIDE_MAX_STEPS} steps`, () => {
-        expect(guide.steps.length).toBeGreaterThanOrEqual(GUIDE_MIN_STEPS);
+      it(`has ${HALACHA_MIN_STEPS}–${GUIDE_MAX_STEPS} steps`, () => {
+        expect(guide.steps.length).toBeGreaterThanOrEqual(HALACHA_MIN_STEPS);
         expect(guide.steps.length).toBeLessThanOrEqual(GUIDE_MAX_STEPS);
       });
       it('every marked phrase is in the text', () => {

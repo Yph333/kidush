@@ -5,8 +5,14 @@ import type { GuideDef } from '../content/guides/types';
 import { GUIDE_14_1, H14_1 } from './ch14/H1';
 import { GUIDE_14_2, GUIDE_14_3, GUIDE_14_4, H14_2, H14_3, H14_4 } from './ch14/H2to4';
 import { GUIDE_14_5, GUIDE_14_6, H14_5, H14_6 } from './ch14/H5to6';
+import { CH6 } from './ch6';
+import { CH7 } from './ch7';
+import { CH8 } from './ch8';
 
 export const RAMBAM_CHAPTERS: ChapterDef[] = [
+  CH6.chapter,
+  CH7.chapter,
+  CH8.chapter,
   { id: 'rambam/14', track: 'rambam', num: 14, title: 'פרק י״ד: מהלך הירח האמצעי', slides: [
     { id: '1', title: 'הלכה א: שני גלגלים', Component: H14_1 },
     { id: '2', title: 'הלכה ב: הטבלה של אמצע הירח', Component: H14_2 },
@@ -19,6 +25,9 @@ export const RAMBAM_CHAPTERS: ChapterDef[] = [
 
 /** Every halacha's guide, for checks (marks must be phrases of the text). */
 export const RAMBAM_GUIDES: { ch: number; h: string; guide: GuideDef }[] = [
+  ...CH6.guides,
+  ...CH7.guides,
+  ...CH8.guides,
   { ch: 14, h: 'א', guide: GUIDE_14_1 },
   { ch: 14, h: 'ב', guide: GUIDE_14_2 },
   { ch: 14, h: 'ג', guide: GUIDE_14_3 },

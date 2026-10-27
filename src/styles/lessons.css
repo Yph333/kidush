@@ -284,3 +284,25 @@ svg.full, .viz .full { width: 100%; }
 .month-face .scene3d > .note { display: none; }   /* the view from the Earth is fixed: no dragging */
 /* slides whose visual should stay in view while the controls column scrolls */
 @media (min-width: 921px) { .slide.sticky-stage > .stage { position: sticky; top: var(--sp-4); align-self: start; } }
+/* chapter 6 visuals */
+.divisors { display: grid; grid-template-columns: repeat(auto-fill, minmax(8.5rem, 1fr)); gap: var(--sp-2); }
+.divisors > div { padding: var(--sp-2) var(--sp-3); border: 1px solid var(--c-line); border-radius: var(--r-sm); display: flex; flex-direction: column; gap: 2px; }
+.divisors > div.on { border-color: var(--c-ok); background: var(--c-ok-soft); }
+.divisors > div.bad { border-color: rgb(255 139 115 / .45); background: var(--c-shift-soft); }
+.divisors b { font-weight: var(--fw-semibold); }
+.divisors span { font-size: var(--fs-sm); color: var(--c-text-2); }
+.ybars { display: flex; flex-direction: column; gap: var(--sp-3); margin-bottom: var(--sp-3); }
+.ybars > div { display: grid; grid-template-columns: 11rem minmax(0, 1fr); grid-template-rows: auto auto; gap: 2px var(--sp-3); padding: var(--sp-2); border-radius: var(--r-sm); }
+.ybars > div.on { background: var(--c-accent-soft); box-shadow: inset 0 0 0 1px rgb(92 184 255 / .45); }
+.ybl { grid-row: span 2; align-self: center; font-size: var(--fs-sm); }
+.ybar { height: .7rem; border-radius: var(--r-pill); background: var(--c-line); overflow: hidden; }
+.ybar i { display: block; height: 100%; border-radius: inherit; }
+.ybv { font-size: var(--fs-sm); color: var(--c-text-2); }
+.hlp { background: var(--c-accent-soft); border-radius: var(--r-sm); padding: var(--sp-2); }
+@media (max-width: 640px) { .ybars > div { grid-template-columns: minmax(0, 1fr); } .ybl { grid-row: auto; } }
+.mlen { display: grid; grid-template-columns: repeat(auto-fill, minmax(5.4rem, 1fr)); gap: var(--sp-2); margin: var(--sp-3) 0; }
+.mlen > div { display: flex; flex-direction: column; align-items: center; padding: var(--sp-2); border-radius: var(--r-sm); border: 1px solid var(--c-line); }
+.mlen > div.full { background: var(--c-moon-soft); }
+.mlen > div.on { box-shadow: 0 0 0 2px var(--c-accent); }
+.mlen b { font-size: var(--fs-sm); } .mlen span { font-size: var(--fs-lg); font-weight: var(--fw-bold); } .mlen small { color: var(--c-text-3); font-size: var(--fs-xs); }
+.topic-link { margin: var(--sp-2) 0 0; font-size: var(--fs-sm); }
