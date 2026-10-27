@@ -2,7 +2,7 @@
    HOME — the entry screen: hero (title + live Earth/Moon/Sun), topics, tools, and "before you start".
    ===================================================================================================== */
 
-.home { max-width: 84rem; margin: 0 auto; padding: 0 var(--gutter) var(--sp-8); }
+.home { padding: 0 var(--gutter) var(--sp-8); padding-inline: max(var(--gutter), calc((100% - 84rem) / 2 + var(--gutter))); overflow-x: clip; }   /* full width, clipped at the page edge (see .slide) */
 
 /* ---------- hero: text on the start side (right), the 3D system on the end side, both on the page's space ---------- */
 .home-hero {
@@ -17,9 +17,9 @@
 .home-cta .btn { min-height: 3rem; padding: 0 var(--sp-5); font-size: var(--fs-base); }
 
 .home-visual { position: relative; height: clamp(22rem, 62vh, 42rem); margin-inline-end: calc(-1 * var(--gutter)); }
-/* the scene dissolves into the page toward the text (right, in RTL) and at top and bottom: no visible edge */
-.home-visual { -webkit-mask-image: linear-gradient(to left, transparent, #000 14%), linear-gradient(to bottom, transparent, #000 10%, #000 90%, transparent); -webkit-mask-composite: source-in; mask-image: linear-gradient(to left, transparent, #000 14%), linear-gradient(to bottom, transparent, #000 10%, #000 90%, transparent); mask-composite: intersect; }
-.home-visual canvas { display: block; width: 100% !important; height: 100% !important; }
+/* the canvas overscans the box (to the page edge on the Sun's side) and carries its own fade: see heroSystem.ts */
+.home-visual { overflow: visible; z-index: 0; }
+.home-intro { position: relative; z-index: 1; }
 /* without WebGL: a lit sphere in CSS */
 .hero-orb {
   position: absolute; inset: 0; margin: auto; width: 46%; aspect-ratio: 1; border-radius: 50%;
@@ -80,7 +80,6 @@
 /* ---------- narrow screens: the system above the title, one column ---------- */
 @media (max-width: 920px) {
   .home-hero { grid-template-columns: minmax(0, 1fr); min-height: 0; gap: 0; padding-top: 0; }
-  .home-visual { -webkit-mask-image: linear-gradient(to bottom, #000 75%, transparent); mask-image: linear-gradient(to bottom, #000 75%, transparent); }
   .home-visual { order: -1; height: clamp(15rem, 42vh, 22rem); margin-inline: calc(-1 * var(--gutter)); }
   .home-lead { font-size: var(--fs-md); }
   .home-start { grid-template-columns: minmax(0, 1fr); }

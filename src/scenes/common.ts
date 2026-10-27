@@ -31,23 +31,39 @@ export interface Stage {
   dispose: () => void;
 }
 
+/**
+ * Overscan: the canvas (and the label layer) is larger than the host by a margin on every side, and the camera
+ * keeps framing the host. So a model that grows past the host — zooming in, a glow — keeps drawing onto the page
+ * around it and fades out far away (see .scene-host canvas), instead of being cut by a rectangle.
+ */
+const overscan = (w: number, h: number) => Math.round(Math.min(560, 0.32 * Math.max(w, h)));
+
 export function createStage(host: HTMLElement, opts: { fov?: number; near?: number; far?: number } = {}): Stage {
   const w = host.clientWidth || 600, h = host.clientHeight || 400;
   const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-  renderer.setPixelRatio(Math.min(2, window.devicePixelRatio || 1));
-  renderer.setSize(w, h);
+  renderer.setPixelRatio(Math.min(1.75, window.devicePixelRatio || 1));
   renderer.setClearColor(0x000000, 0);   // transparent: the scene sits on the page background
   host.appendChild(renderer.domElement);
 
   const labels = new CSS2DRenderer();
-  labels.setSize(w, h);
   labels.domElement.className = 'scene-labels';
   host.appendChild(labels.domElement);
 
   const scene = new THREE.Scene();
   const camera = new THREE.PerspectiveCamera(opts.fov ?? 45, w / h, opts.near ?? 0.1, opts.far ?? 1000);
-  // Drag/zoom must reach the canvas: the label layer above it ignores pointer events (see .scene-labels).
-  const controls = new OrbitControls(camera, renderer.domElement);
+  /** size the canvas and labels to host + margin, and widen the camera's view to match (same framing of the host) */
+  const fit = (W: number, H: number) => {
+    const M = overscan(W, H);
+    renderer.setSize(W + 2 * M, H + 2 * M);
+    labels.setSize(W + 2 * M, H + 2 * M);
+    for (const el of [renderer.domElement, labels.domElement]) { el.style.left = `${-M}px`; el.style.top = `${-M}px`; }
+    camera.aspect = W / H;
+    camera.setViewOffset(W, H, -M, -M, W + 2 * M, H + 2 * M);
+    camera.updateProjectionMatrix();
+  };
+  fit(w, h);
+  // Drag/zoom listen on the host (the box), not the overscanned canvas — so the margin over the text stays inert.
+  const controls = new OrbitControls(camera, host);
   controls.enableDamping = false;
   controls.enablePan = false;
   controls.autoRotateSpeed = 1.2;
@@ -58,11 +74,8 @@ export function createStage(host: HTMLElement, opts: { fov?: number; near?: numb
   const ro = new ResizeObserver(() => {
     const W = host.clientWidth, H = host.clientHeight;
     if (!W || !H) return;
-    renderer.setSize(W, H);
-    labels.setSize(W, H);
     const narrowBefore = camera.aspect < 1.4, narrowNow = W / H < 1.4;
-    camera.aspect = W / H;
-    camera.updateProjectionMatrix();
+    fit(W, H);
     if (last && (narrowBefore || narrowNow)) look(last.pos, last.target); else render();
   });
   ro.observe(host);

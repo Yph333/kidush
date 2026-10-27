@@ -6,7 +6,11 @@
 /* ---------- the slide: text (start side) + stage (end side) ---------- */
 .slide {
   display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: var(--sp-6) clamp(var(--sp-5), 3.5vw, var(--sp-8));
-  align-content: start; max-width: 112rem; margin: 0 auto; padding: var(--sp-6) var(--gutter) var(--sp-8);
+  align-content: start; padding: var(--sp-6) var(--gutter) var(--sp-8);
+  /* full page width, content capped at 112rem by the padding: so overscanned 3D canvases are clipped exactly at the
+     page edge (overflow-x: clip makes no scrollable overflow), never at an inner box */
+  padding-inline: max(var(--gutter), calc((100% - 112rem) / 2 + var(--gutter)));
+  overflow-x: clip;
 }
 .slide.wide { grid-template-columns: minmax(0, 4fr) minmax(0, 8fr); }
 .slide > .text { padding-top: var(--sp-2); }

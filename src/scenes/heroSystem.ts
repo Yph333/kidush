@@ -16,10 +16,9 @@ export interface HeroProps {
 export interface HeroHandle { update(p: HeroProps): void; dispose(): void }
 
 export function createHero(host: HTMLElement, p0: HeroProps): HeroHandle {
-  const w = host.clientWidth || 600, h = host.clientHeight || 600;
+  const w = host.clientWidth || 600, h = host.clientHeight || 600;   // fit() below sizes the canvas
   const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
   renderer.setPixelRatio(Math.min(2, window.devicePixelRatio || 1));
-  renderer.setSize(w, h);
   renderer.setClearColor(0x000000, 0);
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
@@ -86,17 +85,32 @@ export function createHero(host: HTMLElement, p0: HeroProps): HeroHandle {
   // pause when the canvas is off screen
   const io = new IntersectionObserver(([e]) => { if (e.isIntersecting) start(); else cancelAnimationFrame(raf); });
   io.observe(host);
-  const ro = new ResizeObserver(() => {
+  // The canvas reaches past the box: to the page's edge on the Sun's side (left, in RTL) and by a margin above
+  // and below, while the camera keeps framing the box. So the Sun's glow is cut only by the edge of the screen,
+  // and the scene fades out softly toward the text and top/bottom (mask set here, in pixels).
+  const fit = () => {
     const W = host.clientWidth, H = host.clientHeight;
     if (!W || !H) return;
-    renderer.setSize(W, H);
+    const page = (host.closest('main') ?? document.body).getBoundingClientRect(), box = host.getBoundingClientRect();
+    const L = Math.max(0, Math.round(box.left - page.left)), T = Math.round(H * 0.22);
+    const cw = W + L, ch = H + 2 * T;
+    renderer.setSize(cw, ch);
+    const c = renderer.domElement.style;
+    c.position = 'absolute'; c.left = `${-L}px`; c.top = `${-T}px`; c.maxWidth = 'none';
+    const mask = `linear-gradient(to right, #000 ${L + W * 0.86}px, transparent ${cw}px), linear-gradient(to bottom, transparent 0px, #000 ${T * 1.3}px, #000 ${T * 0.7 + H}px, transparent ${ch}px)`;
+    c.setProperty('-webkit-mask-image', mask); c.setProperty('-webkit-mask-composite', 'source-in');
+    c.maskImage = mask; c.maskComposite = 'intersect';
     camera.aspect = W / H;
+    camera.setViewOffset(W, H, -L, -T, cw, ch);
     // keep the whole system in frame on tall, narrow hosts
     camera.position.setLength(W / H < 1 ? 19.5 / (W / H) ** 0.6 : 19.5);
     camera.updateProjectionMatrix();
     if (!p.motion) still();
-  });
+  };
+  fit();
+  const ro = new ResizeObserver(fit);
   ro.observe(host);
+  window.addEventListener('resize', fit);   // the page edge can move without the box changing size
 
   return {
     update(np) { p = np; t0 = performance.now(); start(); },
@@ -105,6 +119,7 @@ export function createHero(host: HTMLElement, p0: HeroProps): HeroHandle {
       offTex();
       io.disconnect();
       ro.disconnect();
+      window.removeEventListener('resize', fit);
       // geometries and materials belong to this scene; the shared textures stay cached for the next one
       scene.traverse(o => {
         const m = o as THREE.Mesh;

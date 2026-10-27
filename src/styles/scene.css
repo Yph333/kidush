@@ -7,21 +7,26 @@
 .viz:has(.scene3d) { background: none; border: 0; box-shadow: none; padding: 0; }
 
 .scene3d { width: 100%; }
-.scene-bar { display: flex; align-items: center; gap: var(--sp-2); flex-wrap: wrap; margin-bottom: var(--sp-3); position: relative; z-index: 1; }
+.scene-bar { display: flex; align-items: center; gap: var(--sp-2); flex-wrap: wrap; margin-bottom: var(--sp-3); position: relative; z-index: 2; }
 .scene-bar .sp { flex: 1; }
 .scene-bar .seg { gap: var(--sp-1); }
 .scene-bar .seg button, .scene-bar .btn { min-height: 2.1rem; font-size: var(--fs-xs); }
 
-.scene-host {
-  position: relative; width: 100%; overflow: hidden; touch-action: none; background: transparent;
-  /* fade to transparent at every edge, so no hard rectangle shows */
-  -webkit-mask-image: radial-gradient(ellipse 72% 70% at 50% 50%, #000 62%, transparent 100%);
-  mask-image: radial-gradient(ellipse 72% 70% at 50% 50%, #000 62%, transparent 100%);
-  cursor: grab;
-}
+/* The host is the box you drag in. The canvas and the label layer overscan it by a margin on every side (sized
+   and placed by scenes/common.ts), so models can grow past the box; they fade out only at the canvas's own far
+   edges. Text and cards sit above the overscan, so it only shows in the gaps. */
+.scene-host { position: relative; z-index: 0; width: 100%; overflow: visible; touch-action: none; background: transparent; cursor: grab; }
 .scene-host:active { cursor: grabbing; }
-.scene-host canvas { display: block; }
-.scene-labels { position: absolute; inset: 0; pointer-events: none; direction: ltr; }
+.scene-host canvas {
+  position: absolute; display: block; pointer-events: none; max-width: none;   /* the base rule caps canvases at 100% */
+  /* the right side faces the text column (RTL): there the fade ends at the box edge, so text stays clean */
+  --fade-r: 72%, transparent 81%;
+  -webkit-mask-image: linear-gradient(to right, transparent, #000 17%, #000 var(--fade-r)), linear-gradient(to bottom, transparent, #000 17%, #000 83%, transparent);
+  -webkit-mask-composite: source-in;
+  mask-image: linear-gradient(to right, transparent, #000 17%, #000 var(--fade-r)), linear-gradient(to bottom, transparent, #000 17%, #000 83%, transparent);
+  mask-composite: intersect;
+}
+.scene-labels { position: absolute; pointer-events: none; direction: ltr; }
 /* CSS2DRenderer positions each label by transform from the top-left corner */
 .scene-labels > div { left: 0; top: 0; pointer-events: none; }
 .s-label {
@@ -35,3 +40,10 @@
 .scene-2d { width: 100%; }
 .scene-2d svg { width: 100%; height: auto; display: block; }
 @media (max-width: 760px) { .scene-host { height: 380px !important; } }
+/* one column: nothing beside the scene, so it fades evenly on both sides */
+@media (max-width: 920px) { .scene-host canvas { --fade-r: 83%, transparent; } }
+
+/* stacking: text above everything; cards above a neighbouring scene's overscan */
+.slide > .text { position: relative; z-index: 2; }
+.viz, .engine { position: relative; z-index: 1; }
+.scene3d > :not(.scene-host) { position: relative; z-index: 2; }   /* captions and the 2D toggle stay above the overscan */
