@@ -207,6 +207,110 @@ export function shadowAxis(ms: number): GeoPoint & { hit: boolean } {
   return { ...toGeo(moon[0] + d[0] * t, moon[1] + d[1] * t, moon[2] + d[2] * t, gmst), hit: false };
 }
 
+// ---- what an observer sees: the Moon's disc against the Sun's (topocentric, spherical Earth)
+
+const R_SUN = 695700, R_MOON = 1737.4;
+
+export interface ObserverView {
+  /** the Moon's centre relative to the Sun's, degrees on the sky: x along the horizon (west +), y toward the zenith */
+  dx: number;
+  dy: number;
+  /** apparent radii, degrees */
+  rs: number;
+  rm: number;
+  /** centre separation, degrees */
+  sep: number;
+  /** the Sun's altitude, degrees (no refraction) */
+  sunAlt: number;
+  /** fraction of the Sun's diameter covered (the eclipse "magnitude" at this moment); 0 when the discs don't touch */
+  mag: number;
+  /** fraction of the Sun's disc area hidden */
+  obsc: number;
+  phase: 'none' | 'partial' | 'total' | 'annular';
+}
+
+/** The Sun and Moon as seen from `c` at `ms`. */
+export function observerView(ms: number, c: Place): ObserverView {
+  const { sun, moon, gmst } = bodies(ms);
+  const th = gmst + c.lon;
+  const up = [cs(c.lat) * cs(th), cs(c.lat) * sn(th), sn(c.lat)];          // local zenith (unit)
+  const o = up.map(x => x * RE);
+  const S = sun.map((x, i) => x - o[i]), M = moon.map((x, i) => x - o[i]);
+  const ls = Math.hypot(...S), lm = Math.hypot(...M);
+  const s = S.map(x => x / ls), m = M.map(x => x / lm);
+  const dot = (a: number[], b: number[]) => a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
+  const sep = Math.acos(Math.min(1, dot(s, m))) * R2D;
+  // tangent plane at the Sun: y toward the zenith, x = y × s (west, as you face the Sun)
+  const yv = up.map((u, i) => u - dot(up, s) * s[i]), ly = Math.hypot(...yv) || 1;
+  const Y = yv.map(v => v / ly);
+  const X = [Y[1] * s[2] - Y[2] * s[1], Y[2] * s[0] - Y[0] * s[2], Y[0] * s[1] - Y[1] * s[0]];
+  const k = R2D / dot(m, s);                                                // gnomonic projection, degrees
+  const dx = dot(m, X) * k, dy = dot(m, Y) * k;
+  const rs = Math.asin(R_SUN / ls) * R2D, rm = Math.asin(R_MOON / lm) * R2D;
+  const mag = sep >= rs + rm ? 0 : (rs + rm - sep) / (2 * rs);
+  return { dx, dy, rs, rm, sep, sunAlt: Math.asin(dot(s, up)) * R2D, mag, obsc: overlap(rs, rm, sep), phase: phaseOf(rs, rm, sep) };
+}
+
+function phaseOf(rs: number, rm: number, d: number): ObserverView['phase'] {
+  if (d >= rs + rm) return 'none';
+  if (d <= rm - rs) return 'total';
+  if (d <= rs - rm) return 'annular';
+  return 'partial';
+}
+
+/** Area of the Sun's disc (radius a) hidden by the Moon's (radius b) at centre distance d, as a fraction. */
+function overlap(a: number, b: number, d: number): number {
+  if (d >= a + b) return 0;
+  if (d <= Math.abs(a - b)) return b >= a ? 1 : (b * b) / (a * a);
+  const p = (d * d + a * a - b * b) / (2 * d * a), q = (d * d + b * b - a * a) / (2 * d * b);
+  const A = a * a * Math.acos(p) + b * b * Math.acos(q) - 0.5 * Math.sqrt((-d + a + b) * (d + a - b) * (d - a + b) * (d + a + b));
+  return A / (Math.PI * a * a);
+}
+
+export interface Contacts {
+  /** first and last contact (partial phase begins / ends) */
+  c1: number; c4: number;
+  /** second and third contact: totality or annularity, when the observer is in the path */
+  c2?: number; c3?: number;
+  /** greatest eclipse for this observer */
+  max: number;
+  central?: 'total' | 'annular';
+}
+
+/** Contact times of a solar eclipse for an observer (UTC ms), or null if the discs never touch there or the Sun is
+ *  below the horizon (−0.83°, the visible limb) for the whole eclipse. */
+export function contacts(e: Eclipse, c: Place): Contacts | null {
+  if (e.kind !== 'solar') return null;
+  const at = (t: number) => observerView(t, c);
+  // scan ±3 h for the closest approach, then refine
+  let best = Infinity, tm = e.ms;
+  for (let t = e.ms - 3 * 3600000; t <= e.ms + 3 * 3600000; t += 60000) { const v = at(t); if (v.sep - v.rs - v.rm < best) { best = v.sep - v.rs - v.rm; tm = t; } }
+  for (let step = 30000; step >= 250; step /= 2) {
+    const a = at(tm - step), b = at(tm + step), m0 = at(tm);
+    if (a.sep < m0.sep) tm -= step; else if (b.sep < m0.sep) tm += step;
+  }
+  if (at(tm).phase === 'none') return null;
+  // the moment f(t) changes sign between t0 (inside) and t1 (outside), by bisection
+  const edge = (f: (v: ObserverView) => boolean, inside: number, dir: 1 | -1) => {
+    let t1 = inside;
+    while (f(at(t1)) && Math.abs(t1 - inside) < 4 * 3600000) t1 += dir * 60000;
+    let a = inside, b = t1;
+    for (let i = 0; i < 30; i++) { const mid = (a + b) / 2; if (f(at(mid))) a = mid; else b = mid; }
+    return Math.round((a + b) / 2);
+  };
+  const touching = (v: ObserverView) => v.phase !== 'none';
+  const out: Contacts = { c1: edge(touching, tm, -1), c4: edge(touching, tm, 1), max: tm };
+  let up = false;
+  for (let t = out.c1; t <= out.c4 && !up; t += 5 * 60000) up = at(t).sunAlt > -0.83;
+  if (!up && at(out.c4).sunAlt <= -0.83) return null;
+  const ph = at(tm).phase;
+  if (ph === 'total' || ph === 'annular') {
+    const central = (v: ObserverView) => v.phase === ph;
+    out.c2 = edge(central, tm, -1); out.c3 = edge(central, tm, 1); out.central = ph;
+  }
+  return out;
+}
+
 /** The point on Earth with the moon at the zenith (lunar eclipses are seen from the hemisphere around it). */
 export function subLunar(ms: number): GeoPoint {
   const { moon, gmst } = bodies(ms);
