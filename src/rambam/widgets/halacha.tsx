@@ -3,13 +3,15 @@
 
 import { type ReactNode, useMemo, useState } from 'react';
 import { geoEquirectangular, geoPath } from 'd3-geo';
-import { CITIES, type OdehZone, ZONE, civOf, localParts, odeh, sunsetOn } from '../../engines/astro';
+import { CITIES, type OdehZone, TofMs, ZONE, civOf, localParts, nrm, odeh, sky, sunEcl, sunsetOn } from '../../engines/astro';
 import { allFullDrift, avivRule, fullMonths, heightsJoin, leapCourt, messengerDays, tekufaInNisan } from '../../engines/beitdin';
 import { DAY_NAME, P_DAY, P_MONTH, dayOfCivil, gem, monthStart, monthsOf, yearHeb } from '../../engines/calendar';
 import { R_DECL, SIGNS, moonFromEquator, rambam, rambamDecl } from '../../engines/rambam';
 import { LAND } from '../../lib/eclipseMap';
 import { monthModel } from '../../lib/month';
-import { MoonGlyph, PhaseStrip, SkyPanorama } from '../../components/astro/visuals';
+import { EarthMoonZoom, MoonGlyph, OrbitTopDown, PhaseStrip, SkyPanorama } from '../../components/astro/visuals';
+import type { MonthProps } from '../../scenes/monthSystem';
+import type { MoonFaceProps } from '../../scenes/moonFace';
 import { Scene3D } from '../../components/Scene3D/Scene3D';
 import { Engine, Viz } from '../../components/Slide';
 import { type StepRow, Steps } from '../../components/Steps';
@@ -163,7 +165,10 @@ export function NightThirty({ focus }: { focus?: 'sky' | 'seen' | 'not' }) {
   const o = odeh(true, a, b, c, JLM), ss = sunsetOn(a, b, c, JLM);
   const seen = !!o && (o.zone === 'A' || o.zone === 'B');
   return <>
-    {ss && <Viz><SkyPanorama ms={o?.tb ?? ss + 20 * 60000} c={JLM} /></Viz>}
+    {ss && <div className="month3d">
+      <Viz><SkyPanorama ms={o?.tb ?? ss + 20 * 60000} c={JLM} /></Viz>
+      <MoonFace3D ms={o?.tb ?? ss + 20 * 60000} title="הסהר באותו ערב" />
+    </div>}
     <Engine title={<>ליל שלושים של {months[mi][0]} {yearHeb(yr.y)}</>} sub="בירושלים, לפי קריטריון מודרני (Odeh)" className={fx(!!focus)}>
       <div className="ctl"><SlideYear yr={yr} />
         <label className="fld">חודש <select value={mi} onChange={e => setMi(+e.target.value)}>{months.map(([n], i) => <option key={i} value={i}>{n}</option>)}</select></label>
@@ -178,10 +183,48 @@ export function NightThirty({ focus }: { focus?: 'sky' | 'seen' | 'not' }) {
   </>;
 }
 
-/** The moon at sunset, each evening of a month (where it hides at the end and appears at the start). */
-export function MonthMoons() {
-  const yr = useSlideYear(), M = useMemo(() => monthModel(yr.y, 0, JLM), [yr.y]);
-  return <Viz><PhaseStrip M={M} t={M.strip[0].ss} /><div className="ctl"><SlideYear yr={yr} /></div></Viz>;
+const loadMonth = () => import('../../scenes/monthSystem').then(m => m.default);
+const loadFace = () => import('../../scenes/moonFace').then(m => m.default);
+
+/** The moon as seen from the Earth at one moment (3D), its lit part and whether it grows. */
+export function MoonFace3D({ ms, height = 230, title = 'כך הירח נראה מכדור הארץ' }: { ms: number; height?: number; title?: ReactNode }) {
+  const sk = sky(ms, JLM);
+  const face = useMemo<MoonFaceProps>(() => ({ sunLam: sk.sunLam, moonLam: sk.moonLam, moonBeta: sk.moonBeta }), [sk.sunLam, sk.moonLam, sk.moonBeta]);
+  return (
+    <Viz className="month-face">
+      <p className="vt">{title}</p>
+      <Scene3D load={loadFace} props={face} label="הירח כפי שהוא נראה מכדור הארץ" views={[]} height={height} fallback={<EarthMoonZoom sk={sk} />} />
+      <p className="note"><Num>{(sk.k * 100).toFixed(1)}%</Num> מואר · {sk.waxing ? 'הולך וגדל' : 'הולך וקטן'}</p>
+    </Viz>
+  );
+}
+
+/** A month of the moon in 3D: the sun, the earth and the moon at sunset of the evening chosen, and how it looks. */
+export function MonthMoons({ day: d0 = 1 }: { day?: number }) {
+  const yr = useSlideYear(), months = monthsOf(yr.y), [mi, setMi] = useState(0), [day, setDay] = useState(d0);
+  const M = useMemo(() => monthModel(yr.y, mi, JLM), [yr.y, mi]);
+  const d = Math.min(day, M.len), t = M.strip[d - 1].ss, sk = sky(t, JLM);
+  const a0 = nrm(sunEcl(TofMs(M.strip[0].ss).T).lam + 180), a1 = nrm(sunEcl(TofMs(M.strip[M.len - 1].ss).T).lam + 180);
+  const month = useMemo<MonthProps>(() => ({ sunLam: sk.sunLam, moonLam: sk.moonLam, moonBeta: sk.moonBeta, arc: [a0, a1], ms: t }), [sk.sunLam, sk.moonLam, sk.moonBeta, a0, a1, t]);
+  return <>
+    <Viz><PhaseStrip M={M} t={t} /></Viz>
+    <div className="ctl">
+      <SlideYear yr={yr} />
+      <label className="fld">חודש <select value={mi} onChange={e => setMi(+e.target.value)}>{months.map(([n], i) => <option key={i} value={i}>{n}</option>)}</select></label>
+      <label className="fld">ערב <Num>{gem(d)}</Num> בחודש
+        <input type="range" min={1} max={M.len} value={d} onChange={e => setDay(+e.target.value)} aria-label="איזה ערב בחודש" />
+      </label>
+    </div>
+    <div className="month3d">
+      <Viz>
+        <Scene3D load={loadMonth} props={month} label="השמש, כדור הארץ והירח בתלת־ממד; הצד המואר של הירח פונה לשמש"
+          views={[{ id: 'oblique', label: 'מבט אלכסוני' }, { id: 'top', label: 'מלמעלה' }, { id: 'earth', label: 'קרוב לכדור הארץ' }]}
+          fallback={<OrbitTopDown M={M} sk={sk} />} />
+        <p className="note">בשקיעה של ערב {gem(d)} ב{months[mi][0]}. לא בקנה מידה.</p>
+      </Viz>
+      <MoonFace3D ms={t} />
+    </div>
+  </>;
 }
 
 // ---------------------------------------------------------------------------------------------------- 2:5

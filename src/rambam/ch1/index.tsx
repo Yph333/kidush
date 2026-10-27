@@ -20,7 +20,7 @@ export const CH1 = defineChapter(1, 'חודשי הלבנה ושני החמה', [
         body: <p>אבל השנה צריכה להתאים לשמש, כדי שפסח יהיה באביב.</p> },
     ] },
     takeaway: <p>חודש לפי הירח, שנה לפי השמש.</p>,
-    stage: f => f === 'years' ? <YearBars hl="sun" /> : <MonthMoons />,
+    stage: f => f === 'years' ? <YearBars hl="sun" /> : <MonthMoons day={f === 'moon' ? 2 : 8} />,
   }),
   halacha<'diff' | 'leap' | 'whole'>({
     h: 'ב', title: 'שנה מעוברת',
@@ -46,7 +46,7 @@ export const CH1 = defineChapter(1, 'חודשי הלבנה ושני החמה', [
         body: <p>נראה בליל שלושים: יום ל׳ ראש חודש. לא נראה: יום ל״א, בכל מקרה. בכלי: בחרו חודש, ותראו את השמיים בליל שלושים שלו.</p> },
     ] },
     takeaway: <p>ראש חודש: יום ל׳ אם נראה בלילו, ואם לא, יום ל״א.</p>,
-    stage: f => f === 'thirty' ? <NightThirty focus="seen" /> : <MonthMoons />,
+    stage: f => f === 'thirty' ? <NightThirty focus="seen" /> : <MonthMoons key={f} day={f === 'hide' ? 29 : 2} />,
   }),
   halacha<'names'>({
     h: 'ד', title: 'חסר ומלא',
