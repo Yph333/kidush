@@ -22,12 +22,14 @@ test('export slide texts for review', async ({ page }, info) => {
     // open "more" so its text is included
     await page.evaluate(() => document.querySelectorAll('.slide details').forEach(d => d.setAttribute('open', '')));
     const data = await page.evaluate(() => {
-      const text = document.querySelector('.slide .text') as HTMLElement;
+      // the home screen (first path) has its own layout; every other path is a slide
+      const home = document.querySelector('.home') as HTMLElement | null;
+      const text = (home ?? document.querySelector('.slide .text')) as HTMLElement;
       const pick = (sel: string) => [...text.querySelectorAll(sel)].map(e => (e as HTMLElement).innerText.trim()).filter(Boolean);
       return {
         title: (document.querySelector('#slide-title') as HTMLElement).innerText,
-        kicker: (document.querySelector('.slide .kicker') as HTMLElement | null)?.innerText ?? '',
-        body: pick(':scope > p, :scope > h3, :scope > blockquote, :scope > table'),
+        kicker: (document.querySelector('.kicker') as HTMLElement | null)?.innerText ?? '',
+        body: home ? pick('.home-intro > p:not(.kicker), .home-start-text > p') : pick(':scope > p, :scope > h3, :scope > blockquote, :scope > table'),
         more: pick(':scope > details > *:not(summary)'),
         gates: [...document.querySelectorAll('.gate .gate-q')].map(e => (e as HTMLElement).innerText.trim()),
       };
