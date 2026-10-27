@@ -118,7 +118,7 @@ export function App() {
           ))}
         </div>
         <span className="pos"><span className="num">{i + 1}/{SLIDES.length}</span></span>
-        <button type="button" className="nb" onClick={next} disabled={i === SLIDES.length - 1}>הבא</button>
+        <button type="button" className="nb next" onClick={next} disabled={i === SLIDES.length - 1}>הבא</button>
       </footer>
       <TeacherNotesPanel />
       <GlossaryPanel />
