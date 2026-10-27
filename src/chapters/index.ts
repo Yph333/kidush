@@ -35,6 +35,7 @@ import { Visibility } from './07-reiya/Visibility';
 import { Calculator } from './08-kelim/Calculator';
 import { MonthCalendar } from './08-kelim/MonthCalendar';
 import { SourcePage } from './08-kelim/SourcePage';
+import { SolarSystem } from './08-kelim/SolarSystem';
 
 export const CHAPTERS: ChapterDef[] = [
   { id: 'yesodot', num: 1, title: 'יסודות', slides: [
@@ -87,6 +88,7 @@ export const CHAPTERS: ChapterDef[] = [
     { id: 'machshevon', title: 'המחשבון המלא', Component: Calculator },
     { id: 'luach', title: 'לוח שנה חודשי', Component: MonthCalendar },
     { id: 'makor', title: 'הדף מהמקור', Component: SourcePage },
+    { id: 'shemesh', title: 'מערכת השמש', Component: SolarSystem },
   ] },
 ];
 

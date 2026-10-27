@@ -53,7 +53,7 @@ const create = (host: HTMLElement, p0: MonthProps): SceneHandle<MonthProps> => {
     E.copy(dirOf(p.sunLam + 180, 0, RE));
     earth.position.copy(E);
     if (p.ms !== undefined) orientEarth(earth, p.ms);
-    earthB.setSun?.(new THREE.Vector3().sub(E).normalize().multiplyScalar(100));
+    earthB.setSun?.(new THREE.Vector3(0, 0, 0));   // the Sun is at the centre
     const M = E.clone().add(dirOf(p.moonLam, p.moonBeta * 3, RM));
     moon.position.copy(M);
     moon.lookAt(E);

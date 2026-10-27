@@ -35,6 +35,7 @@ export const SLIDE_PATHS = [
   'kelim/machshevon',
   'kelim/luach',
   'kelim/makor',
+  'kelim/shemesh',
 ] as const;
 
 export type SlidePath = (typeof SLIDE_PATHS)[number];

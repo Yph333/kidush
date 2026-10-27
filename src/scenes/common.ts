@@ -38,9 +38,10 @@ export interface Stage {
  */
 const overscan = (w: number, h: number) => Math.round(Math.min(560, 0.32 * Math.max(w, h)));
 
-export function createStage(host: HTMLElement, opts: { fov?: number; near?: number; far?: number } = {}): Stage {
+export function createStage(host: HTMLElement, opts: { fov?: number; near?: number; far?: number; logDepth?: boolean } = {}): Stage {
   const w = host.clientWidth || 600, h = host.clientHeight || 400;
-  const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+  // logDepth: for scenes that span huge ranges of scale (the solar system at true size)
+  const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, logarithmicDepthBuffer: !!opts.logDepth });
   renderer.setPixelRatio(Math.min(1.75, window.devicePixelRatio || 1));
   renderer.setClearColor(0x000000, 0);   // transparent: the scene sits on the page background
   host.appendChild(renderer.domElement);

@@ -282,3 +282,5 @@ svg.full, .viz .full { width: 100%; }
 .month-face .scene-bar { display: none; }
 @media (max-width: 1100px) { .month3d { grid-template-columns: minmax(0, 1fr); } }
 .month-face .scene3d > .note { display: none; }   /* the view from the Earth is fixed: no dragging */
+/* slides whose visual should stay in view while the controls column scrolls */
+@media (min-width: 921px) { .slide.sticky-stage > .stage { position: sticky; top: var(--sp-4); align-self: start; } }
