@@ -7,6 +7,8 @@ export interface GuideStep<F extends string = string> {
   title: string;
   body: ReactNode;
   focus?: F;
+  /** Rambam track: phrases of the halacha this step explains, highlighted in the text (exact substrings) */
+  mark?: string[];
 }
 
 export interface GuideDef<F extends string = string> {

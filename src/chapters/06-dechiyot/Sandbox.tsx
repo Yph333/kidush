@@ -1,11 +1,13 @@
 // Sandbox: switch dechiyot off and run the calendar over a range of years.
 
-import { type ReactNode, useMemo, useState } from 'react';
+import { type ReactNode, useEffect, useMemo, useState } from 'react';
 import { type Dechiya, type DechiyaSkip, fmtMolad, isLeap, moladTotal, yearHeb } from '../../engines/calendar';
 import { type SandboxResult, type Tally, rhWithout, runSandbox } from '../../engines/sandbox';
+import { Guide, useGuide } from '../../components/Guide';
 import { Engine, Slide, Viz } from '../../components/Slide';
 import { Num, Sig, Tag } from '../../components/text';
 import { YearControl } from '../../components/YearControl';
+import { ARGAZ as GUIDE, type ArgazFocus } from '../../content/guides/dechiyot';
 import { NUM, RULE_NAME, dayWord } from '../../lib/format';
 import { useStore } from '../../state/store';
 
@@ -74,12 +76,23 @@ function Example({ y, skip, onClose }: { y: number; skip: DechiyaSkip; onClose: 
   );
 }
 
+/** guide steps that switch exactly one dechiya off */
+const ONLY_OFF: Partial<Record<ArgazFocus, Dechiya>> = { adu: 'adu', gatrad: 'gatrad', betu: 'betu', zaken: 'zaken' };
+
 export function Sandbox() {
   const demo = useStore(s => s.demoYear);
   const [on, setOn] = useState<Record<Dechiya, boolean>>({ adu: false, zaken: true, gatrad: true, betu: true });
   const [from, setFrom] = useState(Math.max(2, demo - 500));
   const [count, setCount] = useState(1000);
   const [example, setExample] = useState<number | null>(null);
+  const g = useGuide(GUIDE);
+  const off = g.focus && ONLY_OFF[g.focus];
+  useEffect(() => {
+    if (!off) return;
+    setOn({ adu: off !== 'adu', zaken: off !== 'zaken', gatrad: off !== 'gatrad', betu: off !== 'betu' });
+    setExample(null);
+  }, [off]);
+  const f = (on: boolean) => (on ? 'guide-focus' : '');
   const skip: DechiyaSkip = { adu: !on.adu, zaken: !on.zaken, gatrad: !on.gatrad, betu: !on.betu };
 
   const { real, mine, ms } = useMemo(() => {
@@ -107,10 +120,11 @@ export function Sandbox() {
       wide
       kicker="הדחיות · ארגז חול"
       title="מה היה קורה בלי הדחייה?"
+      guide={<Guide g={g} />}
       text={<>
         <p>כבו דחייה אחת או יותר, והלוח יחושב מחדש לאורך <Num>{NUM(count)}</Num> שנה. משמאל רואים מה יוצא, לעומת הלוח האמיתי.</p>
         <p>שימו לב: <strong>בלי לא אד״ו</strong> יום כיפור נצמד לשבת וההושענא רבה נופלת בשבת. <strong>בלי גטר״ד או בטו תקפט</strong> מופיעים אורכי שנה אסורים.</p>
-        <Engine title="המתגים">
+        <Engine title="המתגים" className={f(g.focus === 'intro' || g.focus === 'sum')}>
           <div className="switches" role="group" aria-label="הדחיות">
             {ALL.map(k => (
               <label key={k} className="switch">
@@ -132,14 +146,14 @@ export function Sandbox() {
         {example != null && <Example y={example} skip={skip} onClose={() => setExample(null)} />}
       </>}
       stage={<>
-        <div className="counts">
+        <div className={`counts ${f(g.focus === 'adu')}`}>
           <Count label="יום כיפור צמוד לשבת (ביום ו׳ או א׳)" a={real.ykNextToShabbat} b={mine.ykNextToShabbat} onExample={setExample} />
           <Count label="הושענא רבה בשבת" a={real.hrOnShabbat} b={mine.hrOnShabbat} onExample={setExample} />
           <Count label="פסח ביום ב׳, ד׳ או ו׳" a={real.pesachBDU} b={mine.pesachBDU} onExample={setExample} />
           <Count label="אורך שנה אסור" a={{ count: real.forbidden.reduce((s, f) => s + f.count, 0), example: null }}
             b={{ count: mine.forbidden.reduce((s, f) => s + f.count, 0), example: mine.forbidden[0]?.example ?? null }} onExample={setExample} />
         </div>
-        <Viz><Bars title="אורכי השנים" rows={lengthRows(real, mine)} onExample={setExample} /></Viz>
+        <Viz className={f(g.focus === 'gatrad' || g.focus === 'betu' || g.focus === 'zaken')}><Bars title="אורכי השנים" rows={lengthRows(real, mine)} onExample={setExample} /></Viz>
         <Viz className="explore-only"><Bars title="יום ראש השנה" rows={dayRows} onExample={setExample} /></Viz>
         <p className="note explore-only">
           כמה פעמים כל דחייה הזיזה את ראש השנה בטווח: {ALL.map(k => <span key={k}>{RULE_NAME[k]} <Num>{NUM(real.applied[k])}</Num>{' '}</span>)}

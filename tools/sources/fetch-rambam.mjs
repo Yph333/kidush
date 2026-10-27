@@ -1,10 +1,11 @@
-// Build-time: fetch Rambam, Hilchot Kiddush HaChodesh ch. 6–8 (public domain) from Hebrew Wikisource
+// Build-time: fetch Rambam, Hilchot Kiddush HaChodesh ch. 1–19 (public domain) from Hebrew Wikisource
 // (exact wikitext, "דפוס" = Warsaw-Vilna printing) and write src/content/rambamKH.json.
-// Run: node tools/sources/fetch-rambam.mjs
+// Run: node tools/sources/fetch-rambam.mjs   (behind an HTTPS proxy: NODE_USE_ENV_PROXY=1 node …)
 
 import { writeFileSync } from 'node:fs';
 
-const CHAPTERS = [['ו', 6], ['ז', 7], ['ח', 8]];
+const HEB = ['א', 'ב', 'ג', 'ד', 'ה', 'ו', 'ז', 'ח', 'ט', 'י', 'יא', 'יב', 'יג', 'יד', 'טו', 'טז', 'יז', 'יח', 'יט'];
+const CHAPTERS = HEB.map((heb, i) => [heb, i + 1]);
 const out = { source: 'ויקיטקסט, רמב״ם הלכות קידוש החודש (דפוס וורשא־ווילנא)', fetched: new Date().toISOString().slice(0, 10), chapters: [] };
 
 for (const [heb, n] of CHAPTERS) {

@@ -1,10 +1,12 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { EX, P_DAY, P_HOUR, P_MONTH, fmtDur, fmtMolad, isLeap, rh, rhFrom, yearHeb } from '../../engines/calendar';
+import { Guide, useGuide } from '../../components/Guide';
 import { MoladControl, moladParts } from '../../components/MoladControl';
 import { Engine, Slide, Viz } from '../../components/Slide';
 import { Steps } from '../../components/Steps';
 import { Chips, Civil, Legend, Num, Sig, Tag } from '../../components/text';
 import { WeekWheel, dayMark } from '../../components/WeekWheel';
+import { BETU as GUIDE, type BetuFocus } from '../../content/guides/dechiyot';
 import { RULE_NAME, dayWord } from '../../lib/format';
 import { OurYear } from './OurYear';
 import { useStore } from '../../state/store';
@@ -12,9 +14,17 @@ import { findYears, moladOf } from './shared';
 
 const ck = (b: boolean) => (b ? '✓' : '✗');
 
+/** every guide step except the last loads Rambam's case; ROW: the row each step points at */
+const DEMO = { m: { d: 1, h: 15, p: 589 }, prevLeap: true };
+const ROW: Partial<Record<BetuFocus, number>> = { rule: 1, prev: 2, prevRh: 3, without: 5, fix: 6 };
+
 export function Betu() {
   const [m, setM] = useState({ d: 1, h: 15, p: 589 });
   const [PL, setPL] = useState(true);
+  const g = useGuide(GUIDE);
+  const demoOn = !!g.focus && g.focus !== 'try';
+  useEffect(() => { if (demoOn) { setM(DEMO.m); setPL(DEMO.prevLeap); } }, [demoOn, g.i]);
+  const f = (on: boolean) => (on ? 'guide-focus' : '');
   const demo = useStore(s => s.demoYear);
   const examples = useMemo(() => findYears(y => y !== demo && rh(y).rules.includes('betu'), 5400, 6400, 6), [demo]);
   const t = moladParts(m), PP = m.h * P_HOUR + m.p;
@@ -29,6 +39,7 @@ export function Betu() {
     <Slide
       kicker="הדחיות · 4 מתוך 4"
       title="בט״ו תקפ״ט אחרי מעוברת"
+      guide={<Guide g={g} />}
       text={<>
         <p>אם השנה <strong>שעברה הייתה מעוברת</strong>, והמולד ביום <strong>ב׳</strong> ב־<strong><Num>15</Num> שעות ו־<Num>589</Num> חלקים</strong> או אחרי, ראש השנה נדחה ליום ג׳.</p>
         <h3>למה? כי השנה שעברה הייתה יוצאת קצרה מדי</h3>
@@ -39,7 +50,7 @@ export function Betu() {
         <p>דוחים לשלישי, והשנה המעוברת שעברה יוצאת <Num>383</Num>.</p>
       </>}
       stage={<>
-        <Viz>
+        <Viz className={f(g.focus === 'rule' || g.focus === 'back' || g.focus === 'prev')}>
           <WeekWheel
             markers={[{ x: t0, cls: 'leap', label: 'שעברה' }, { x: t, cls: 'moon', label: 'השנה' }]}
             arcs={[{ from: t0, to: t0 + ex, cls: 'leap' }]}
@@ -48,10 +59,10 @@ export function Betu() {
             center={['− שנה', fmtDur(ex), ap ? 'בטו תקפט חלה' : 'בטו תקפט לא חלה']} aria="בטו תקפט על גלגל השבוע" />
           <Legend items={[['var(--leap)', 'מולד השנה שעברה'], ['var(--moon)', 'מולד השנה'], ['var(--shift)', 'הקווים: ב׳ ט״ו תקפ״ט וג׳ 18 שעות']]} />
         </Viz>
-        <Engine title="בודק בטו תקפט" sub="עם ובלי הדחייה">
+        <Engine title="בודק בטו תקפט" sub="עם ובלי הדחייה" className={f(!!g.focus && (g.focus in ROW || g.focus === 'try'))}>
           <MoladControl value={m} onChange={setM}
             extras={<label className="chk"><input type="checkbox" checked={PL} onChange={e => setPL(e.target.checked)} />השנה שעברה מעוברת</label>} />
-          <Steps rows={[
+          <Steps focus={g.focus && ROW[g.focus]} rows={[
             { l: 'מולד השנה', v: <Sig>{fmtMolad(t)}</Sig>, s: <Civil t={t} /> },
             { l: 'תנאי בטו תקפט', v: <>יום ב׳ {ck(m.d === 1)} · שעברה מעוברת {ck(PL)} · ט״ו תקפ״ט ומעלה {ck(PP >= 15 * P_HOUR + 589)} · לא מולד זקן {ck(m.h < 18)}</>, c: ap ? 'bad' : '' },
             { l: <>מולד השנה שעברה: − <Sig>{fmtDur(ex)}</Sig></>, v: <Sig>{fmtMolad(t0)}</Sig>, s: <Civil t={t0} /> },

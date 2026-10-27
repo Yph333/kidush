@@ -16,6 +16,22 @@ export interface WheelsProps {
   /** the table correction, arc-minutes, and whether it is subtracted */
   eqMin: number;
   subtract: boolean;
+  /** chapter 14 only (the mean motions): no true moon and no correction, the moon labelled on its wheel */
+  meanOnly?: boolean;
+  /** what a guided step is talking about: that part is drawn strong and the rest dimmed */
+  hl?: 'small' | 'big' | 'course' | 'mean' | null;
+}
+
+/** A filled angle, for highlighting: points on a circle from t = 0 to t = to (radians), fanned from `c`. */
+function fan(c: THREE.Vector3, at: (t: number) => THREE.Vector3, to: number, color: number): THREE.Mesh {
+  const n = Math.max(2, Math.ceil(Math.abs(to) / 0.05)), pos: number[] = [];
+  for (let i = 0; i < n; i++) {
+    const a = at((to * i) / n), b = at((to * (i + 1)) / n);
+    pos.push(c.x, c.y, c.z, a.x, a.y, a.z, b.x, b.y, b.z);
+  }
+  const g = new THREE.BufferGeometry();
+  g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+  return new THREE.Mesh(g, new THREE.MeshBasicMaterial({ color, transparent: true, opacity: 0.22, side: THREE.DoubleSide, depthWrite: false }));
 }
 
 
@@ -23,7 +39,8 @@ const create = (host: HTMLElement, p0: WheelsProps): SceneHandle<WheelsProps> =>
   const st = createStage(host);
   const { scene, label } = st;
   scene.add(new THREE.AmbientLight(0xffffff, 0.9));
-  scene.add(ring(BIG, COLORS.leap, { opacity: 0.9 }));
+  const bigRing = ring(BIG, COLORS.leap, { opacity: 0.9 });
+  scene.add(bigRing);
   const bigL = label('הגלגל הגדול', 'leap small');
   scene.add(bigL);
   const earthB = earthBody(0.7), earth = earthB.object;
@@ -36,7 +53,10 @@ const create = (host: HTMLElement, p0: WheelsProps): SceneHandle<WheelsProps> =>
   scene.add(dyn);
   const moonB = moonBody(0.4), moon = moonB.object;
   scene.add(moon);
-  const labels = { small: label('הגלגל הקטן', 'moon small'), mean: label('אמצע הירח', 'leap small'), tru: label('מקום הירח האמיתי', 'moon small'), eq: label('', 'shift') };
+  const labels = {
+    small: label('הגלגל הקטן', 'moon small'), mean: label('אמצע הירח', 'leap small'), tru: label('מקום הירח האמיתי', 'moon small'), eq: label('', 'shift'),
+    moon: label('הירח', 'moon small'), course: label('אמצע המסלול', 'moon small'), aries: label('תחילת טלה', 'small'),
+  };
   Object.values(labels).forEach(l => scene.add(l));
 
   const offTex = onTextureLoad(st.render);
@@ -45,9 +65,20 @@ const create = (host: HTMLElement, p0: WheelsProps): SceneHandle<WheelsProps> =>
     clearGroup(dyn);
     const g = moonOnWheel(p.meanLon, p.course);
     const C = new THREE.Vector3(g.cx, 0, g.cz), Mv = new THREE.Vector3(g.mx, 0, g.mz);
-    const small = ring(SMALL, COLORS.moon, { opacity: 0.95 });
+    const hl = p.hl ?? null, dim = (on: boolean) => (hl === null || on ? 0.95 : 0.25);
+    (bigRing.material as THREE.LineBasicMaterial).opacity = dim(hl === 'big' || hl === 'mean');
+    const small = ring(SMALL, COLORS.moon, { opacity: dim(hl === 'small' || hl === 'course') });
     small.position.copy(C);
     dyn.add(small);
+    // the angle a guided step is about: the course on the small circle, or the mean moon on the big one (from the start of Aries)
+    const u = dirOf(p.meanLon, 0, 1), v = dirOf(p.meanLon + 90, 0, 1);
+    if (hl === 'course' || hl === 'small') {
+      dyn.add(fan(C, t => C.clone().add(u.clone().multiplyScalar(SMALL * Math.cos(t))).sub(v.clone().multiplyScalar(SMALL * Math.sin(t))), (p.course * Math.PI) / 180, COLORS.moon));
+    }
+    if (hl === 'mean' || hl === 'big') {
+      dyn.add(fan(new THREE.Vector3(), t => dirOf((t * 180) / Math.PI, 0, BIG), (p.meanLon * Math.PI) / 180, COLORS.leap));
+      dyn.add(line([new THREE.Vector3(), dirOf(0, 0, BIG * 1.12)], COLORS.leap, { opacity: 0.8 }));
+    }
     const far = C.clone().add(C.clone().normalize().multiplyScalar(SMALL));
     dyn.add(line([C, far], COLORS.moon, { dashed: true, opacity: 0.6 }));
     const centre = sphere(0.15, COLORS.moon, true);
@@ -55,7 +86,7 @@ const create = (host: HTMLElement, p0: WheelsProps): SceneHandle<WheelsProps> =>
     dyn.add(centre);
     // rays from earth
     dyn.add(line([new THREE.Vector3(), C.clone().multiplyScalar(1.35)], COLORS.leap, { dashed: true }));
-    dyn.add(line([new THREE.Vector3(), Mv.clone().multiplyScalar(1.35 * BIG / Mv.length())], COLORS.moon));
+    if (!p.meanOnly) dyn.add(line([new THREE.Vector3(), Mv.clone().multiplyScalar(1.35 * BIG / Mv.length())], COLORS.moon));
     moon.position.copy(Mv);
     moon.lookAt(earth.position);
     // labels
@@ -66,6 +97,13 @@ const create = (host: HTMLElement, p0: WheelsProps): SceneHandle<WheelsProps> =>
     const d = Math.floor(p.eqMin / 60), mnt = p.eqMin % 60;
     labels.eq.element.textContent = `מנת המסלול ${d}° ${mnt}′ (${p.subtract ? 'גורעים' : 'מוסיפים'})`;
     labels.eq.position.copy(C.clone().multiplyScalar(0.55).add(new THREE.Vector3(0, 0.8, 0)));
+    labels.tru.visible = labels.eq.visible = !p.meanOnly;
+    labels.moon.visible = !!p.meanOnly;
+    labels.moon.position.copy(Mv.clone().add(new THREE.Vector3(0, 0.75, 0)));
+    labels.course.visible = hl === 'course';
+    labels.course.position.copy(C.clone().add(u.clone().multiplyScalar(SMALL * 0.45)).add(new THREE.Vector3(0, 0.5, 0)));
+    labels.aries.visible = hl === 'mean' || hl === 'big';
+    labels.aries.position.copy(dirOf(0, 0, BIG * 1.2));
     st.render();
   };
   build();

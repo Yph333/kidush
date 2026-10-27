@@ -29,6 +29,8 @@ export function Scene3D<P>({ load, props, views, fallback, label, height = 440, 
   const [hasGL] = useState(webglAvailable);
   const [mode, setMode] = useState<'3d' | '2d'>(hasGL ? '3d' : '2d');
   const [status, setStatus] = useState<'loading' | 'ready' | 'error'>('loading');
+  /** why the 3D scene could not start (shown, so a screenshot tells what went wrong) */
+  const [failure, setFailure] = useState<string | null>(null);
   const [view, setView] = useState(views[0]?.id);
   const [spin, setSpin] = useState(false);
   // photographic bodies (on) or the schematic look; only scenes that have photographic bodies offer the switch
@@ -43,6 +45,7 @@ export function Scene3D<P>({ load, props, views, fallback, label, height = 440, 
     if (mode !== '3d') return;
     let dead = false;
     setStatus('loading');
+    setFailure(null);
     load().then(m => {
       if (dead || !host.current) return;
       try {
@@ -52,11 +55,18 @@ export function Scene3D<P>({ load, props, views, fallback, label, height = 440, 
         handle.current.setRealism?.(real);
         setCanReal(!!handle.current.setRealism);
         setStatus('ready');
-      } catch {
+      } catch (e) {
         setStatus('error');
+        setFailure(`יצירת הסצנה נכשלה: ${String((e as Error)?.message ?? e)}`);
         setMode('2d');
       }
-    }).catch(() => { if (!dead) { setStatus('error'); setMode('2d'); } });
+    }).catch(e => {
+      if (dead) return;
+      setStatus('error');
+      // after a new version is published the old scene files are gone: a page loaded before that needs a reload
+      setFailure(`טעינת קובץ הסצנה נכשלה: ${String((e as Error)?.message ?? e)}`);
+      setMode('2d');
+    });
     return () => { dead = true; handle.current?.dispose(); handle.current = null; };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mode, load]);
@@ -103,7 +113,13 @@ export function Scene3D<P>({ load, props, views, fallback, label, height = 440, 
         <div className="scene-2d">{fallback}</div>
       )}
       {mode === '3d' && <p className="note">גוררים כדי לסובב, גלגלת או צביטה כדי להגדיל.</p>}
-      {!hasGL && <p className="note">הדפדפן לא תומך ב־WebGL, ולכן מוצגת הגרסה הדו־ממדית.</p>}
+      {!hasGL && <p className="note">הדפדפן לא תומך ב־WebGL, או שהוא כבוי (למשל כשהאצת החומרה כבויה), ולכן מוצגת הגרסה הדו־ממדית.</p>}
+      {failure && mode === '2d' && (
+        <p className="note scene-fail" role="status">
+          לא הצלחנו להציג את התלת־ממד, ולכן מוצגת הגרסה הדו־ממדית. <bdi>{failure}</bdi>{' '}
+          <button type="button" className="linkbtn" onClick={() => location.reload()}>טעינה מחדש של העמוד</button>
+        </p>
+      )}
     </div>
   );
 }

@@ -3,14 +3,14 @@
 // Screenshots: e2e/__screenshots__/<project>/<mode>/<nn>-<chapter>-<slide>.png
 
 import { expect, test } from '@playwright/test';
-import { SLIDE_PATHS } from '../src/content/paths';
+import { RAMBAM_PATHS, SLIDE_PATHS } from '../src/content/paths';
 
 const MODES = ['explore', 'present'] as const;
 const YEAR = 5787;
 
 for (const mode of MODES) {
   test.describe(mode, () => {
-    SLIDE_PATHS.forEach((path, i) => {
+    [...SLIDE_PATHS, ...RAMBAM_PATHS].forEach((path, i) => {
       test(`${String(i + 1).padStart(2, '0')} ${path}`, async ({ page }, info) => {
         const errors: string[] = [];
         // Google Fonts may time out; the site must work with fallback fonts, so those failures are not errors.
@@ -34,7 +34,7 @@ for (const mode of MODES) {
         });
         expect(overflow, 'horizontal overflow').toEqual([]);
 
-        const name = `${String(i + 1).padStart(2, '0')}-${path.replace('/', '-')}.png`;
+        const name = `${String(i + 1).padStart(2, '0')}-${path.replaceAll('/', '-')}.png`;
         // full content of the slide (the deck scrolls internally)
         const deck = page.locator('#deck');
         const h = await deck.evaluate(el => el.scrollHeight);
@@ -292,4 +292,24 @@ test('guided explanation is folded in presentation mode', async ({ page }) => {
   await expect(page.getByRole('region', { name: 'הסבר מודרך' })).toHaveCount(0);
   await page.getByRole('button', { name: /הסבר מודרך/ }).click();
   await expect(page.getByRole('region', { name: 'הסבר מודרך' })).toBeVisible();
+});
+
+test('Rambam track: a guide step lights up its words, and "next" stays inside the track', async ({ page }) => {
+  await page.goto(`/#/rambam/14/1?y=${YEAR}&city=0&mode=explore`);
+  await expect(page.locator('#slide-title')).toHaveText('שני גלגלים, שני מהלכים');
+  await expect(page.locator('.rt-mark')).toHaveText(['הירח שני מהלכים אמצעיים יש לו']);
+  const guide = page.getByRole('region', { name: 'הסבר מודרך' });
+  await guide.getByRole('button', { name: /צעד 6:/ }).click();
+  await expect(page.locator('.rt-mark')).toHaveCount(2);
+  await expect(guide.locator('.guide-quote')).toContainText('סימנם י״ג יל״ה');
+  await page.getByRole('button', { name: 'יום קדימה' }).click();
+  await expect(page.locator('.facts')).toContainText('14° 25′ 18″ במזל שור');     // 1° 14′ 43″ + 13° 10′ 35″
+  await expect(page.locator('.bot .pos')).toHaveText('1/1');                       // the bottom bar counts this track only
+  await expect(page.locator('.bot .nb.next')).toBeDisabled();
+});
+
+test('home: two equal ways in', async ({ page }) => {
+  await page.goto(`/#/yesodot/petiha?y=${YEAR}&city=0&mode=explore`);
+  await page.getByRole('button', { name: /הלכה הלכה ברמב״ם/ }).click();
+  await expect(page).toHaveURL(/rambam\/14\/1/);
 });

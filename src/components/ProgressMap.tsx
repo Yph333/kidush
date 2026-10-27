@@ -1,7 +1,9 @@
 // Side map: chapters and slides, "you are here", and what we've already computed for the demo year.
 
 import { yearHeb } from '../engines/calendar';
-import { CHAPTERS } from '../chapters';
+import { useEffect, useState } from 'react';
+import { slideByPath, trackChapters } from '../chapters';
+import type { Track } from '../chapters/types';
 import { FACTS } from '../content/facts';
 import { YEAR_GATES, gateKey } from '../content/gates';
 import { go } from '../state/nav';
@@ -16,6 +18,10 @@ export function ProgressMap() {
   const seen = seenAll[demo] ?? [];
   const guesses = useStore(s => s.guesses);
   const guidesDone = useStore(s => s.guidesDone);
+  // which track the map lists: follows the current slide, and the reader can look at the other one
+  const curTrack: Track = slideByPath(cur)?.track ?? 'topics';
+  const [track, setTrack] = useState<Track>(curTrack);
+  useEffect(() => setTrack(curTrack), [curTrack]);
   const answered = (id: string) => gateKey(id, demo) in guesses;
   const facts = FACTS.filter(f => (f.gate ? answered(f.gate) : seen.includes(f.slide)));
   const recs = YEAR_GATES.map(g => guesses[gateKey(g.id, demo)]);
@@ -29,10 +35,14 @@ export function ProgressMap() {
           <b>מפת השיעור</b>
           <button type="button" className="iconbtn map-close" onClick={() => setState({ mapOpen: false })} aria-label="סגירת המפה">✕</button>
         </div>
+        <div className="seg map-tracks" role="group" aria-label="מסלול">
+          <button type="button" aria-pressed={track === 'topics'} onClick={() => setTrack('topics')}>לפי נושאים</button>
+          <button type="button" aria-pressed={track === 'rambam'} onClick={() => setTrack('rambam')}>הלכה הלכה</button>
+        </div>
         <ol className="map-ch">
-          {CHAPTERS.map(ch => (
+          {trackChapters(track).map(ch => (
             <li key={ch.id}>
-              <span className="map-ch-t"><span className="num">{ch.num}</span> {ch.title}</span>
+              <span className="map-ch-t">{ch.track !== 'rambam' && <span className="num">{ch.num}</span>} {ch.title}</span>
               <ol>
                 {ch.slides.map(s => {
                   const path = `${ch.id}/${s.id}`, here = path === cur, done = seen.includes(path);
@@ -52,6 +62,7 @@ export function ProgressMap() {
             </li>
           ))}
         </ol>
+        {track === 'topics' && <>
         <section className="computed" aria-label="מה כבר חישבנו">
           <b>מה כבר חישבנו ל{yearHeb(demo)}</b>
           {facts.length === 0 ? <p className="note">עדיין כלום. כל שקף שעוברים מוסיף כאן את מה שחישב.</p> : (
@@ -84,6 +95,7 @@ export function ProgressMap() {
             })}
           </ol>
         </section>
+        </>}
       </nav>
     </>
   );

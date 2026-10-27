@@ -37,7 +37,7 @@ export function SourcePage() {
       </>}
       stage={
         <div className="srcpage">
-          {tab === 'rambam' ? KH.chapters.map(c => (
+          {tab === 'rambam' ? KH.chapters.filter(c => c.n >= 6 && c.n <= 8).map(c => (
             <section key={c.n} aria-label={`הלכות קידוש החודש ${CH_NAME[c.n]}`}>
               <h3>הלכות קידוש החודש, {CH_NAME[c.n]} <a className="note" href={c.url} target="_blank" rel="noreferrer">(ויקיטקסט)</a></h3>
               {c.halachot.map(h => (

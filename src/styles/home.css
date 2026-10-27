@@ -91,3 +91,18 @@
 
 /* presentation mode on the home screen: the same, a little larger */
 .app[data-mode="present"] .home-lead { font-size: var(--fs-xl); }
+
+/* ---------- the two ways in, side by side and equal ---------- */
+.tracks { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--sp-4); }
+.track-card { gap: var(--sp-3); padding: var(--sp-6); }
+.track-card .topic-t { font-size: var(--fs-xl); }
+.track-d { color: var(--c-text-2); line-height: 1.6; }
+.track-go { margin-top: auto; color: var(--c-accent); font-weight: var(--fw-medium); }
+@media (max-width: 720px) { .tracks { grid-template-columns: minmax(0, 1fr); } }
+
+/* ---------- Rambam chapters: built ones open, the rest marked "soon" ---------- */
+.rambam-chs { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(9rem, 1fr)); gap: var(--sp-2); }
+.rambam-chs .tool { justify-content: space-between; padding: var(--sp-3) var(--sp-4); }
+.rambam-chs .tool small { color: var(--c-text-3); font-size: var(--fs-xs); font-weight: var(--fw-regular); }
+.rambam-chs .soon { opacity: .45; cursor: default; }
+.rambam-chs .soon:hover { background: var(--glass-bg); border-color: var(--glass-border); }

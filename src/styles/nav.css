@@ -129,3 +129,5 @@ main#deck { flex: 1; min-width: 0; overflow: auto; outline: none; scroll-behavio
 }
 
 @media print { .top, .bot, .map, .notes, .stepbar { display: none !important; } body { overflow: visible; background: #fff; } main#deck { overflow: visible; } }
+.map-tracks { display: flex; margin: 0 0 var(--sp-4); }
+.map-tracks button { flex: 1; min-height: 2.1rem; font-size: var(--fs-xs); }
