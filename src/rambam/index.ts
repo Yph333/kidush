@@ -11,6 +11,9 @@ import { CH8 } from './ch8';
 import { CH11 } from './ch11';
 import { CH12 } from './ch12';
 import { CH13 } from './ch13';
+import { CH15 } from './ch15';
+import { CH16 } from './ch16';
+import { CH17 } from './ch17';
 
 export const RAMBAM_CHAPTERS: ChapterDef[] = [
   CH6.chapter,
@@ -27,6 +30,9 @@ export const RAMBAM_CHAPTERS: ChapterDef[] = [
     { id: '5', title: 'הלכה ה: התיקון לפי השמש', Component: H14_5 },
     { id: '6', title: 'הלכה ו: לשעת הראייה', Component: H14_6 },
   ] },
+  CH15.chapter,
+  CH16.chapter,
+  CH17.chapter,
 ];
 
 /** Every halacha's guide, for checks (marks must be phrases of the text). */
@@ -43,4 +49,7 @@ export const RAMBAM_GUIDES: { ch: number; h: string; guide: GuideDef }[] = [
   { ch: 14, h: 'ד', guide: GUIDE_14_4 },
   { ch: 14, h: 'ה', guide: GUIDE_14_5 },
   { ch: 14, h: 'ו', guide: GUIDE_14_6 },
+  ...CH15.guides,
+  ...CH16.guides,
+  ...CH17.guides,
 ];

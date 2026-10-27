@@ -11,10 +11,10 @@ import { YearControl } from '../../components/YearControl';
 import { NUM } from '../../lib/format';
 import { SignPos } from './Wheels14';
 
-export type Which = 'moon' | 'crs' | 'sun' | 'apo';
+export type Which = 'moon' | 'crs' | 'sun' | 'apo' | 'head';
 export const FULL = 1296000;
 const norm = (s: number) => ((s % FULL) + FULL) % FULL;
-export const WHICH_NAME: Record<Which, string> = { moon: 'אמצע הירח', crs: 'אמצע המסלול', sun: 'אמצע השמש', apo: 'גובה השמש' };
+export const WHICH_NAME: Record<Which, string> = { moon: 'אמצע הירח', crs: 'אמצע המסלול', sun: 'אמצע השמש', apo: 'גובה השמש', head: 'אמצע הראש' };
 /** The rows in the order the Rambam lists them. */
 const ORDER: Block[] = [1, 10, 100, 1000, 10000, 29, 354];
 const BLOCK_NAME: Record<Block, ReactNode> = { 1: 'יום אחד', 10: <><Num>10</Num> ימים</>, 100: <><Num>100</Num> ימים</>, 1000: <><Num>1,000</Num> ימים</>, 10000: <><Num>10,000</Num> ימים</>, 29: <><Num>29</Num> ימים</>, 354: <>שנה סדורה (<Num>354</Num>)</> };
@@ -96,6 +96,7 @@ const ROOT_NAME: Record<Which, ReactNode> = {
   crs: <><Num>84</Num> מעלות, <Num>28</Num> חלקים, <Num>42</Num> שניות</>,
   sun: <><Num>7</Num> מעלות, <Num>3</Num> חלקים, <Num>32</Num> שניות במזל טלה</>,
   apo: <><Num>26</Num> מעלות, <Num>45</Num> חלקים, <Num>8</Num> שניות במזל תאומים</>,
+  head: <><Num>180</Num> מעלות, <Num>57</Num> חלקים, <Num>28</Num> שניות</>,
 };
 
 /** A night to calculate for (the evening that begins a Hebrew date). Default: the Rambam's example, 2 Iyar 4938
@@ -147,7 +148,7 @@ export function FullCalc({ focus, onN, which = ['moon', 'crs'], example = { mont
     const rows: StepRow[] = [
       { l: <>{WHICH_NAME[which]} ב־<Num>{NUM(N)}</Num> ימים (לפי הטבלאות)</>, v: <DMS sec={norm(b.v)} />, s: b.parts.map(([k, c]) => `${c}×${NUM(k)}`).join(' + ') },
       { l: 'ועוד העיקר', v: <DMS sec={root} />, s: ROOT_NAME[which] },
-      { l: <>{WHICH_NAME[which]} בתחילת הליל</>, v: which !== 'crs' ? <SignPos sec={res} /> : <DMS sec={res} />, s: which !== 'crs' ? <>מתחילת טלה: <DMS sec={res} /></> : undefined, c: 'final' },
+      { l: <>{WHICH_NAME[which]} בתחילת הליל</>, v: which !== 'crs' && which !== 'head' ? <SignPos sec={res} /> : <DMS sec={res} />, s: which !== 'crs' && which !== 'head' ? <>מתחילת טלה: <DMS sec={res} /></> : undefined, c: 'final' },
     ];
     return rows;
   };
