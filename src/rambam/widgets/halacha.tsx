@@ -18,6 +18,7 @@ import { type StepRow, Steps } from '../../components/Steps';
 import { DM, Num, Tag } from '../../components/text';
 import { SlideYear, useSlideYear } from '../../components/YearControl';
 import type { EarthPinProps } from '../../scenes/earthPin';
+import type { TerrainProps } from '../../scenes/terrainMap';
 import { NightPicker, useNight } from '../ch14/Blocks';
 import { SignPos } from '../ch14/Wheels14';
 import { EqTable, SightSky3D, eveningMs } from './moon';
@@ -76,6 +77,7 @@ export function TimeStrip({ title, from, to, spans = [], marks = [], hl }: {
 // ---------------------------------------------------------------------------------------------------- maps
 
 const MW = 520, MH = 420;
+const loadTerrain = () => import('../../scenes/terrainMap').then(m => m.default);
 type Box = [number, number, number, number];   // lon0, lat0, lon1, lat1
 function useProj(box: Box) {
   return useMemo(() => {
@@ -88,17 +90,30 @@ function useProj(box: Box) {
 export interface MapPlace { name: string; lat: number; lon: number; kind?: 'il' | 'syria' | 'abroad' | 'beacon' | 'land' | 'city'; approx?: boolean }
 
 /** A map of the region (coastlines approximate), with places, an optional ring around Jerusalem and a route. */
-export function RegionMap({ places, box = [28, 27.5, 46, 37.5], ring, route, hl, note }: {
+export function RegionMap({ places, box: box0, ring, route, hl, note }: {
   places: MapPlace[]; box?: Box; ring?: { km: number; label: string }; route?: string[]; hl?: string[]; note?: ReactNode;
 }) {
+  const box: Box = box0 ?? [28, 27.5, 46, 37.5];
   const { land, xy } = useProj(box);
   const [jx, jy] = xy(JLM.lon, JLM.lat);
   // a ring of `km` around Jerusalem: one degree of latitude ≈ 111 km
   const rr = ring ? Math.abs(xy(JLM.lon, JLM.lat + ring.km / 111)[1] - jy) : 0;
   const col = (k?: MapPlace['kind']) => k === 'il' ? 'var(--c-ok, #7fce9c)' : k === 'syria' ? 'var(--c-leap, #e7c76f)' : k === 'abroad' ? 'var(--c-shift, #ef8f76)' : k === 'beacon' ? '#ffb36b' : '#e8ecf6';
   const pts = route?.map(n => places.find(p => p.name === n)).filter((p): p is MapPlace => !!p) ?? [];
+  // the 3D relief: Israel in detail when the map stays inside it, otherwise the region from Egypt to Babylon
+  const inIsrael = box[0] >= 33.8 && box[1] >= 29.3 && box[2] <= 36.4 && box[3] <= 33.6;
+  const COLS: Record<string, number> = { il: 0x7fce9c, syria: 0xe7c76f, abroad: 0xef8f76, beacon: 0xffb36b, land: 0x7fce9c, city: 0xffffff };
+  const props3d = useMemo<TerrainProps>(() => ({
+    map: inIsrael || places.every(q => q.lon < 36.6 && q.lat < 33.6 && q.lon > 33.8) ? 'israel' : 'region',
+    pins: places.map(q => ({ name: q.name, lat: q.lat, lon: q.lon, color: COLS[q.kind ?? 'city'], hl: hl?.includes(q.name), approx: q.approx, area: q.kind === 'land' })),
+    route: pts.length > 1 ? pts.map(q => [q.lon, q.lat] as [number, number]) : undefined,
+    ring,
+    frame: box0,
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }), [JSON.stringify([places, hl, route, ring, inIsrael])]);
   return (
     <Viz className={fx(!!hl?.length)}>
+      <Scene3D load={loadTerrain} props={props3d} label="מפת תבליט בתלת־ממד" views={[{ id: 'oblique', label: 'מבט אלכסוני' }, { id: 'low', label: 'מבט נמוך' }, { id: 'top', label: 'מלמעלה' }]} fallback={
       <svg viewBox={`0 0 ${MW} ${MH}`} direction="ltr" role="img" aria-label="מפת ארץ ישראל וסביבתה">
         <rect width={MW} height={MH} fill="#16243f" />
         <path d={land} fill="#3a4a3a" stroke="#6b7d6b" strokeWidth="0.6" />
@@ -114,8 +129,8 @@ export function RegionMap({ places, box = [28, 27.5, 46, 37.5], ring, route, hl,
           </g>
         ); })}
         <circle cx={jx} cy={jy} r="5" fill="#fff" stroke="#000" />
-      </svg>
-      <p className="note">{note ?? 'קווי החוף בקירוב.'} {places.some(p => p.approx) && 'סימן שאלה: מקום משוער.'}</p>
+      </svg>} />
+      <p className="note">{note ?? 'קווי החוף בקירוב.'} תבליט: גובה מוגדל{props3d.map === 'israel' ? ' פי 7' : ' פי 12'}, לפי נתוני SRTM ו־ETOPO. {places.some(p => p.approx) && 'סימן שאלה: מקום משוער.'}</p>
     </Viz>
   );
 }
