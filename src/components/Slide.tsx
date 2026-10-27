@@ -6,9 +6,11 @@ import type { ReactNode } from 'react';
 import { useStore } from '../state/store';
 import { SlideSources } from './Sources';
 
-export function Slide({ kicker, title, text, more, stage, wide, hero, className = '' }: {
+export function Slide({ kicker, title, guide, text, more, stage, wide, hero, className = '' }: {
   kicker: ReactNode;
   title: ReactNode;
+  /** guided step-by-step explanation (<Guide>), shown above the text */
+  guide?: ReactNode;
   text: ReactNode;
   /** longer explanation, explore mode only */
   more?: ReactNode;
@@ -24,6 +26,7 @@ export function Slide({ kicker, title, text, more, stage, wide, hero, className 
       <div className="text">
         <p className="kicker">{kicker}</p>
         {hero ? <h1 id="slide-title">{title}</h1> : <h2 id="slide-title">{title}</h2>}
+        {guide}
         {text}
         {more && mode === 'explore' && (
           <details><summary>עוד הסבר</summary>{more}</details>

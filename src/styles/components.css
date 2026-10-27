@@ -194,3 +194,44 @@ input[type=range] { accent-color: var(--c-accent); }
 .notes-cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr)); gap: var(--sp-3) var(--sp-6); }
 .notes h4 { margin: 0 0 var(--sp-1); color: var(--c-moon); font-size: var(--fs-sm); }
 .notes ul { margin: 0; padding-inline-start: var(--sp-4); color: var(--c-text-2); }
+
+/* ---------- guided explanation: one step at a time ---------- */
+.guide {
+  margin: var(--sp-2) 0 var(--sp-5); padding: var(--sp-4) var(--sp-5);
+  background: var(--c-surface); border: 1px solid rgb(92 184 255 / .35); border-radius: var(--r-lg);
+  box-shadow: 0 0 0 1px rgb(92 184 255 / .08), var(--glass-shadow);
+}
+.guide-h { display: flex; align-items: center; gap: var(--sp-3); flex-wrap: wrap; }
+.guide-h > b { color: var(--c-accent); font-size: var(--fs-sm); font-weight: var(--fw-semibold); }
+.guide-count { color: var(--c-text-3); font-size: var(--fs-xs); }
+.guide-x { margin-inline-start: auto; }
+.guide-dots { display: flex; align-items: center; gap: var(--sp-1); margin: var(--sp-3) 0 var(--sp-4); }
+.guide-dots .guide-count { margin-inline-end: var(--sp-2); }
+.guide-dots button {
+  flex: 1; height: .4rem; min-width: 1rem; padding: 0; border: 0; border-radius: var(--r-pill);
+  background: var(--c-line-strong); cursor: pointer;
+}
+.guide-dots button.past { background: rgb(92 184 255 / .45); }
+.guide-dots button.cur { background: var(--c-accent); }
+.guide-dots button:focus-visible { outline: 2px solid var(--c-accent-strong); outline-offset: 3px; }
+.guide-body h3 { margin: 0 0 var(--sp-2); font-size: var(--fs-lg); color: var(--c-text); }
+.guide-body p { margin: 0 0 var(--sp-3); }
+.guide-body .src { margin: var(--sp-2) 0 var(--sp-3); }
+.guide-nav { display: flex; gap: var(--sp-2); justify-content: space-between; flex-wrap: wrap; margin-top: var(--sp-3); }
+.guide-nav .btn { white-space: normal; text-align: center; }
+.guide-open { margin: var(--sp-1) 0 var(--sp-4); }
+.guide-open small { color: var(--c-text-3); font-weight: var(--fw-regular); }
+
+/* what the current step is talking about */
+.guide-focus { scroll-margin: var(--sp-6); outline: 2px solid var(--c-accent); outline-offset: 4px; box-shadow: 0 0 28px rgb(92 184 255 / .22); }
+.step.focus { background: var(--c-accent-soft); border-radius: var(--r-md); box-shadow: inset 0 0 0 1px rgb(92 184 255 / .45); }
+@media (prefers-reduced-motion: no-preference) {
+  .guide-body { animation: guide-in var(--dur) var(--ease-out); }
+  .guide-focus { transition: outline-color var(--dur), box-shadow var(--dur); }
+}
+@keyframes guide-in { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+/* two columns: the card stays at the top of the text column while the stage scrolls */
+@media (min-width: 921px) {
+  .slide > .text .guide { position: sticky; top: var(--sp-4); z-index: 3; max-height: calc(100dvh - 11rem); overflow-y: auto; }
+}
+@media print { .guide, .guide-open { display: none; } }

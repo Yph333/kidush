@@ -1,18 +1,26 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { DAY_NAME, P_DAY, rh, yearHeb } from '../../engines/calendar';
+import { Guide, useGuide } from '../../components/Guide';
 import { Engine, Slide, Viz } from '../../components/Slide';
 import { Steps } from '../../components/Steps';
 import { Chips, Legend, Tag } from '../../components/text';
 import { WeekWheel } from '../../components/WeekWheel';
+import { ADU as GUIDE, type AduFocus } from '../../content/guides/dechiyot';
 import { dayWord } from '../../lib/format';
 import { useStore } from '../../state/store';
 import { OurYear } from './OurYear';
 import { findYears } from './shared';
 
 const ADU = [0, 3, 5];
+/** guide steps that set the day in "what would happen", and the row they point at */
+const DEMO: Partial<Record<AduFocus, { day: number; row: number }>> = { wed: { day: 3, row: 1 }, fri: { day: 5, row: 1 }, why: { day: 5, row: 1 }, sun: { day: 0, row: 2 } };
 
 export function Adu() {
   const [d, setD] = useState(3);
+  const g = useGuide(GUIDE);
+  const demoStep = g.focus && DEMO[g.focus];
+  useEffect(() => { if (demoStep) setD(demoStep.day); }, [demoStep]);
+  const f = (on: boolean) => (on ? 'guide-focus' : '');
   const demo = useStore(s => s.demoYear);
   const examples = useMemo(() => findYears(y => { const r = rh(y); return r.rules.length === 1 && r.rules[0] === 'adu'; }, demo + 1, demo + 60, 6), [demo]);
   // Yom Kippur is 10 Tishrei (9 days later), Hoshana Rabba 21 Tishrei (20 days later)
@@ -22,6 +30,7 @@ export function Adu() {
     <Slide
       kicker="הדחיות · 1 מתוך 4"
       title="לא אד״ו ראש"
+      guide={<Guide g={g} />}
       text={<>
         <p>ראש השנה לא חל ביום <strong>א׳</strong>, <strong>ד׳</strong> או <strong>ו׳</strong>. אם יצא באחד מהם, דוחים ליום שאחריו.</p>
         <h3>הטעם המעשי</h3>
@@ -33,7 +42,7 @@ export function Adu() {
         <p>החשבון לפי מולד ממוצע, לא אמיתי. הדחייה מקרבת את הלוח למולד האמיתי.</p>
       </>}
       stage={<>
-        <Viz>
+        <Viz className={f(g.focus === 'rule' || g.focus === 'rambam')}>
           <WeekWheel days={['bad', '', '', 'bad', '', 'bad', '']}
             markers={[
               { x: d * P_DAY + P_DAY / 2, cls: bad ? 'shift' : 'ok', label: 'ר״ה' },
@@ -43,7 +52,7 @@ export function Adu() {
             center={['ראש השנה ב', dayWord(d), bad ? 'אסור' : 'מותר']} aria="ימי אד״ו על גלגל השבוע" />
           <Legend items={[['var(--shift-soft)', 'א, ד, ו: ראש השנה לא חל בהם']]} />
         </Viz>
-        <Engine title="מה היה קורה" sub="בחרו יום לראש השנה">
+        <Engine title="מה היה קורה" sub="בחרו יום לראש השנה" className={f(!!demoStep || g.focus === 'try')}>
           <div className="week" role="group" aria-label="יום ראש השנה">
             {'אבגדהוז'.split('').map((l, i) => (
               <button key={i} type="button" className={ADU.includes(i) ? 'bad' : ''} aria-pressed={d === i} onClick={() => setD(i)}>
@@ -51,7 +60,7 @@ export function Adu() {
               </button>
             ))}
           </div>
-          <Steps rows={[
+          <Steps focus={demoStep ? demoStep.row : undefined} rows={[
             { l: 'ראש השנה', v: dayWord(d) },
             { l: 'יום כיפור (י׳ תשרי): 9 ימים אחרי', v: dayWord(yk), s: ykBad ? (yk === 5 ? 'יום שישי: צמוד לשבת שאחריו' : 'יום ראשון: צמוד לשבת שלפניו') : 'לא צמוד לשבת', c: ykBad ? 'bad' : '' },
             { l: 'הושענא רבה (כ״א תשרי): 20 ימים אחרי', v: dayWord(hr), s: hrBad ? 'שבת: חביטת הערבה מתבטלת' : '', c: hrBad ? 'bad' : '' },

@@ -269,3 +269,27 @@ test.describe('3D scenes move', () => {
     });
   }
 });
+
+test('guided explanation: steps, keyboard inside the card, and the "read" mark in the map', async ({ page }) => {
+  await page.goto(`/#/dechiyot/adu?y=${YEAR}&city=0&mode=explore`);
+  const guide = page.getByRole('region', { name: 'הסבר מודרך' });
+  await expect(guide).toBeVisible();
+  await expect(guide.locator('.guide-count')).toHaveText(/צעד\s*1\s*מתוך\s*7/);
+  await guide.getByRole('button', { name: 'הצעד הבא' }).click();
+  await expect(page.locator('.step.focus')).toContainText('יום כיפור');           // step 2 points at the Yom Kippur row
+  await page.keyboard.press('ArrowLeft');                                          // focus is in the card: next step, same slide
+  await expect(page).toHaveURL(/dechiyot\/adu/);
+  await expect(guide.locator('.guide-count')).toHaveText(/צעד\s*3\s*מתוך\s*7/);
+  await guide.getByRole('button', { name: /צעד 7:/ }).click();
+  await expect(guide.getByRole('button', { name: /לשקף הבא: מולד זקן/ })).toBeVisible();
+  const mapBtn = page.getByRole('button', { name: 'מפת השיעור' });   // phone: the map is a drawer; desktop: always shown
+  if (await mapBtn.isVisible()) await mapBtn.click();
+  await expect(page.locator('.map').getByRole('button', { name: /לא אד״ו/ }).locator('.guide-tag')).toBeVisible();
+});
+
+test('guided explanation is folded in presentation mode', async ({ page }) => {
+  await page.goto(`/#/dechiyot/lama?y=${YEAR}&city=0&mode=present`);
+  await expect(page.getByRole('region', { name: 'הסבר מודרך' })).toHaveCount(0);
+  await page.getByRole('button', { name: /הסבר מודרך/ }).click();
+  await expect(page.getByRole('region', { name: 'הסבר מודרך' })).toBeVisible();
+});

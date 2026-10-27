@@ -23,6 +23,7 @@ import { Bahrad } from './05-luach/Bahrad';
 import { Excess } from './05-luach/Excess';
 import { YearTypes } from './05-luach/YearTypes';
 import { Keviut } from './05-luach/Keviut';
+import { Lama } from './06-dechiyot/Lama';
 import { Adu } from './06-dechiyot/Adu';
 import { Zaken } from './06-dechiyot/Zaken';
 import { Gatrad } from './06-dechiyot/Gatrad';
@@ -68,6 +69,7 @@ export const CHAPTERS: ChapterDef[] = [
     { id: 'keviut', title: 'קביעות השנה', Component: Keviut },
   ] },
   { id: 'dechiyot', num: 6, title: 'הדחיות', slides: [
+    { id: 'lama', title: 'למה דוחים את ראש השנה', Component: Lama },
     { id: 'adu', title: 'לא אד״ו', Component: Adu },
     { id: 'zaken', title: 'מולד זקן', Component: Zaken },
     { id: 'gatrad', title: 'גטר״ד', Component: Gatrad },

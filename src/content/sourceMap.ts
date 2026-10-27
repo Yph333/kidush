@@ -24,7 +24,7 @@ export const RAMBAM_TO_SLIDES: Record<string, SlidePath[]> = {
   '7:ג': ['dechiyot/zaken'],
   '7:ד': ['dechiyot/gatrad'],
   '7:ה': ['dechiyot/betu'],
-  '7:ו': ['dechiyot/gatrad', 'dechiyot/betu'],
+  '7:ו': ['dechiyot/lama', 'dechiyot/gatrad', 'dechiyot/betu'],
   '7:ז': ['dechiyot/adu', 'reiya/memutza'],
   '7:ח': ['dechiyot/zaken', 'dechiyot/argaz'],
   '8:א': ['chodesh/levana'],
