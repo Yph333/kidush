@@ -5,6 +5,7 @@ import { gem, hebDate, yearHeb } from '../../engines/calendar';
 import { D2R, R2D, type Place, type Sky, TofMs, dayOfMs, hm, nrm, sky, sunEcl } from '../../engines/astro';
 import type { MonthModel } from '../../lib/month';
 import { starColor, visibleStars } from '../../lib/starSky';
+import { skyCols } from '../../lib/skyColor';
 
 /** Moon disc with lit fraction k, rotated so the lit limb points at `rot` degrees. */
 export function MoonGlyph({ cx, cy, r, k, rot, dash }: { cx: number; cy: number; r: number; k: number; rot: number; dash?: boolean }) {
@@ -91,22 +92,6 @@ export function EarthMoonZoom({ sk }: { sk: Sky }) {
 }
 
 // ---- sky panorama (looking south: east on the left, west on the right)
-function lerpHex(a: string, b: string, t: number): string {
-  const p = (h: string) => [1, 3, 5].map(i => parseInt(h.substr(i, 2), 16));
-  const x = p(a), y = p(b);
-  return '#' + x.map((v, i) => Math.round(v + (y[i] - v) * t).toString(16).padStart(2, '0')).join('');
-}
-function skyCols(h: number): [string, string] {
-  const st: [number, string, string][] = [[12, '#4A8FCB', '#B9DCF2'], [0, '#5D8FC6', '#F2C58C'], [-4, '#344F88', '#E58A5C'], [-8, '#1A2655', '#58497A'], [-14, '#070C20', '#121A38']];
-  if (h >= st[0][0]) return [st[0][1], st[0][2]];
-  const z = st[st.length - 1];
-  if (h <= z[0]) return [z[1], z[2]];
-  for (let i = 0; i < st.length - 1; i++) {
-    const [a, t1, b1] = st[i], [c, t2, b2] = st[i + 1];
-    if (h <= a && h >= c) { const t = (a - h) / (a - c); return [lerpHex(t1, t2, t), lerpHex(b1, b2, t)]; }
-  }
-  return [z[1], z[2]];
-}
 const sn = (a: number) => Math.sin(a * D2R), cs = (a: number) => Math.cos(a * D2R);
 const FONT = "'IBM Plex Sans Hebrew',Arial";
 
