@@ -5,7 +5,7 @@
 
 import type { SceneHandle, SceneModule } from '../components/Scene3D/types';
 import { SIGNS } from '../engines/rambam';
-import { raDecToEcl, precessionLon, zodiacFigures, zodiacSpans } from '../engines/zodiac';
+import { eclToRaDec, raDecToEcl, precessionLon, zodiacFigures, zodiacSpans } from '../engines/zodiac';
 import CAT from '../assets/space/stars.json';
 import { earthBody, moonBody, onTextureLoad, sunBody } from './bodies';
 import { THREE, clearGroup, createStage, dirOf, line } from './common';
@@ -26,6 +26,8 @@ export interface ZodiacProps {
   spans?: boolean;
   /** the celestial equator, tilted to the plane of the sun's path (ch. 19) */
   equator?: boolean;
+  /** ch. 19: a point of the sky (the moon), its declination and latitude as arcs; `hl` lights one */
+  decl?: { lon: number; lat: number; hl?: 'decl' | 'lat' | 'sum'; labels?: Partial<Record<'decl' | 'lat' | 'sum', string>> };
 }
 
 export const SIGN_COLORS = [0xe0675a, 0xd9894a, 0xd8b44a, 0xb3c752, 0x7cc45c, 0x52b98a, 0x4fb3b8, 0x4f93cf, 0x6a78d6, 0x8f6ad6, 0xb565c8, 0xcf5f98];
@@ -192,6 +194,35 @@ const create = (host: HTMLElement, p0: ZodiacProps): SceneHandle<ZodiacProps> =>
       L.arc.element.textContent = p.arc.label ?? '';
       L.arc.position.copy(dirOf((from + to) / 2, 0, R + W + 2.2));
     }
+    if (p.equator) {
+      const pts = Array.from({ length: 121 }, (_, k) => { const [lo, la] = raDecToEcl(k * 3, 0); return dirOf(lo, la, R); });
+      dyn.add(line(pts, 0x88c5d8, { dashed: true }));
+      const t = label('הקו השווה', 'small');
+      t.position.copy(dirOf(...raDecToEcl(100, 0), R + 0.8));
+      dyn.add(t);
+      // the axis of the equator (the earth's axis), tilted 23½° from the axis of the sun's path
+      const n = dirOf(...raDecToEcl(0, 90), R * 0.75);
+      dyn.add(line([n.clone().negate(), n], 0x88c5d8, { opacity: 0.6 }));
+    }
+    if (p.decl) {
+      const { lon, lat, hl, labels = {} } = p.decl;
+      const arcDec = (l: number, b: number) => { const [ra, dec] = eclToRaDec(l, b); return Array.from({ length: 31 }, (_, k) => { const [lo, la] = raDecToEcl(ra, (dec * k) / 30); return dirOf(lo, la, R); }); };
+      const P = dirOf(lon, lat, R), dim = (k: string) => (hl && hl !== k ? 0.3 : 1);
+      const parts: [string, THREE.Vector3[], number][] = [
+        ['decl', arcDec(lon, 0), 0xe7c76f],
+        ['lat', Array.from({ length: 21 }, (_, k) => dirOf(lon, (lat * k) / 20, R)), 0xb0a2ff],
+        ['sum', arcDec(lon, lat), 0x7fce9c],
+      ];
+      for (const [k, pts, col] of parts) {
+        dyn.add(line(pts, col, { opacity: dim(k) }));
+        if (!hl || hl === k) for (const e of [pts[0], pts[pts.length - 1]]) { const b = new THREE.Mesh(new THREE.SphereGeometry(0.13, 12, 8), new THREE.MeshBasicMaterial({ color: col })); b.position.copy(e); dyn.add(b); }
+        const txt = labels[k as 'decl'];
+        if (txt && (!hl || hl === k)) { const l = label(txt, 'small strong'); l.element.style.color = `#${col.toString(16)}`; l.position.copy(pts[Math.floor(pts.length / 2)].clone().multiplyScalar(1.08)); dyn.add(l); }
+      }
+      const dot = new THREE.Mesh(new THREE.SphereGeometry(0.22, 16, 12), new THREE.MeshBasicMaterial({ color: 0xf6e7a6 }));
+      dot.position.copy(P);
+      dyn.add(dot);
+    }
     buildFine();
     st.render();
   };
@@ -244,6 +275,12 @@ const create = (host: HTMLElement, p0: ZodiacProps): SceneHandle<ZodiacProps> =>
       else if (id === 'sign') {
         const sg = p.hlSign ?? Math.floor(focusLon() / 30), c = dirOf(sg * 30 + 15, 0, R + W / 2), o = dirOf(sg * 30 + 15, 0, 1);
         st.look([c.x - o.x * 3, 5.5, c.z - o.z * 3], [c.x, 0, c.z]);
+      }
+      else if (id === 'decl') {
+        // from outside, just beyond the point, level with the plane of the sun's path: the wheel is a line across,
+        // the equator crosses it at a slant, and the arcs from the equator to the point stand upright in front
+        const l = p.decl?.lon ?? focusLon(), c = dirOf(l + 12, 0, 21), t = dirOf(l, 0, R * 0.8);
+        st.look([c.x, 2.2, c.z], [t.x, -1.5, t.z]);
       }
       else if (id === 'degs') zoomTo(2.6);
       else if (id === 'deg') zoomTo(0.32);

@@ -60,3 +60,17 @@ describe('moon node and seasons', () => {
     seasons(2026).forEach((t, i) => expect(Math.abs(t - Date.parse(want[i])) / 60000, want[i]).toBeLessThanOrEqual(10));
   });
 });
+
+import { eclToHorizon, eqToHorizon } from './astro';
+describe('ecliptic → horizon', () => {
+  it('the sun from its ecliptic longitude stands where sky() puts it', async () => {
+    const { sky, sunEcl, TofMs, CITIES } = await import('./astro');
+    const ms = Date.UTC(2026, 3, 20, 16, 30), s = sky(ms, CITIES[0]), lam = sunEcl(TofMs(ms).T).lam;
+    const h = eclToHorizon(lam, 0, ms, CITIES[0]);
+    expect(h.alt).toBeCloseTo(s.sun.alt, 1);
+    expect(h.az).toBeCloseTo(s.sun.az, 1);
+    // the celestial pole stands at the latitude, due north
+    const p = eqToHorizon(0, 90, ms, CITIES[0]);
+    expect(p.alt).toBeCloseTo(CITIES[0].lat, 6);
+  });
+});

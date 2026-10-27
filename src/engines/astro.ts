@@ -78,6 +78,21 @@ export function altAz(ra: number, dec: number, lat: number, lon: number, jd: num
   return { alt, az, H, q };
 }
 
+/**
+ * Where a point given in ecliptic coordinates (of date) stands in the sky of a place at a moment: altitude and
+ * azimuth (geocentric, no refraction). Used to place the Rambam's computed sun and moon in the real evening sky.
+ */
+export function eclToHorizon(lam: number, beta: number, ms: number, c: Place): { alt: number; az: number } {
+  const { jd, T } = TofMs(ms), q = toEq(lam, beta, 23.439291 - 0.0130042 * T), h = altAz(q.ra, q.dec, c.lat, c.lon, jd);
+  return { alt: h.alt, az: h.az };
+}
+
+/** The same for equatorial coordinates of date (right ascension, declination). */
+export function eqToHorizon(ra: number, dec: number, ms: number, c: Place): { alt: number; az: number } {
+  const h = altAz(ra, dec, c.lat, c.lon, TofMs(ms).jd);
+  return { alt: h.alt, az: h.az };
+}
+
 export function refr(h: number): number {
   return h < -1.5 ? 0 : 1.02 / Math.tan((h + 10.3 / (h + 5.11)) * D2R) / 60;
 }

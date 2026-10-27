@@ -2,7 +2,10 @@
 // Everything comes from engines/rambam (the chain of rambam(day)); this file only lays it out.
 
 import { type ReactNode, useMemo, useState } from 'react';
-import { TofMs, moonEcl, moonNode, sunEcl } from '../../engines/astro';
+import { CITIES, TofMs, moonEcl, moonNode, sunEcl } from '../../engines/astro';
+import { sightSky } from '../../lib/sightSky';
+import type { WestSkyProps } from '../../scenes/westSky';
+import type { MoonFaceProps } from '../../scenes/moonFace';
 import { gDate } from '../../engines/calendar';
 import { CIRCLE_TABLE, R_DBL, R_FOURTH, R_LAT, R_MOON, R_PLAT, R_PLON, SIGHTING_LIMITS, SIGNS, interp, rambam } from '../../engines/rambam';
 import { Scene3D } from '../../components/Scene3D/Scene3D';
@@ -167,7 +170,8 @@ export function Sighting({ focus }: { focus?: SightStep }) {
   ];
   const f = { long1: 0, pre: 1, long2: 2, lat2: 3, circle: 4, long3: 5, long4: 6, geo: 7, arc: 8, verdict: 9 } as const;
   return <>
-    {(focus === 'long1' || focus === 'pre' || !focus) && <ZodiacScene sunLon={R.sunTrue / 60} moonLon={R.moonTrue / 60} hlSign={R.sign} arc={{ from: R.sunTrue / 60, to: R.moonTrue / 60, label: 'האורך הראשון' }} note="הקשת הצהובה: האורך הראשון, מהשמש עד הירח לאורך המזלות." />}
+    <SightSky3D dayIdx={night.dayIdx} step={focus} verdict={R.visible ? 'ייראה' : 'לא ייראה'} />
+    {(focus === 'long1' || focus === 'pre') && <ZodiacScene sunLon={R.sunTrue / 60} moonLon={R.moonTrue / 60} hlSign={R.sign} arc={{ from: R.sunTrue / 60, to: R.moonTrue / 60, label: 'האורך הראשון' }} note="הקשת הצהובה: האורך הראשון, מהשמש עד הירח לאורך המזלות." />}
     <Limits arc={R.arc / 60} long1={R.long1 / 60} hl={focus === 'verdict'} />
     <Engine title="חשבון הראייה" sub={night.label} className={fx(!!focus)}>
       <NightPicker night={night} />
@@ -183,6 +187,41 @@ function verdictText(R: ReturnType<typeof rambam>): ReactNode {
   if (r.kind === 'arcAtMost9') return <>קשת הראייה <Num>9°</Num> או פחות</>;
   if (r.kind === 'arcAbove14') return <>קשת הראייה יותר מ־<Num>14°</Num></>;
   return <>קשת <DM min={r.arc} />: צריך אורך ראשון <Num>{r.need}°</Num> לפחות; יש <DM min={r.long1} /></>;
+}
+
+const loadFace = () => import('../../scenes/moonFace').then(m => m.default);
+const loadWest = () => import('../../scenes/westSky').then(m => m.default);
+const GOLD = 0xe7c76f, VIOLET = 0xb0a2ff, CYAN = 0x88c5d8;
+
+/** The evening sky in 3D with the piece each step of ch. 17 talks about (from lib/sightSky). */
+export function SightSky3D({ dayIdx, step, verdict }: { dayIdx: number; step?: SightStep | 'dir' | 'height'; verdict?: string }) {
+  const S = useMemo(() => sightSky(dayIdx, CITIES[0]), [dayIdx]);
+  const face = useMemo<MoonFaceProps>(() => ({ sunLam: S.R.sunTrue / 60, moonLam: S.lam, moonBeta: S.beta }), [S]);
+  const props = useMemo<WestSkyProps>(() => {
+    const p: WestSkyProps = { sun: S.sun, moon: S.moon, ecliptic: S.ecliptic, equator: S.equator, paths: [] };
+    const add = (pts: { alt: number; az: number }[], color: number, label?: string, dashed?: boolean) => p.paths.push({ pts, color, label, dashed });
+    if (!step || step === 'long1' || step === 'pre') add(S.long1, GOLD, 'האורך הראשון');
+    if (step === 'long2' || step === 'lat2') { p.ghost = S.moon; p.moon = S.seen; add([S.moon, S.seen], GOLD, `שינוי המראה (מוגדל פי ${S.K})`); }
+    if (step === 'circle') { add(S.latLine, VIOLET, 'הרוחב', true); add(S.footToLevel, GOLD, 'מעגל הירח'); }
+    if (step === 'long3') { add(S.long1, CYAN, 'האורך', true); add(S.footToLevel, GOLD, 'מעגל הירח'); }
+    if (step === 'long4') { add(S.hourSun, CYAN, undefined, true); add(S.hourMoon, CYAN, undefined, true); add(S.eqArc, GOLD, 'האורך הרביעי: לאורך הקו השווה'); }
+    if (step === 'geo') { add(S.latLine, VIOLET, 'הרוחב', true); add(S.drop, GOLD, 'גובה הירח'); }
+    if (step === 'arc' || step === 'height') add(S.drop, GOLD, 'קשת הראייה: גובה הירח מעל האופק');
+    if (step === 'verdict') p.moonLabel = verdict;
+    if (step === 'dir') add([{ alt: 0, az: 270 }, { alt: 0, az: S.moon.az }], GOLD, S.moon.az > 272 ? 'נוטה לצפון' : S.moon.az < 268 ? 'נוטה לדרום' : 'אמצע מערב');
+    return p;
+  }, [S, step, verdict]);
+  return (
+    <Viz>
+      <Scene3D load={loadWest} props={props} height={500} label="השמיים במערב בשעת הראייה, בתלת־ממד" views={[{ id: 'west', label: 'מבט מערבה' }, { id: 'out', label: 'מבחוץ' }]}
+        fallback={<p className="note">הירח <Num>{S.moon.alt.toFixed(1)}°</Num> מעל האופק המערבי.</p>} />
+      <p className="note">ירושלים, כעשרים דקות אחרי השקיעה. השמש והירח במקומות שהרמב״ם מחשב; הקו הצבעוני: המזלות בשמיים; המקווקו התכלת: הקו השווה. הירח מוגדל פי שלושה, ועיגול סביבו.</p>
+      <div className="month-face sight-face">
+        <p className="vt">הסהר באותו ערב, מוגדל</p>
+        <Scene3D load={loadFace} props={face} label="הסהר באותו ערב, מוגדל" views={[]} height={200} fallback={<p className="note">הסהר.</p>} />
+      </div>
+    </Viz>
+  );
 }
 
 /** The limits of sighting (17:15–21): arc against first longitude, the staircase, and tonight's point. */

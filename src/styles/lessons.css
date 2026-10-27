@@ -355,3 +355,4 @@ svg.full, .viz .full { width: 100%; }
 .s-label.sign { font-weight: 700; font-size: 14px; text-shadow: 0 0 6px #000; }
 .s-label.fine { font-size: 11px; color: #f6e7a6; }
 .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.sight-face { max-width: 16rem; margin: var(--sp-2) auto 0; }

@@ -9,7 +9,7 @@ import { DAY_NAME, P_DAY, P_MONTH, dayOfCivil, gem, monthStart, monthsOf, yearHe
 import { R_DECL, SIGNS, moonFromEquator, rambam, rambamDecl } from '../../engines/rambam';
 import { LAND } from '../../lib/eclipseMap';
 import { monthModel } from '../../lib/month';
-import { EarthMoonZoom, MoonGlyph, OrbitTopDown, PhaseStrip, SkyPanorama } from '../../components/astro/visuals';
+import { EarthMoonZoom, OrbitTopDown, PhaseStrip, SkyPanorama } from '../../components/astro/visuals';
 import type { MonthProps } from '../../scenes/monthSystem';
 import type { MoonFaceProps } from '../../scenes/moonFace';
 import { Scene3D } from '../../components/Scene3D/Scene3D';
@@ -20,7 +20,8 @@ import { SlideYear, useSlideYear } from '../../components/YearControl';
 import type { EarthPinProps } from '../../scenes/earthPin';
 import { NightPicker, useNight } from '../ch14/Blocks';
 import { SignPos } from '../ch14/Wheels14';
-import { EqTable, eveningMs } from './moon';
+import { EqTable, SightSky3D, eveningMs } from './moon';
+import { ZodiacScene } from './zodiac';
 
 const fx = (on: boolean) => (on ? 'guide-focus' : '');
 const JLM = CITIES[0];
@@ -434,9 +435,6 @@ export function MoonLean({ focus }: { focus?: LeanStep }) {
   if (!R) return <Engine title="לאן הירח נוטה"><NightPicker night={night} /><p className="note">התאריך לפני העיקר.</p></Engine>;
   const m = moonFromEquator(R.moonTrue, R.lat1, R.north);
   const deg = (v: number) => <><Num>{Math.abs(Math.round(v / 60))}°</Num> {v >= 0 ? 'צפון' : 'דרום'}</>;
-  const W = 360, H = 200, cx = W / 2 - (m.dist / 60) * 4, cy = H - 40 - (R.arc / 60) * 9;
-  // the sun is below the western horizon, at the middle; the lit limb faces it, the "פגימה" faces away (east)
-  const rot = (Math.atan2(H - 20 - cy, W / 2 - cx) * 180) / Math.PI - 90;
   const rows: StepRow[] = [
     { l: <>נטיית מעלת הירח (<SignPos sec={R.moonTrue * 60} />)</>, v: deg(m.decl) },
     { l: 'רוחב הירח הראשון', v: deg(m.lat) },
@@ -445,18 +443,13 @@ export function MoonLean({ focus }: { focus?: LeanStep }) {
     { l: 'הגובה: לפי קשת הראייה', v: <DM min={R.arc} /> },
   ];
   const at: Record<LeanStep, number> = { decl: 0, lat: 1, sum: 2, dir: 3, height: 4 };
+  const lat = (R.north ? 1 : -1) * R.lat1 / 60, show = (v: number) => `${Math.abs(Math.round(v / 60))}° ${v >= 0 ? 'צפון' : 'דרום'}`;
   return <>
-    <Viz>
-      <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label="האופק המערבי והירח" direction="ltr">
-        <rect width={W} height={H - 20} fill="#1b2a4c" /><rect y={H - 20} width={W} height="20" fill="#1E2A1F" />
-        <text x={W / 2} y={H - 6} textAnchor="middle" fontSize="11" fill="#e8ecf6">מערב</text>
-        <text x={W - 8} y={H - 6} textAnchor="end" fontSize="11" fill="#e8ecf6">צפון</text>
-        <text x="8" y={H - 6} fontSize="11" fill="#e8ecf6">דרום</text>
-        <circle cx={W / 2} cy={H - 12} r="9" fill="#ffb36b" opacity=".7" />
-        <MoonGlyph cx={cx} cy={cy} r={14} k={0.08} rot={rot} />
-      </svg>
-      <p className="note">מבט מערבה אחרי השקיעה (סכמטי). הצד המואר פונה אל השמש שמתחת לאופק; הפגימה לצד השני.</p>
-    </Viz>
+    {focus === 'decl' || focus === 'lat' || focus === 'sum'
+      ? <ZodiacScene view="decl" equator stars={false} moonLon={R.moonTrue / 60} moonLat={lat} hlSign={Math.floor(R.moonTrue / 1800)}
+          decl={{ lon: R.moonTrue / 60, lat, hl: focus, labels: { decl: `נטיית המעלה: ${show(m.decl)}`, lat: `הרוחב: ${show(m.lat)}`, sum: `מהקו השווה: ${show(m.dist)}` } }}
+          note="המקווקו התכלת: הקו השווה, נוטה ממסלול השמש. הקשת הצהובה: נטיית המעלה של הירח; הסגולה: רוחב הירח; הירוקה: מרחקו מהקו השווה." />
+      : <SightSky3D dayIdx={night.dayIdx} step={focus === 'height' ? 'height' : 'dir'} />}
     <Engine title="לאן הירח נוטה" sub="רמב״ם י״ט, י–ט״ו, בקירוב" className={fx(!!focus)}>
       <NightPicker night={night} />
       <Steps rows={rows} focus={focus ? at[focus] : undefined} />

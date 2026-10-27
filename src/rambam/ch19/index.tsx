@@ -4,7 +4,12 @@ import { Num } from '../../components/text';
 import { rambamD0 } from '../../engines/rambam';
 import { defineChapter, halacha } from '../define';
 import { SeasonsScene } from '../widgets/tekufot';
-import { DeclTable, EclipticWave, MoonLean, Points, RealSky } from '../widgets/halacha';
+import { DeclTable, MoonLean, Points } from '../widgets/halacha';
+import { SightSky3D } from '../widgets/moon';
+import { ZodiacScene } from '../widgets/zodiac';
+
+/** the equator on the zodiac wheel, with the slant of one degree of the zodiac */
+const Slant = ({ at, note }: { at: number; note?: string }) => <ZodiacScene view="decl" equator stars={false} pointer={{ lon: at }} hlSign={Math.floor(at / 30) % 12} decl={{ lon: at, lat: 0, hl: 'decl', labels: { decl: 'הנטייה' } }} note={note ?? 'המקווקו התכלת: הקו השווה. הקשת הצהובה: כמה המעלה המסומנת רחוקה ממנו.'} />;
 
 const D = true;
 const EXAMPLE = rambamD0() + 29;
@@ -17,7 +22,7 @@ export const CH19 = defineChapter(19, 'לאן הירח נוטה', [
         body: <p>בית דין שאל את העדים לאן נטה הירח (פרק ב׳, ד). הרמב״ם מראה איך מחשבים זאת, ״בלי דקדוק״, כי זה לא משפיע על השאלה אם ייראה.</p> },
     ] },
     takeaway: <p>חשבון בקירוב, לבדיקת העדים.</p>,
-    stage: () => <RealSky dayIdx={EXAMPLE} />,
+    stage: () => <SightSky3D dayIdx={EXAMPLE} step="dir" />,
   }),
   halacha<'tilt'>({
     h: 'ב', title: 'העגולה נוטה',
@@ -35,7 +40,7 @@ export const CH19 = defineChapter(19, 'לאן הירח נוטה', [
         body: <p>נקודות המפגש: ראש טלה וראש מאזנים. מטלה עד בתולה: צפונה; ממאזנים עד דגים: דרומה.</p> },
     ] },
     takeaway: <p>טלה עד בתולה צפוני; מאזנים עד דגים דרומי.</p>,
-    stage: () => <EclipticWave hl />,
+    stage: () => <Slant at={0} note="ראש טלה: על הקו השווה. משם המזלות עולים צפונה עד סרטן ויורדים." />,
   }),
   halacha<'max'>({
     h: 'ד', title: 'עשרים ושלוש וחצי',
@@ -44,7 +49,7 @@ export const CH19 = defineChapter(19, 'לאן הירח נוטה', [
         body: <p>הנטייה גדלה עד ראש סרטן, <Num>23½°</Num> צפונה, וחוזרת. וכך דרומה עד ראש גדי.</p> },
     ] },
     takeaway: <p>עד <Num>23½°</Num>.</p>,
-    stage: () => <EclipticWave at={90} hl />,
+    stage: () => <Slant at={90} />,
   }),
   halacha<'equal'>({
     h: 'ה', title: 'יום ולילה שווים',
@@ -62,7 +67,7 @@ export const CH19 = defineChapter(19, 'לאן הירח נוטה', [
         body: <p>לכל מעלה במזלות יש נטייה מסוימת, לכל היותר <Num>23½°</Num>.</p> },
     ] },
     takeaway: <p>לכל מעלה: נטייה משלה.</p>,
-    stage: () => <EclipticWave hl />,
+    stage: () => <Slant at={45} />,
   }),
   halacha<'table'>({
     h: 'ז', title: 'הלוח',
@@ -71,7 +76,7 @@ export const CH19 = defineChapter(19, 'לאן הירח נוטה', [
         body: <p>הלוח מראש טלה: <Num>10°</Num> → <Num>4°</Num>, <Num>20°</Num> → <Num>8°</Num>, ... <Num>90°</Num> → <Num>23½°</Num>.</p> },
     ] },
     takeaway: <p>לוח הנטייה, כל עשר מעלות.</p>,
-    stage: () => <DeclTable deg={90} />,
+    stage: () => <><DeclTable deg={90} /><Slant at={90} /></>,
   }),
   halacha<'interp'>({
     h: 'ח', title: 'בין העשרות',
@@ -80,7 +85,7 @@ export const CH19 = defineChapter(19, 'לאן הירח נוטה', [
         body: <p>בין העשרות לפי היחס: <Num>5</Num> → <Num>2°</Num>; <Num>23</Num> → כ־<Num>9°</Num>.</p> },
     ] },
     takeaway: <p>לפי היחס, כמו בשאר הלוחות.</p>,
-    stage: () => <DeclTable deg={23} />,
+    stage: () => <><DeclTable deg={23} /><Slant at={23} /></>,
   }),
   halacha<'fold'>({
     h: 'ט', title: 'מעבר ל־90',
@@ -89,7 +94,7 @@ export const CH19 = defineChapter(19, 'לאן הירח נוטה', [
         body: <p>מעל <Num>90</Num>: אותן גריעות כמו ברוחב הירח (ט״ז, י״ג–ט״ו). נסו בכלי.</p> },
     ] },
     takeaway: <p>אותן גריעות כמו ברוחב.</p>,
-    stage: () => <DeclTable deg={200} />,
+    stage: () => <><DeclTable deg={200} /><Slant at={200} /></>,
   }),
   halacha<'decl' | 'lat' | 'sum'>({
     h: 'י', title: 'מרחק הירח מהקו השווה',
