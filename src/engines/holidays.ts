@@ -1,10 +1,11 @@
 // Holidays and fasts of a Hebrew year, from the fixed calendar. Pure.
 // Covers the biblical and rabbinic days (with the standard postponements of fasts that fall on Shabbat).
-// Modern Israeli days (Yom HaShoah, HaZikaron, HaAtzmaut, Yerushalayim) are not included yet.
+// With { national: true }: the Israeli national days (Yom HaShoah, HaZikaron, HaAtzmaut, Yerushalayim), with the
+// moves that keep them off Shabbat and its eves, as fixed by law and the Chief Rabbinate.
 
 import { isLeap, monthStart, monthsOf } from './calendar';
 
-export type HolidayKind = 'yomtov' | 'cholhamoed' | 'fast' | 'minor' | 'roshchodesh' | 'chanukah';
+export type HolidayKind = 'yomtov' | 'cholhamoed' | 'fast' | 'minor' | 'roshchodesh' | 'chanukah' | 'national';
 
 export interface Holiday {
   /** day index (weekday = day % 7, 0 = Sunday) */
@@ -25,7 +26,7 @@ export function dayOf(y: number, month: string, d: number): number {
   return monthStart(y, mi) + d - 1;
 }
 
-export function holidays(y: number, opts: { diaspora?: boolean } = {}): Holiday[] {
+export function holidays(y: number, opts: { diaspora?: boolean; national?: boolean } = {}): Holiday[] {
   const out: Holiday[] = [];
   const dia = !!opts.diaspora;
   const add = (month: string, d: number, name: string, kind: HolidayKind) => out.push({ day: dayOf(y, month, d), name, kind });
@@ -70,6 +71,8 @@ export function holidays(y: number, opts: { diaspora?: boolean } = {}): Holiday[
   fast('אב', 9, 'תשעה באב');
   add('אב', 15, 'ט״ו באב', 'minor');
 
+  if (opts.national) national(y, out);
+
   // Rosh Chodesh: the 30th of a full month and the 1st of the next (not Tishrei)
   const ms = monthsOf(y);
   for (let mi = 1; mi < ms.length; mi++) {
@@ -81,7 +84,29 @@ export function holidays(y: number, opts: { diaspora?: boolean } = {}): Holiday[
   return out.sort((a, b) => a.day - b.day);
 }
 
+/**
+ * Israeli national days. Weekdays: 0 = Sunday … 5 = Friday, 6 = Shabbat.
+ * - Yom HaShoah, 27 Nisan (from 5711): on a Friday → Thursday; on a Sunday → Monday.
+ * - Yom HaAtzmaut, 5 Iyar (from 5708), with Yom HaZikaron the day before (from 5711): if 5 Iyar is Friday or
+ *   Shabbat both move back to Wednesday–Thursday; if it is Monday they move forward to Monday–Tuesday (from 5764).
+ * - Yom Yerushalayim, 28 Iyar (from 5728); not moved.
+ */
+function national(y: number, out: Holiday[]) {
+  const push = (day: number, name: string, orig: number) => out.push(day === orig ? { day, name, kind: 'national' } : { day, name, kind: 'national', movedFrom: orig });
+  if (y >= 5711) {
+    const s = dayOf(y, 'ניסן', 27), wd = s % 7;
+    push(wd === 5 ? s - 1 : wd === 0 ? s + 1 : s, 'יום השואה', s);
+  }
+  if (y >= 5708) {
+    const a = dayOf(y, 'אייר', 5), wd = a % 7;
+    const atz = wd === 5 ? a - 1 : wd === 6 ? a - 2 : wd === 1 && y >= 5764 ? a + 1 : a;
+    if (y >= 5711) push(atz - 1, 'יום הזיכרון', a - 1);
+    push(atz, 'יום העצמאות', a);
+  }
+  if (y >= 5728) push(dayOf(y, 'אייר', 28), 'יום ירושלים', dayOf(y, 'אייר', 28));
+}
+
 /** All holidays on a given day index (looks in the Hebrew year containing it and the next, for Elul/Tishrei edges). */
-export function holidaysOn(day: number, y: number, opts: { diaspora?: boolean } = {}): Holiday[] {
+export function holidaysOn(day: number, y: number, opts: { diaspora?: boolean; national?: boolean } = {}): Holiday[] {
   return holidays(y, opts).filter(h => h.day === day);
 }

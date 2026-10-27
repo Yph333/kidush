@@ -62,3 +62,40 @@ describe('diaspora', () => {
     expect(one(5786, 'שמיני עצרת ושמחת תורה').day).toBe(one(5786, 'שמיני עצרת', true).day);
   });
 });
+
+describe('Israeli national days', () => {
+  const nat = (y: number, name: string) => { const h = holidays(y, { national: true }).filter(x => x.name === name); expect(h, name).toHaveLength(1); return h[0]; };
+  it('are left out unless asked for', () => {
+    expect(holidays(5785).some(h => h.kind === 'national')).toBe(false);
+  });
+  it('5784 (2024): 5 Iyar on Monday → HaZikaron Mon 13 May, HaAtzmaut Tue 14 May; HaShoah Sunday → Mon 6 May', () => {
+    expect(iso(nat(5784, 'יום הזיכרון').day)).toBe('2024-05-13');
+    expect(iso(nat(5784, 'יום העצמאות').day)).toBe('2024-05-14');
+    expect(nat(5784, 'יום העצמאות').movedFrom).toBeDefined();
+    expect(iso(nat(5784, 'יום השואה').day)).toBe('2024-05-06');
+    expect(iso(nat(5784, 'יום ירושלים').day)).toBe('2024-06-05');
+  });
+  it('5785 (2025): 5 Iyar on Friday → Wed 30 Apr and Thu 1 May; HaShoah Friday → Thu 24 Apr', () => {
+    expect(iso(nat(5785, 'יום הזיכרון').day)).toBe('2025-04-30');
+    expect(iso(nat(5785, 'יום העצמאות').day)).toBe('2025-05-01');
+    expect(iso(nat(5785, 'יום השואה').day)).toBe('2025-04-24');
+  });
+  it('5786 (2026): no moves — HaZikaron Tue 21 Apr, HaAtzmaut Wed 22 Apr, HaShoah Tue 14 Apr', () => {
+    expect(iso(nat(5786, 'יום הזיכרון').day)).toBe('2026-04-21');
+    expect(iso(nat(5786, 'יום העצמאות').day)).toBe('2026-04-22');
+    expect(nat(5786, 'יום העצמאות').movedFrom).toBeUndefined();
+    expect(iso(nat(5786, 'יום השואה').day)).toBe('2026-04-14');
+  });
+  it('5768 (2008): 5 Iyar on Shabbat → HaZikaron Wed 7 May, HaAtzmaut Thu 8 May', () => {
+    expect(iso(nat(5768, 'יום הזיכרון').day)).toBe('2008-05-07');
+    expect(iso(nat(5768, 'יום העצמאות').day)).toBe('2008-05-08');
+  });
+  it('never on Shabbat or a Friday, in any year', () => {
+    for (let y = 5764; y < 5900; y++) for (const h of holidays(y, { national: true }).filter(x => x.kind === 'national' && x.name !== 'יום ירושלים'))
+      expect([5, 6], `${y} ${h.name}`).not.toContain(h.day % 7);
+  });
+  it('none before they were instituted', () => {
+    expect(holidays(5707, { national: true }).some(h => h.kind === 'national')).toBe(false);
+    expect(holidays(5727, { national: true }).some(h => h.name === 'יום ירושלים')).toBe(false);
+  });
+});

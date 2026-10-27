@@ -186,6 +186,7 @@ svg.full, .viz .full { width: 100%; }
 .cal-h.fast { color: var(--c-shift); }
 .cal-h.roshchodesh, .cal-h.minor { color: var(--c-leap); font-weight: var(--fw-medium); }
 .cal-h.chanukah { color: var(--c-moon); }
+.cal-h.national { color: var(--c-accent); font-weight: var(--fw-medium); }
 .cal-z { margin-top: 2px; color: var(--c-text-3); font-size: .7rem; }
 @media (max-width: 760px) { .cal { border-spacing: 2px; } .cal td { height: 4.2rem; font-size: .66rem; padding: 2px; } .cal-d b { font-size: .95rem; } .cal th { font-size: .6rem; } }
 

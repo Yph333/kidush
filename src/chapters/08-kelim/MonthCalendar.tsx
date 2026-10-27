@@ -36,7 +36,7 @@ function Month({ y, mi, hol, zmanim }: { y: number; mi: number; hol: Map<number,
                 return (
                   <td key={c} className={cls}>
                     <div className="cal-d"><b>{gem(day - start + 1)}</b><span className="num">{cd}/{cm + 1}</span></div>
-                    {hs.map(h => <div key={h.name} className={`cal-h ${h.kind}`}>{h.name}{h.movedFrom !== undefined && ' (נדחה)'}</div>)}
+                    {hs.map(h => <div key={h.name} className={`cal-h ${h.kind}`}>{h.name}{h.movedFrom !== undefined && (h.movedFrom > h.day ? ' (הוקדם)' : ' (נדחה)')}</div>)}
                     {z && <div className="cal-z">{z.label} <span className="num">{z.t}</span></div>}
                   </td>
                 );
@@ -58,15 +58,16 @@ export function MonthCalendar() {
   const [dia, setDia] = useState(false);
   const [showZ, setShowZ] = useState(true);
   const [all, setAll] = useState(false);
+  const [nat, setNat] = useState(true);
   const { p, city } = useZDay();
   const pick = usePick();
   const mode = useStore(s => s.mode);
 
   const hol = useMemo(() => {
     const m = new Map<number, Holiday[]>();
-    for (const h of holidays(y, { diaspora: dia })) m.set(h.day, [...(m.get(h.day) ?? []), h]);
+    for (const h of holidays(y, { diaspora: dia, national: nat })) m.set(h.day, [...(m.get(h.day) ?? []), h]);
     return m;
-  }, [y, dia]);
+  }, [y, dia, nat]);
 
   const zmanim = showZ ? (day: number) => {
     const wd = day % 7;
@@ -91,7 +92,7 @@ export function MonthCalendar() {
           <div className="ctl">
             <SlideYear yr={yr} />
             <label className="fld">חודש
-              <select value={mi} onChange={e => { setMi(+e.target.value); setAll(false); }}>
+              <select aria-label="חודש" value={mi} onChange={e => { setMi(+e.target.value); setAll(false); }}>
                 {months.map((m, i) => <option key={m[0]} value={i}>{m[0]}</option>)}
               </select>
             </label>
@@ -100,6 +101,7 @@ export function MonthCalendar() {
           <div className="colpick">
             <label className="chk"><input type="checkbox" checked={dia} onChange={e => setDia(e.target.checked)} />חוץ לארץ (יום טוב שני)</label>
             <label className="chk"><input type="checkbox" checked={showZ} onChange={e => setShowZ(e.target.checked)} />שקיעה ביום שישי וצאת השבת ({city.name})</label>
+            <label className="chk"><input type="checkbox" checked={nat} onChange={e => setNat(e.target.checked)} />ימים לאומיים בישראל</label>
             <label className="chk"><input type="checkbox" checked={all} onChange={e => setAll(e.target.checked)} />כל השנה</label>
           </div>
           <div className="ctl">
