@@ -96,17 +96,45 @@ const ROOT_NAME: Record<Which, ReactNode> = {
   crs: <><Num>84</Num> מעלות, <Num>28</Num> חלקים, <Num>42</Num> שניות</>,
 };
 
+/** A night to calculate for (the evening that begins a Hebrew date). Default: the Rambam's example, 2 Iyar 4938. */
+export function useNight() {
+  const exMonth = () => monthsOf(4938).findIndex(x => x[0] === 'אייר');
+  const [y, setY] = useState(4938);
+  const months = monthsOf(y);
+  const [mi, setMi] = useState(exMonth);
+  const [d, setD] = useState(2);
+  const m = Math.min(mi, months.length - 1), day = Math.min(d, months[m][1]);
+  const dayIdx = dayOf(y, m, day);
+  return {
+    y, setY, months, m, setMi, day, setD, dayIdx, N: dayIdx - rambamD0(),
+    isExample: y === 4938 && months[m][0] === 'אייר' && day === 2,
+    reset: () => { setY(4938); setMi(exMonth()); setD(2); },
+    label: <>ליל {day} {months[m][0]} {yearHeb(y)}</>,
+  };
+}
+export type Night = ReturnType<typeof useNight>;
+
+export function NightPicker({ night }: { night: Night }) {
+  const { y, setY, months, m, setMi, day, setD, isExample, reset } = night;
+  return (
+    <div className="ctl">
+      <YearControl value={y} onChange={setY} label="שנה" />
+      <label className="fld">חודש
+        <select value={m} onChange={e => setMi(+e.target.value)}>{months.map(([name], k) => <option key={k} value={k}>{name}</option>)}</select>
+      </label>
+      <label className="fld">יום
+        <input type="number" min={1} max={months[m][1]} value={day} onChange={e => setD(Math.max(1, Math.min(30, Math.round(+e.target.value || 1))))} />
+      </label>
+      {!isExample && <button type="button" className="btn" onClick={reset}>הדוגמה של הרמב״ם</button>}
+    </div>
+  );
+}
+
 export type CalcFocus = 'days' | 'blocks' | 'root' | 'result';
 
 /** Halacha 4: the mean moon and the mean course at the start of any night, from the epoch. Default: the Rambam's example. */
 export function FullCalc({ focus, onN }: { focus?: CalcFocus; onN?: (N: number) => void }) {
-  const [y, setY] = useState(4938);
-  const months = monthsOf(y);
-  const [mi, setMi] = useState(() => months.findIndex(m => m[0] === 'אייר'));
-  const [d, setD] = useState(2);
-  const m = Math.min(mi, months.length - 1), day = Math.min(d, months[m][1]);
-  const N = dayOf(y, m, day) - rambamD0();
-  const isExample = y === 4938 && months[m][0] === 'אייר' && day === 2;
+  const night = useNight(), { N, isExample, months, m, day, y } = night;
   useEffect(() => { if (N >= 0) onN?.(N); }, [N, onN]);
 
   const calc = (which: Which) => {
@@ -122,16 +150,7 @@ export function FullCalc({ focus, onN }: { focus?: CalcFocus; onN?: (N: number) 
 
   return (
     <Engine title="החשבון המלא" sub="לתחילת כל ליל שתרצו" className={focus ? 'guide-focus' : ''}>
-      <div className="ctl">
-        <YearControl value={y} onChange={setY} label="שנה" />
-        <label className="fld">חודש
-          <select value={m} onChange={e => setMi(+e.target.value)}>{months.map(([name], k) => <option key={k} value={k}>{name}</option>)}</select>
-        </label>
-        <label className="fld">יום
-          <input type="number" min={1} max={months[m][1]} value={day} onChange={e => setD(Math.max(1, Math.min(30, Math.round(+e.target.value || 1))))} />
-        </label>
-        {!isExample && <button type="button" className="btn" onClick={() => { setY(4938); setMi(monthsOf(4938).findIndex(x => x[0] === 'אייר')); setD(2); }}>הדוגמה של הרמב״ם</button>}
-      </div>
+      <NightPicker night={night} />
       {N < 0 ? <p className="note">התאריך לפני העיקר (ג׳ ניסן {yearHeb(4938)}). החשבון של הרמב״ם מתחיל מהעיקר והלאה.</p> : <>
         <Steps focus={focus === 'days' ? 0 : undefined} rows={[{ l: <>ימים שלמים מתחילת ליל העיקר עד תחילת ליל {day} {months[m][0]} {yearHeb(y)}</>, v: <Num>{NUM(N)}</Num>, s: isExample ? 'הדוגמה של הרמב״ם (ט״ו, ח): ליל שבת, ב׳ אייר שנת העיקר' : undefined }]} />
         <div className="vpair">

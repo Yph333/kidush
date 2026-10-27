@@ -45,4 +45,6 @@ export const RAMBAM_PATHS = [
   'rambam/14/2',
   'rambam/14/3',
   'rambam/14/4',
+  'rambam/14/5',
+  'rambam/14/6',
 ] as const;

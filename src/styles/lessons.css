@@ -269,3 +269,11 @@ svg.full, .viz .full { width: 100%; }
 .turns-n { fill: var(--c-text); font-size: 30px; font-weight: 700; }
 .turns-t { fill: var(--c-text-3); font-size: 12px; }
 .turns figcaption { flex: 1; min-width: 12rem; color: var(--c-text-2); }
+.season-wheel { width: min(100%, 24rem); display: block; margin: 0 auto; }
+.sw-v { fill: var(--c-text); font-size: 13px; font-weight: 600; }
+.sw-s { fill: var(--c-text-2); font-size: 11px; }
+.sw-c { fill: var(--c-text-2); font-size: 13px; }
+.sw-c2 { fill: var(--c-text-3); font-size: 11px; }
+.evening { width: 100%; display: block; border-radius: var(--r-md); }
+.ev-t { fill: var(--c-text-2); font-size: 12px; }
+.ev-h { fill: var(--c-text); font-size: 14px; font-weight: 600; }
