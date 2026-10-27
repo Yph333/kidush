@@ -18,7 +18,7 @@ const days = (a: number, b: number) => (a - b) / (24 * HOUR);
 const hex = (c: number) => `#${c.toString(16).padStart(6, '0')}`;
 
 /** 2D: the orbit from above with the three sets of markers. */
-function Orbit2D({ p }: { p: EarthSeasonsProps }) {
+export function Orbit2D({ p }: { p: EarthSeasonsProps }) {
   const c = 200, R = 150;
   const P = (sunLon: number, r = R) => { const a = ((sunLon + 180) * Math.PI) / 180; return [c + r * Math.cos(a), c - r * Math.sin(a)]; };
   const [ex, ey] = P(p.sunLon);
@@ -35,32 +35,39 @@ function Orbit2D({ p }: { p: EarthSeasonsProps }) {
   );
 }
 
+/** The four tekufot of Hebrew year y: true (astronomy), Shmuel and Rav Adda, as times (ms). */
+export function seasonRows(y: number) {
+  // civil year in which Nisan of Hebrew year y falls
+  const gy = gDate(Math.floor(tekufotAbsolute(y, 'shmuel')[2] / 25920)).getUTCFullYear();
+  const tru = seasons(gy);                                    // Mar, Jun, Sep, Dec of gy
+  const trueByName = [seasons(gy - 1)[2], seasons(gy - 1)[3], tru[0], tru[1]];   // Tishrei, Tevet (previous civil year), Nisan, Tammuz
+  const sh = tekufotAbsolute(y, 'shmuel').map(moladMs), ra = tekufotAbsolute(y, 'ravAdda').map(moladMs);
+  return NAMES.map((n, i) => ({ name: n, tru: trueByName[i], sh: sh[i], ra: ra[i] }));
+}
+export type SeasonRow = ReturnType<typeof seasonRows>[number];
+
+/** Scene props: the earth at time `now`, with markers for the chosen kinds of tekufa. */
+export function seasonProps(rows: SeasonRow[], now: number, kinds: TekufaKind[] = ['true', 'shmuel', 'ravAdda']): EarthSeasonsProps {
+  const markers: SeasonMarker[] = [];
+  const lab: Record<TekufaKind, string> = { true: 'אמיתית', shmuel: 'שמואל', ravAdda: 'רב אדא' };
+  rows.forEach(r => {
+    if (kinds.includes('true')) markers.push({ sunLon: sunLonAt(r.tru), kind: 'true', label: r.name });
+    if (kinds.includes('shmuel')) markers.push({ sunLon: sunLonAt(r.sh), kind: 'shmuel', label: kinds.length === 1 ? r.name : lab.shmuel });
+    if (kinds.includes('ravAdda')) markers.push({ sunLon: sunLonAt(r.ra), kind: 'ravAdda', label: kinds.length === 1 ? r.name : lab.ravAdda });
+  });
+  return { sunLon: sunLonAt(now), markers };
+}
+
 export function Seasons() {
   const yr = useSlideYear();
   const y = yr.y;
-  // civil year in which Nisan of Hebrew year y falls
-  const gy = gDate(Math.floor(tekufotAbsolute(y, 'shmuel')[2] / 25920)).getUTCFullYear();
-  const rows = useMemo(() => {
-    const tru = seasons(gy);                                    // Mar, Jun, Sep, Dec of gy
-    const trueByName = [seasons(gy - 1)[2], seasons(gy - 1)[3], tru[0], tru[1]];   // Tishrei, Tevet (previous civil year), Nisan, Tammuz
-    const sh = tekufotAbsolute(y, 'shmuel').map(moladMs), ra = tekufotAbsolute(y, 'ravAdda').map(moladMs);
-    return NAMES.map((n, i) => ({ name: n, tru: trueByName[i], sh: sh[i], ra: ra[i] }));
-  }, [y, gy]);
+  const rows = useMemo(() => seasonRows(y), [y]);
 
   const [k, setK] = useState(2);   // which tekufa the earth sits at (index), or slider
   const [t, setT] = useState<number | null>(null);
   const now = t ?? rows[k].tru;
 
-  const props = useMemo<EarthSeasonsProps>(() => {
-    const markers: SeasonMarker[] = [];
-    const lab: Record<TekufaKind, string> = { true: 'אמיתית', shmuel: 'שמואל', ravAdda: 'רב אדא' };
-    rows.forEach(r => {
-      markers.push({ sunLon: sunLonAt(r.tru), kind: 'true', label: r.name });
-      markers.push({ sunLon: sunLonAt(r.sh), kind: 'shmuel', label: lab.shmuel });
-      markers.push({ sunLon: sunLonAt(r.ra), kind: 'ravAdda', label: lab.ravAdda });
-    });
-    return { sunLon: sunLonAt(now), markers };
-  }, [rows, now]);
+  const props = useMemo(() => seasonProps(rows, now), [rows, now]);
 
   const tlo = rows[0].tru - 20 * 24 * HOUR, thi = rows[3].ra + 40 * 24 * HOUR;
   const player = usePlay(dt => setT(prev => { const v = (prev ?? now) + dt * 20 * 24 * HOUR; return v > thi ? tlo : v; }));

@@ -1,16 +1,26 @@
-import { sky } from '../../engines/astro';
+import { useMemo } from 'react';
+import { TofMs, nrm, sky, sunEcl } from '../../engines/astro';
 import { AstroControls } from '../../components/astro/AstroControls';
 import { useAstro } from '../../components/astro/useAstro';
 import { EarthMoonZoom, OrbitTopDown, PhaseStrip } from '../../components/astro/visuals';
 import { Term } from '../../components/Glossary';
+import { Scene3D } from '../../components/Scene3D/Scene3D';
 import { Engine, Slide, Viz } from '../../components/Slide';
 import { Facts, Num } from '../../components/text';
 import { NUM, hrs } from '../../lib/format';
+import type { MonthProps } from '../../scenes/monthSystem';
+import type { MoonFaceProps } from '../../scenes/moonFace';
+
+const loadMonth = () => import('../../scenes/monthSystem').then(m => m.default);
+const loadFace = () => import('../../scenes/moonFace').then(m => m.default);
 
 export function MoonMonth() {
   const v = useAstro();
   const { M, t } = v;
   const sk = sky(t, M.c);
+  const a0 = nrm(sunEcl(TofMs(M.strip[0].ss).T).lam + 180), a1 = nrm(sunEcl(TofMs(M.strip[M.len - 1].ss).T).lam + 180);
+  const month = useMemo<MonthProps>(() => ({ sunLam: sk.sunLam, moonLam: sk.moonLam, moonBeta: sk.moonBeta, arc: [a0, a1], ms: t }), [sk.sunLam, sk.moonLam, sk.moonBeta, a0, a1, t]);
+  const face = useMemo<MoonFaceProps>(() => ({ sunLam: sk.sunLam, moonLam: sk.moonLam, moonBeta: sk.moonBeta }), [sk.sunLam, sk.moonLam, sk.moonBeta]);
   return (
     <Slide
       wide
@@ -36,9 +46,19 @@ export function MoonMonth() {
       </>}
       stage={<>
         <Viz><PhaseStrip M={M} t={t} /></Viz>
-        <div className="vpair">
-          <Viz className="explore-only"><OrbitTopDown M={M} sk={sk} /></Viz>
-          <Viz><EarthMoonZoom sk={sk} /></Viz>
+        <div className="month3d">
+          <Viz>
+            <Scene3D load={loadMonth} props={month} label="השמש, כדור הארץ והירח בתלת־ממד; הצד המואר של הירח פונה לשמש"
+              views={[{ id: 'oblique', label: 'מבט אלכסוני' }, { id: 'top', label: 'מלמעלה' }, { id: 'earth', label: 'קרוב לכדור הארץ' }]}
+              fallback={<OrbitTopDown M={M} sk={sk} />} />
+            <p className="note">לא בקנה מידה: מסלול הירח מוגדל כ־<Num>130</Num> פעם. אור השמש מאיר תמיד את חצי הירח שפונה אליה.</p>
+          </Viz>
+          <Viz className="month-face">
+            <p className="vt">כך הירח נראה מכדור הארץ</p>
+            <Scene3D load={loadFace} props={face} label="הירח כפי שהוא נראה מכדור הארץ ברגע הזה" views={[]} height={230}
+              fallback={<EarthMoonZoom sk={sk} />} />
+            <p className="note"><Num>{(sk.k * 100).toFixed(1)}%</Num> מואר · {sk.waxing ? 'הולך וגדל' : 'הולך וקטן'}</p>
+          </Viz>
         </div>
       </>}
     />

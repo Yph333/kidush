@@ -236,3 +236,4 @@ input[type=range] { accent-color: var(--c-accent); }
 }
 @media print { .guide, .guide-open { display: none; } }
 .guide-quote { font-family: var(--font-serif); font-size: var(--fs-md); line-height: var(--lh-snug); color: var(--c-text); background: var(--c-accent-soft); border-inline-start: 3px solid var(--c-accent); padding: var(--sp-2) var(--sp-3); border-radius: var(--r-sm); }
+.seg.wrap { flex-wrap: wrap; }

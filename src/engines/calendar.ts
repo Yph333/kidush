@@ -375,3 +375,103 @@ export function tekufotAbsolute(y: number, which: 'shmuel' | 'ravAdda'): [number
   const q = (which === 'shmuel' ? SHMUEL_YEAR : RAV_ADDA_YEAR) / 4;
   return [n - 2 * q, n - q, n, n + q];
 }
+
+// ---- adding remainders the Rambam's way (Kiddush HaChodesh 6:9): parts carry into hours, hours into days,
+//      and whole weeks are dropped. Returns every intermediate, for the slides that show the carrying.
+
+export interface DhpSum {
+  /** the two summands */
+  a: DHP; b: DHP;
+  /** parts: raw sum, carried hours, what is left */
+  pRaw: number; pCarry: number; p: number;
+  /** hours: raw sum (with the carry), carried days, what is left */
+  hRaw: number; hCarry: number; h: number;
+  /** days: raw sum (with the carry), whole weeks dropped, what is left (0–6) */
+  dRaw: number; weeks: number; d: number;
+}
+
+export function addDHP(a: DHP, b: DHP): DhpSum {
+  const pRaw = a.p + b.p, pCarry = Math.floor(pRaw / P_HOUR), p = pRaw % P_HOUR;
+  const hRaw = a.h + b.h + pCarry, hCarry = Math.floor(hRaw / 24), h = hRaw % 24;
+  const dRaw = a.d + b.d + hCarry, weeks = Math.floor(dRaw / 7), d = dRaw % 7;
+  return { a, b, pRaw, pCarry, p, hRaw, hCarry, h, dRaw, weeks, d };
+}
+
+/** The Rambam counts weekdays from 1 (א = Sunday); this module from 0. A molad "on day 1" is { d: 0 }. */
+export const dhpOf = (t: number): DHP => splitParts(wk(t));
+
+// ---- the Rambam's ways to the tekufa (Kiddush HaChodesh 9:4–7, 10:5): by the excess of the solar year over
+//      the lunar year, reduced by lunar months and added to molad Nisan; and the day of the month (9:6).
+
+// Rav Adda's year has 48/76 of a part: these constants are computed in rega'im (76 to a part) to stay exact.
+const RAV_ADDA_REGAIM = (365 * P_DAY + 5 * P_HOUR + 997) * 76 + 48;
+
+/** Excess of the solar year over 12 lunar months, in parts (Shmuel 10d 21h 204p, 9:4; Rav Adda 10d 21h 121p 48r, 10:1). */
+export const YEAR_EXCESS = { shmuel: SHMUEL_YEAR - 12 * P_MONTH, ravAdda: (RAV_ADDA_REGAIM - 12 * 76 * P_MONTH) / 76 } as const;
+/** Excess of 19 solar years over 235 months: Shmuel 1h 485p (9:2), Rav Adda none (10:1). */
+export const CYCLE_EXCESS = { shmuel: 19 * SHMUEL_YEAR - 235 * P_MONTH, ravAdda: (19 * RAV_ADDA_REGAIM - 235 * 76 * P_MONTH) / 76 } as const;
+/** How far tekufat Nisan of year 1 falls before molad Nisan: 7d 9h 642p (9:3) or 9h 642p (10:3). */
+export const TEKUFA_LEAD = { shmuel: 7 * P_DAY + 9 * P_HOUR + 642, ravAdda: 9 * P_HOUR + 642 } as const;
+
+/** Molad Nisan of year y (absolute parts). */
+export const moladNisan = (y: number): number => moladTotal(y, isLeap(y) ? 7 : 6);
+
+export interface TekufaSteps {
+  which: 'shmuel' | 'ravAdda';
+  /** whole 19-year cycles before y, and whole years elapsed in the current one */
+  cycles: number; years: number;
+  /** cycles × cycle excess + years × year excess (parts, may be fractional for Rav Adda) */
+  sum: number;
+  /** sum − the lead of year 1 */
+  less: number;
+  /** whole lunar months dropped, and what is left (< one month; negative only in a first year of a cycle, 10:3) */
+  months: number; rem: number;
+  moladNisan: number;
+  /** the tekufa: moladNisan + rem, or one month less when it falls before molad Nisan (then `before` is set) */
+  tekufa: number;
+  before: boolean;
+}
+
+/** Tekufat Nisan of year y the Rambam's way (9:4 for Shmuel, 10:5 for Rav Adda). */
+export function tekufaSteps(y: number, which: 'shmuel' | 'ravAdda'): TekufaSteps {
+  const cycles = Math.floor((y - 1) / 19), years = (y - 1) % 19;
+  const sum = cycles * CYCLE_EXCESS[which] + years * YEAR_EXCESS[which];
+  const less = sum - TEKUFA_LEAD[which];
+  const months = less < 0 ? 0 : Math.floor(less / P_MONTH), rem = less - months * P_MONTH;
+  const mn = moladNisan(y), abs = which === 'shmuel' ? tekufaNisanShmuel(y) : tekufaNisanRavAdda(y);
+  // The remainder fixes the moment within the lunar month; whether that is after molad Nisan or a month earlier
+  // (the tekufa can precede the molad by up to about two weeks) is read from the absolute tekufa.
+  const before = mn + rem - abs > P_MONTH / 2;
+  return { which, cycles, years, sum, less, months, rem, moladNisan: mn, tekufa: before ? mn + rem - P_MONTH : mn + rem, before };
+}
+
+export interface TekufaDay {
+  /** whole years elapsed in the 19-year cycle */
+  years: number;
+  /** 11 × years + 7, and its remainder after dropping 30s */
+  days: number; rem: number;
+  /** month counted from: Nisan, or Adar II in a leap year (as the Rambam writes) */
+  from: string;
+  /** weekday (0 = Sunday) of the 1st of that month, of the day the count reaches, and of the tekufa (Shmuel, 9:4) */
+  startWd: number; landWd: number; tekWd: number;
+  /** days added to reach the tekufa's weekday (9:8: one, two or three) */
+  added: number;
+  /** day of that month on which the count puts the tekufa */
+  day: number;
+  /** the tekufa's actual date (from the absolute tekufa, 9:3), for comparison */
+  actual: { name: string; d: number };
+}
+
+/**
+ * The day of the month of tekufat Nisan (Shmuel), by the Rambam's short way (9:6–8).
+ * The constant 7 fits his era ("בזמנים אלו"): the tekufa gains 1h 485p on the molad every cycle, so far from it the count drifts.
+ */
+export function tekufaDay(y: number): TekufaDay {
+  const years = (y - 1) % 19, days = 11 * years + 7, rem = days % 30;
+  const L = isLeap(y), mi = 6;   // Nisan in a common year, Adar II in a leap year: both index 6
+  const start = monthStart(y, mi), startWd = start % 7;
+  const landWd = (start + rem - 1) % 7, tekWd = Math.floor(tekufotShmuel(y).nisan / 24) % 7;
+  const added = (tekWd - landWd + 7) % 7;
+  const act = hebDate(Math.floor(tekufaNisanShmuel(y) / P_DAY));
+  return { years, days, rem, from: L ? 'אדר ב׳' : 'ניסן', startWd, landWd, tekWd, added, day: rem + added, actual: { name: act.name, d: act.d } };
+}

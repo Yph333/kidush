@@ -304,7 +304,7 @@ test('Rambam track: a guide step lights up its words, and "next" stays inside th
   await expect(guide.locator('.guide-quote')).toContainText('סימנם י״ג יל״ה');
   await page.getByRole('button', { name: 'יום קדימה' }).click();
   await expect(page.locator('.facts')).toContainText('14° 25′ 18″ במזל שור');     // 1° 14′ 43″ + 13° 10′ 35″
-  await expect(page.locator('.bot .pos')).toHaveText(`1/${RAMBAM_PATHS.length}`);   // the bottom bar counts this track only
+  await expect(page.locator('.bot .pos')).toHaveText(`${RAMBAM_PATHS.indexOf('rambam/14/1') + 1}/${RAMBAM_PATHS.length}`);   // the bottom bar counts this track only
   await page.locator('.bot .nb.next').click();
   await expect(page).toHaveURL(/rambam\/14\/2/);
   await page.goto(`/#/${RAMBAM_PATHS[RAMBAM_PATHS.length - 1]}?y=${YEAR}&city=0&mode=explore`);
@@ -314,5 +314,5 @@ test('Rambam track: a guide step lights up its words, and "next" stays inside th
 test('home: two equal ways in', async ({ page }) => {
   await page.goto(`/#/yesodot/petiha?y=${YEAR}&city=0&mode=explore`);
   await page.getByRole('button', { name: /הלכה הלכה ברמב״ם/ }).click();
-  await expect(page).toHaveURL(/rambam\/14\/1/);
+  await expect(page).toHaveURL(new RegExp(RAMBAM_PATHS[0].replaceAll('/', '\\/')));
 });

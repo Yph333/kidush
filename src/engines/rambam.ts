@@ -247,3 +247,25 @@ export function moonEquation(course: number): { eq: number; sign: -1 | 0 | 1; fo
   const c2 = c > 180 ? 360 - c : c;
   return { eq: Math.round(interp(R_MOON, c2)), sign: c < 180 ? -1 : c > 180 ? 1 : 0, folded: c2, row: Math.min(17, Math.floor(c2 / 10)) };
 }
+
+// ---- chapter 19: the slant of the zodiac from the equator, and which way the moon leans (approximate, as he says)
+
+/** Declination of the ecliptic every 10° from the head of Aries (19:7), arc-minutes: 4, 8, 11½, 15, 18, 20, 22, 23, 23½. */
+export const R_DECL = [0, 240, 480, 690, 900, 1080, 1200, 1320, 1380, 1410] as const;
+
+/** Declination (minutes, north positive) of a degree of the zodiac, by the table and the folds of 19:8–9. */
+export function rambamDecl(lonDeg: number): { fold: number; decl: number; north: boolean } {
+  const d = ((lonDeg % 360) + 360) % 360;
+  const fold = d <= 90 ? d : d <= 180 ? 180 - d : d <= 270 ? d - 180 : 360 - d;
+  const v = interp(R_DECL, fold), north = d < 180;
+  return { fold, decl: north ? v : -v, north };
+}
+
+/** The moon's distance from the equator (19:10): declination of its degree and its first latitude, added or subtracted. */
+export function moonFromEquator(moonTrueMin: number, lat1Min: number, latNorth: boolean): {
+  decl: number; lat: number; dist: number; dir: 'west' | 'north' | 'south';
+} {
+  const decl = rambamDecl(moonTrueMin / 60).decl, lat = latNorth ? lat1Min : -lat1Min, dist = decl + lat;
+  // 19:12: on the equator or within two or three degrees of it, the moon stands due west
+  return { decl, lat, dist, dir: Math.abs(dist) <= 180 ? 'west' : dist > 0 ? 'north' : 'south' };
+}

@@ -277,3 +277,68 @@ svg.full, .viz .full { width: 100%; }
 .evening { width: 100%; display: block; border-radius: var(--r-md); }
 .ev-t { fill: var(--c-text-2); font-size: 12px; }
 .ev-h { fill: var(--c-text); font-size: 14px; font-weight: 600; }
+/* the month in 3D, and next to it the Moon as seen from the Earth */
+.month3d { display: grid; grid-template-columns: minmax(0, 2.2fr) minmax(0, 1fr); gap: var(--sp-4); align-items: start; }
+.month-face .scene-bar { display: none; }
+@media (max-width: 1100px) { .month3d { grid-template-columns: minmax(0, 1fr); } }
+.month-face .scene3d > .note { display: none; }   /* the view from the Earth is fixed: no dragging */
+/* slides whose visual should stay in view while the controls column scrolls */
+@media (min-width: 921px) { .slide.sticky-stage > .stage { position: sticky; top: var(--sp-4); align-self: start; } }
+/* chapter 6 visuals */
+.divisors { display: grid; grid-template-columns: repeat(auto-fill, minmax(8.5rem, 1fr)); gap: var(--sp-2); }
+.divisors > div { padding: var(--sp-2) var(--sp-3); border: 1px solid var(--c-line); border-radius: var(--r-sm); display: flex; flex-direction: column; gap: 2px; }
+.divisors > div.on { border-color: var(--c-ok); background: var(--c-ok-soft); }
+.divisors > div.bad { border-color: rgb(255 139 115 / .45); background: var(--c-shift-soft); }
+.divisors b { font-weight: var(--fw-semibold); }
+.divisors span { font-size: var(--fs-sm); color: var(--c-text-2); }
+.ybars { display: flex; flex-direction: column; gap: var(--sp-3); margin-bottom: var(--sp-3); }
+.ybars > div { display: grid; grid-template-columns: 11rem minmax(0, 1fr); grid-template-rows: auto auto; gap: 2px var(--sp-3); padding: var(--sp-2); border-radius: var(--r-sm); }
+.ybars > div.on { background: var(--c-accent-soft); box-shadow: inset 0 0 0 1px rgb(92 184 255 / .45); }
+.ybl { grid-row: span 2; align-self: center; font-size: var(--fs-sm); }
+.ybar { height: .7rem; border-radius: var(--r-pill); background: var(--c-line); overflow: hidden; }
+.ybar i { display: block; height: 100%; border-radius: inherit; }
+.ybv { font-size: var(--fs-sm); color: var(--c-text-2); }
+.hlp { background: var(--c-accent-soft); border-radius: var(--r-sm); padding: var(--sp-2); }
+@media (max-width: 640px) { .ybars > div { grid-template-columns: minmax(0, 1fr); } .ybl { grid-row: auto; } }
+.mlen { display: grid; grid-template-columns: repeat(auto-fill, minmax(5.4rem, 1fr)); gap: var(--sp-2); margin: var(--sp-3) 0; }
+.mlen > div { display: flex; flex-direction: column; align-items: center; padding: var(--sp-2); border-radius: var(--r-sm); border: 1px solid var(--c-line); }
+.mlen > div.full { background: var(--c-moon-soft); }
+.mlen > div.on { box-shadow: 0 0 0 2px var(--c-accent); }
+.mlen b { font-size: var(--fs-sm); } .mlen span { font-size: var(--fs-lg); font-weight: var(--fw-bold); } .mlen small { color: var(--c-text-3); font-size: var(--fs-xs); }
+.topic-link { margin: var(--sp-2) 0 0; font-size: var(--fs-sm); }
+.dms-in { display: flex; align-items: center; gap: var(--sp-1); flex-wrap: wrap; margin: var(--sp-2) 0; direction: ltr; justify-content: flex-end; }
+.dms-in span { direction: rtl; margin-inline-start: var(--sp-2); color: var(--c-text-2); font-size: var(--fs-sm); }
+.dms-in input { width: 4.2rem; text-align: center; }
+
+/* Rambam ch. 9: the 28-year ring beside the week wheel, and the four tekufa hour dials */
+.pair { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: var(--sp-3); align-items: center; }
+.hours4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--sp-2); }
+.hours4 figure { margin: 0; text-align: center; border-radius: var(--r-2, 8px); padding: var(--sp-1); }
+.hours4 figure.hl { outline: 2px solid var(--c-accent, #6cb6ff); }
+.hours4 figcaption { font-size: var(--fs-sm); color: var(--c-text-2); }
+@media (max-width: 520px) { .hours4 { grid-template-columns: repeat(2, 1fr); } }
+
+/* Rambam ch. 1–5, 18–19 */
+.points { margin: 0; padding-inline-start: 1.4em; display: grid; gap: var(--sp-2); }
+.points li { padding: var(--sp-1) var(--sp-2); border-radius: 6px; }
+.points li.hl, .legend-list li.hl { background: var(--c-moon-soft, #e7c76f22); outline: 2px solid var(--c-accent, #6cb6ff); }
+.twoways { display: grid; grid-template-columns: 1fr 1fr; gap: var(--sp-3); }
+.twoways > div { border: 1px solid var(--c-line, #33405f); border-radius: 8px; padding: var(--sp-2) var(--sp-3); }
+.twoways > div.hl { outline: 2px solid var(--c-accent, #6cb6ff); }
+.twoways h4 { margin: 0 0 var(--sp-1); }
+@media (max-width: 520px) { .twoways { grid-template-columns: 1fr; } }
+.legend-list { list-style: none; padding: 0; margin: var(--sp-2) 0 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: var(--sp-1); }
+.legend-list li { padding: 2px var(--sp-2); border-radius: 6px; }
+.walk { margin-block: var(--sp-2); padding: var(--sp-2); border-radius: 8px; }
+.walk.hl { outline: 2px solid var(--c-accent, #6cb6ff); }
+.walk h4 { margin: 0 0 var(--sp-1); }
+.walk-days { display: flex; flex-wrap: wrap; gap: 4px; }
+.walk-days span { display: inline-flex; flex-direction: column; align-items: center; min-width: 2.2rem; padding: 2px 4px; border-radius: 6px; font-family: var(--font-serif); }
+.walk-days span.w { background: #7fce9c33; }
+.walk-days span.x { background: #ef8f7633; opacity: .8; }
+.walk-days span small { font-size: .65rem; color: var(--c-shift, #ef8f76); }
+.walk-days .fest { background: #e7c76f44; font-family: inherit; }
+.judges { display: inline-flex; gap: 3px; margin-inline-start: var(--sp-2); vertical-align: middle; }
+.judges i { width: 12px; height: 12px; border-radius: 50%; display: inline-block; }
+.judges i.y { background: #7fce9c; }
+.judges i.n { background: #ef8f76; }

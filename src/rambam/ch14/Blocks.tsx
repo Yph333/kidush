@@ -11,10 +11,10 @@ import { YearControl } from '../../components/YearControl';
 import { NUM } from '../../lib/format';
 import { SignPos } from './Wheels14';
 
-export type Which = 'moon' | 'crs';
+export type Which = 'moon' | 'crs' | 'sun' | 'apo' | 'head';
 export const FULL = 1296000;
 const norm = (s: number) => ((s % FULL) + FULL) % FULL;
-export const WHICH_NAME: Record<Which, string> = { moon: 'אמצע הירח', crs: 'אמצע המסלול' };
+export const WHICH_NAME: Record<Which, string> = { moon: 'אמצע הירח', crs: 'אמצע המסלול', sun: 'אמצע השמש', apo: 'גובה השמש', head: 'אמצע הראש' };
 /** The rows in the order the Rambam lists them. */
 const ORDER: Block[] = [1, 10, 100, 1000, 10000, 29, 354];
 const BLOCK_NAME: Record<Block, ReactNode> = { 1: 'יום אחד', 10: <><Num>10</Num> ימים</>, 100: <><Num>100</Num> ימים</>, 1000: <><Num>1,000</Num> ימים</>, 10000: <><Num>10,000</Num> ימים</>, 29: <><Num>29</Num> ימים</>, 354: <>שנה סדורה (<Num>354</Num>)</> };
@@ -94,21 +94,25 @@ const dayOf = (y: number, mi: number, d: number) => monthStart(y, mi) + d - 1;
 const ROOT_NAME: Record<Which, ReactNode> = {
   moon: <>מעלה אחת, <Num>14</Num> חלקים, <Num>43</Num> שניות במזל שור</>,
   crs: <><Num>84</Num> מעלות, <Num>28</Num> חלקים, <Num>42</Num> שניות</>,
+  sun: <><Num>7</Num> מעלות, <Num>3</Num> חלקים, <Num>32</Num> שניות במזל טלה</>,
+  apo: <><Num>26</Num> מעלות, <Num>45</Num> חלקים, <Num>8</Num> שניות במזל תאומים</>,
+  head: <><Num>180</Num> מעלות, <Num>57</Num> חלקים, <Num>28</Num> שניות</>,
 };
 
-/** A night to calculate for (the evening that begins a Hebrew date). Default: the Rambam's example, 2 Iyar 4938. */
-export function useNight() {
-  const exMonth = () => monthsOf(4938).findIndex(x => x[0] === 'אייר');
+/** A night to calculate for (the evening that begins a Hebrew date). Default: the Rambam's example, 2 Iyar 4938
+ *  (15:8); chapter 12–13 pass their own, 14 Tammuz 4938. */
+export function useNight(ex: { month: string; day: number } = { month: 'אייר', day: 2 }) {
+  const exMonth = () => monthsOf(4938).findIndex(x => x[0] === ex.month);
   const [y, setY] = useState(4938);
   const months = monthsOf(y);
   const [mi, setMi] = useState(exMonth);
-  const [d, setD] = useState(2);
+  const [d, setD] = useState(ex.day);
   const m = Math.min(mi, months.length - 1), day = Math.min(d, months[m][1]);
   const dayIdx = dayOf(y, m, day);
   return {
     y, setY, months, m, setMi, day, setD, dayIdx, N: dayIdx - rambamD0(),
-    isExample: y === 4938 && months[m][0] === 'אייר' && day === 2,
-    reset: () => { setY(4938); setMi(exMonth()); setD(2); },
+    isExample: y === 4938 && months[m][0] === ex.month && day === ex.day,
+    reset: () => { setY(4938); setMi(exMonth()); setD(ex.day); },
     label: <>ליל {day} {months[m][0]} {yearHeb(y)}</>,
   };
 }
@@ -133,8 +137,10 @@ export function NightPicker({ night }: { night: Night }) {
 export type CalcFocus = 'days' | 'blocks' | 'root' | 'result';
 
 /** Halacha 4: the mean moon and the mean course at the start of any night, from the epoch. Default: the Rambam's example. */
-export function FullCalc({ focus, onN }: { focus?: CalcFocus; onN?: (N: number) => void }) {
-  const night = useNight(), { N, isExample, months, m, day, y } = night;
+export function FullCalc({ focus, onN, which = ['moon', 'crs'], example = { month: 'אייר', day: 2 } }: {
+  focus?: CalcFocus; onN?: (N: number) => void; which?: Which[]; example?: { month: string; day: number };
+}) {
+  const night = useNight(example), { N, isExample, months, m, day, y } = night;
   useEffect(() => { if (N >= 0) onN?.(N); }, [N, onN]);
 
   const calc = (which: Which) => {
@@ -142,7 +148,7 @@ export function FullCalc({ focus, onN }: { focus?: CalcFocus; onN?: (N: number) 
     const rows: StepRow[] = [
       { l: <>{WHICH_NAME[which]} ב־<Num>{NUM(N)}</Num> ימים (לפי הטבלאות)</>, v: <DMS sec={norm(b.v)} />, s: b.parts.map(([k, c]) => `${c}×${NUM(k)}`).join(' + ') },
       { l: 'ועוד העיקר', v: <DMS sec={root} />, s: ROOT_NAME[which] },
-      { l: <>{WHICH_NAME[which]} בתחילת הליל</>, v: which === 'moon' ? <SignPos sec={res} /> : <DMS sec={res} />, s: which === 'moon' ? <>מתחילת טלה: <DMS sec={res} /></> : undefined, c: 'final' },
+      { l: <>{WHICH_NAME[which]} בתחילת הליל</>, v: which !== 'crs' && which !== 'head' ? <SignPos sec={res} /> : <DMS sec={res} />, s: which !== 'crs' && which !== 'head' ? <>מתחילת טלה: <DMS sec={res} /></> : undefined, c: 'final' },
     ];
     return rows;
   };
@@ -152,10 +158,9 @@ export function FullCalc({ focus, onN }: { focus?: CalcFocus; onN?: (N: number) 
     <Engine title="החשבון המלא" sub="לתחילת כל ליל שתרצו" className={focus ? 'guide-focus' : ''}>
       <NightPicker night={night} />
       {N < 0 ? <p className="note">התאריך לפני העיקר (ג׳ ניסן {yearHeb(4938)}). החשבון של הרמב״ם מתחיל מהעיקר והלאה.</p> : <>
-        <Steps focus={focus === 'days' ? 0 : undefined} rows={[{ l: <>ימים שלמים מתחילת ליל העיקר עד תחילת ליל {day} {months[m][0]} {yearHeb(y)}</>, v: <Num>{NUM(N)}</Num>, s: isExample ? 'הדוגמה של הרמב״ם (ט״ו, ח): ליל שבת, ב׳ אייר שנת העיקר' : undefined }]} />
-        <div className="vpair">
-          <div><p className="vt">{WHICH_NAME.moon}</p><Steps rows={calc('moon')} focus={rowFocus} /></div>
-          <div><p className="vt">{WHICH_NAME.crs}</p><Steps rows={calc('crs')} focus={rowFocus} /></div>
+        <Steps focus={focus === 'days' ? 0 : undefined} rows={[{ l: <>ימים שלמים מתחילת ליל העיקר עד תחילת ליל {day} {months[m][0]} {yearHeb(y)}</>, v: <Num>{NUM(N)}</Num>, s: isExample ? 'הדוגמה של הרמב״ם' : undefined }]} />
+        <div className={which.length > 1 ? 'vpair' : ''}>
+          {which.map(w => <div key={w}><p className="vt">{WHICH_NAME[w]}</p><Steps rows={calc(w)} focus={rowFocus} /></div>)}
         </div>
       </>}
     </Engine>

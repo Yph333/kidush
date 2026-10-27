@@ -18,4 +18,6 @@ export interface GuideDef<F extends string = string> {
 }
 
 export const GUIDE_MIN_STEPS = 4;
+/** a halacha of one sentence needs fewer steps than a topic slide */
+export const HALACHA_MIN_STEPS = 1;
 export const GUIDE_MAX_STEPS = 8;

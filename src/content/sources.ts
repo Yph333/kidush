@@ -33,6 +33,7 @@ export const SOURCES: Record<SlidePath, SourceRef[]> = {
   'luach/odfim': [{ ref: KITZUR, note: 'חישוב בעודפים' }, { ref: `${KH} ו, ה–ט; ו, יב–טו` }],
   'luach/sugim': [{ ref: `${KH} ח, ה–ט`, note: 'חודשים מלאים וחסרים, סדר החודשים' }],
   'luach/keviut': [{ ref: 'טור, אורח חיים תכח', note: 'קביעות ראש השנה וסוג השנה, וכללים קצרים' }, { ref: `${KH} ח, י`, note: 'סימנים לסדר החודשים' }, { ref: 'סימון בשלוש אותיות', note: 'מקובל בלוחות; מקור הסימון: TODO: verify' }],
+  'kelim/shemesh': [{ ref: 'E. M. Standish, Approximate Positions of the Planets (JPL/SSD), טבלה 1', note: 'איברי המסלול, 1800–2050' }, { ref: 'NASA Planetary Fact Sheets', note: 'רדיוסים, ימים, ירחים' }],
   'dechiyot/lama': [{ ref: `${KH} ז, ו`, note: 'יום המולד הוא יום הקביעה, אלא אם כן…' }, { ref: `${KH} ז, א–ה`, note: 'ארבע הדחיות' }],
   'dechiyot/adu': [{ ref: 'ראש השנה כ ע״א', note: 'עולא: משום ירקיא; ר׳ אחא בר חנינא: משום מתיא' }, { ref: 'סוכה מג ע״ב', note: 'ערבה בשבת' }, { ref: `${KH} ז, א; ז, ז`, note: 'הדין והטעם האסטרונומי' }, { ref: 'טור, אורח חיים תכח', note: 'לא אד״ו ראש; מולד זקן' }],
   'dechiyot/zaken': [{ ref: KITZUR, note: 'מולד זקן' }, { ref: 'ראש השנה כ ע״ב', note: 'נולד קודם חצות, בידוע שנראה סמוך לשקיעת החמה' }, { ref: `${KH} ז, ב–ג` }],
