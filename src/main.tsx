@@ -7,6 +7,7 @@ import './styles/base.css';
 import './styles/components.css';
 import './styles/nav.css';
 import './styles/home.css';
+import './styles/lessons.css';
 import './styles/global.css';
 
 createRoot(document.getElementById('root')!).render(
