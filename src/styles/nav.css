@@ -100,10 +100,12 @@ main#deck { flex: 1; min-width: 0; overflow: auto; outline: none; scroll-behavio
 }
 .bot .nb { min-width: 6rem; }
 .bot .pos { color: var(--c-text-3); font-size: var(--fs-xs); }
-.prog { flex: 1; display: flex; gap: 3px; align-items: center; height: 1.5rem; }
+.prog { flex: 1; min-width: 0; overflow: hidden; display: flex; gap: 3px; align-items: center; height: 1.5rem; }
 .prog button { flex: 1; height: 3px; padding: 0; border: 0; border-radius: 2px; background: rgb(255 255 255 / .14); cursor: pointer; transition: height var(--dur-fast), background-color var(--dur-fast); }
 .prog button:hover { height: 7px; background: rgb(255 255 255 / .35); }
 .prog button.on { background: rgb(92 184 255 / .45); }
+/* many slides (the Rambam track has hundreds) on a narrow screen: no gaps, a transparent edge instead */
+@media (max-width: 900px) { .prog { gap: 0; } .prog button { min-width: 0; border-inline: 0.5px solid transparent; background-clip: padding-box; } }
 .prog button.cur { height: 5px; background: var(--c-accent); box-shadow: 0 0 10px rgb(92 184 255 / .7); }
 
 /* ---------- presentation mode: bigger type, quieter chrome, less blur (projectors) ---------- */
