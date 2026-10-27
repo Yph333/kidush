@@ -58,6 +58,9 @@ Expected chain (all match the Rambam's text):
 ### Open points to confirm in the Hebrew original
 - 17:12 — RESOLVED (Hebrew, Wikisource Vilna text, checked 2026-10-04): דגים/טלה ⅙, דלי/שור ⅕, גדי/תאומים ⅙,
   קשת/סרטן 0, עקרב/אריה −⅕, מאזנים/בתולה −⅓. Matches R_FOURTH for all 12 signs.
+- 14:5 — RESOLVED (content owner, 2026-10-27): from the start of Gemini to the start of Leo the season adjustment is
+  +30′. The Vilna printing on Wikisource reads ט״ו there; +30 is symmetric with the printed −30′ for Sagittarius–Capricorn
+  and is what the prototype used. The engine keeps +30; the 14:5 page shows the printed text and explains the choice.
 - 15:3 — doubled distance ranges are whole degrees; fractional values are rounded to the nearest degree.
 - 16:20 uses the moon at 18° 40′ while 15:9 and 17:13 use 18° 36′. Both give latitude 3° 53′.
   Good classroom discussion point; the engine uses 18° 36′.

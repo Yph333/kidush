@@ -1,6 +1,7 @@
 // Load the slide list first, as the app does (the track's slides import components that import it).
 import '../chapters';
 import { describe, expect, it } from 'vitest';
+import { RB, rMotion, rambam, rambamD0, secOf } from '../engines/rambam';
 import KH from '../content/rambamKH.json';
 import { GUIDE_MAX_STEPS, GUIDE_MIN_STEPS } from '../content/guides/types';
 import { RAMBAM_PATHS } from '../content/paths';
@@ -53,4 +54,34 @@ describe('Rambam track', () => {
       });
     });
   }
+});
+
+describe('chapter 14 numbers quoted in the guides', () => {
+  const FULL = 1296000, norm = (s: number) => ((s % FULL) + FULL) % FULL;
+  const dms = (d: number, m: number, s: number) => d * 3600 + m * 60 + s;
+  it('halacha 4 = the engine: root + table motion, for many nights', () => {
+    for (let N = 0; N < 40000; N += 997) {
+      const R = rambam(rambamD0() + N);
+      expect(norm(secOf(RB.root.moon) + rMotion(RB.moon, N).v)).toBe(R.moonMean);
+      expect(norm(secOf(RB.root.crs) + rMotion(RB.crs, N).v)).toBe(R.crs);
+    }
+  });
+  it("the Rambam's example (15:8), 29 days: mean moon 53° 21′ 39″, mean course 103° 21′ 46″", () => {
+    const R = rambam(rambamD0() + 29);
+    expect(R.moonMean).toBe(dms(53, 21, 39));
+    expect(R.crs).toBe(dms(103, 21, 46));
+    expect(R.moonAdj).toBe(dms(53, 36, 39));      // + 15′ (14:5), as written in 15:8
+  });
+  it('one day after the epoch: 14° 25′ 18″ in Taurus', () => expect(norm(secOf(RB.root.moon) + secOf(RB.moon[1]))).toBe(dms(30 + 14, 25, 18)));
+  it('tables vs multiplying the daily motion', () => {
+    const daily = (k: number, w: 'moon' | 'crs') => norm(k * secOf(RB[w][1]));
+    expect(daily(10, 'moon')).toBe(secOf(RB.moon[10]));
+    expect(secOf(RB.moon[100]) - daily(100, 'moon')).toBe(3);
+    expect(secOf(RB.moon[10000]) - daily(10000, 'moon')).toBe(5 * 60);
+    expect(daily(10, 'crs')).toBe(dms(130, 39, 0));                  // "בלא שניות"
+    expect(secOf(RB.crs[100]) - daily(100, 'crs')).toBe(-7);
+    expect(secOf(RB.crs[10000]) - daily(10000, 'crs')).toBe(-(11 * 60 + 40));
+    expect(secOf(RB.moon[1]) - secOf(RB.crs[1])).toBe(6 * 60 + 41);
+  });
+  it('2357 days = 2 × 1000 + 354 + 3', () => expect(rMotion(RB.moon, 2357).parts).toEqual([[1000, 2], [354, 1], [1, 3]]));
 });
