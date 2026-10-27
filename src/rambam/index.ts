@@ -8,11 +8,17 @@ import { GUIDE_14_5, GUIDE_14_6, H14_5, H14_6 } from './ch14/H5to6';
 import { CH6 } from './ch6';
 import { CH7 } from './ch7';
 import { CH8 } from './ch8';
+import { CH11 } from './ch11';
+import { CH12 } from './ch12';
+import { CH13 } from './ch13';
 
 export const RAMBAM_CHAPTERS: ChapterDef[] = [
   CH6.chapter,
   CH7.chapter,
   CH8.chapter,
+  CH11.chapter,
+  CH12.chapter,
+  CH13.chapter,
   { id: 'rambam/14', track: 'rambam', num: 14, title: 'פרק י״ד: מהלך הירח האמצעי', slides: [
     { id: '1', title: 'הלכה א: שני גלגלים', Component: H14_1 },
     { id: '2', title: 'הלכה ב: הטבלה של אמצע הירח', Component: H14_2 },
@@ -28,6 +34,9 @@ export const RAMBAM_GUIDES: { ch: number; h: string; guide: GuideDef }[] = [
   ...CH6.guides,
   ...CH7.guides,
   ...CH8.guides,
+  ...CH11.guides,
+  ...CH12.guides,
+  ...CH13.guides,
   { ch: 14, h: 'א', guide: GUIDE_14_1 },
   { ch: 14, h: 'ב', guide: GUIDE_14_2 },
   { ch: 14, h: 'ג', guide: GUIDE_14_3 },

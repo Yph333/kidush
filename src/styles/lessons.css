@@ -306,3 +306,6 @@ svg.full, .viz .full { width: 100%; }
 .mlen > div.on { box-shadow: 0 0 0 2px var(--c-accent); }
 .mlen b { font-size: var(--fs-sm); } .mlen span { font-size: var(--fs-lg); font-weight: var(--fw-bold); } .mlen small { color: var(--c-text-3); font-size: var(--fs-xs); }
 .topic-link { margin: var(--sp-2) 0 0; font-size: var(--fs-sm); }
+.dms-in { display: flex; align-items: center; gap: var(--sp-1); flex-wrap: wrap; margin: var(--sp-2) 0; direction: ltr; justify-content: flex-end; }
+.dms-in span { direction: rtl; margin-inline-start: var(--sp-2); color: var(--c-text-2); font-size: var(--fs-sm); }
+.dms-in input { width: 4.2rem; text-align: center; }
