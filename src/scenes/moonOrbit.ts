@@ -2,7 +2,7 @@
 // (head and tail) regressing over ~18.6 years, the sun's direction, the moon and its latitude.
 
 import type { SceneHandle, SceneModule } from '../components/Scene3D/types';
-import { earthBody, moonBody, onTextureLoad, sunBody } from './bodies';
+import { earthBody, moonBody, onTextureLoad, orientEarth, sunBody } from './bodies';
 import { COLORS, THREE, createStage, dirOf, disc, line, lineLoop, ring, sphere, clearGroup } from './common';
 
 export interface MoonOrbitProps {
@@ -15,6 +15,8 @@ export interface MoonOrbitProps {
   rambamHead: number | null;
   /** visual exaggeration of the 5.1° tilt */
   exaggerate: number;
+  /** the moment shown: turns the Earth to its true orientation */
+  ms?: number;
 }
 
 const R = 10, INC = 5.145;
@@ -103,6 +105,7 @@ const create = (host: HTMLElement, p0: MoonOrbitProps): SceneHandle<MoonOrbitPro
     sunL.position.copy(sd.clone().add(new THREE.Vector3(0, 1.8, 0)));
     sunLight.position.copy(sd);
     earthB.setSun!(sd);
+    if (p.ms != null) orientEarth(earth, p.ms);
     sunRay.add(line([new THREE.Vector3(), dirOf(p.sunLon, 0, R)], COLORS.sun, { dashed: true, opacity: 0.6 }));
     // Rambam's head
     const show = p.rambamHead !== null;

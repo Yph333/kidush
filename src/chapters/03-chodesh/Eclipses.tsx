@@ -70,7 +70,7 @@ export function Eclipses() {
   const [ex, setEx] = useState(3);
   const player = usePlay(s => setDt(v => (v + s * 4 * HOUR > 36 * HOUR ? -36 * HOUR : v + s * 4 * HOUR)));
   const pos = positions(t);
-  const props = useMemo<EclipseSceneProps>(() => ({ ...pos, exaggerate: ex }), [pos.sunLon, pos.moonLon, pos.moonLat, pos.node, pos.phase, ex]);
+  const props = useMemo<EclipseSceneProps>(() => ({ ...pos, exaggerate: ex, ms: t }), [pos.sunLon, pos.moonLon, pos.moonLat, pos.node, pos.phase, ex, t]);   // eslint-disable-line react-hooks/exhaustive-deps
 
   // a century of eclipses, for "how often"
   const stats = useMemo(() => {

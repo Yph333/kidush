@@ -46,8 +46,8 @@ export function InclinedOrbit() {
   const node = moonNode(t);
   const R = useMemo(() => rambam(dayOfMs(t, c)), [t, c]);
   const props = useMemo<MoonOrbitProps>(() => ({
-    sunLon: sun.lam, moonLon: moon.lam, moonLat: moon.beta, node, rambamHead: R.head / 60, exaggerate: ex,
-  }), [sun.lam, moon.lam, moon.beta, node, R.head, ex]);
+    sunLon: sun.lam, moonLon: moon.lam, moonLat: moon.beta, node, rambamHead: R.head / 60, exaggerate: ex, ms: t,
+  }), [sun.lam, moon.lam, moon.beta, node, R.head, ex, t]);
   const distNode = Math.min(Math.abs(((sun.lam - node + 540) % 360) - 180), Math.abs(((sun.lam - node - 180 + 540) % 360) - 180));
 
   return (

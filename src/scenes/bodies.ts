@@ -10,6 +10,7 @@ import earthDayUrl from '../assets/space/earth-day.jpg';
 import earthNightUrl from '../assets/space/earth-night.jpg';
 import earthWaterUrl from '../assets/space/earth-water.jpg';
 import earthCloudsUrl from '../assets/space/earth-clouds.jpg';
+import { earthBasis } from '../lib/earthFrame';
 
 export interface Body {
   /** add this to the scene and position it like any object */
@@ -125,6 +126,12 @@ export function earthBody(r: number): Body {
   real.add(surface, clouds, atmos);
   const flat = new THREE.Mesh(new THREE.SphereGeometry(r, 48, 32), new THREE.MeshStandardMaterial({ color: COLORS.earth, roughness: 0.9 }));
   return { ...twoLooks(real, flat), setSun: w => { sun.copy(w); } };
+}
+
+/** Turn a globe (longitude 0 at +x, north pole at +y) to its true orientation at the moment ms (sidereal time + axial tilt). */
+export function orientEarth(globe: THREE.Object3D, ms: number): void {
+  const [x, y, z] = earthBasis(ms);
+  globe.quaternion.setFromRotationMatrix(new THREE.Matrix4().makeBasis(new THREE.Vector3(...x), new THREE.Vector3(...y), new THREE.Vector3(...z)));
 }
 
 /* ---------- the Sun: limb darkening and granulation on the disc, a soft glow around it ---------- */

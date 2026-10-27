@@ -3,7 +3,7 @@
 // the Earth. Schematic sizes and distances; the moon's latitude is exaggerated so the "miss" is visible.
 
 import type { SceneHandle, SceneModule } from '../components/Scene3D/types';
-import { earthBody, moonBody, onTextureLoad, sunBody } from './bodies';
+import { earthBody, moonBody, onTextureLoad, orientEarth, sunBody } from './bodies';
 import { COLORS, THREE, clearGroup, createStage, dirOf, disc, line, lineLoop } from './common';
 
 export type EclipsePhase = 'none' | 'lunar-penumbral' | 'lunar-umbral' | 'solar';
@@ -15,6 +15,8 @@ export interface EclipseSceneProps {
   node: number;
   exaggerate: number;
   phase: EclipsePhase;
+  /** the moment shown: turns the Earth to its true orientation (day side, the countries under the shadow) */
+  ms?: number;
 }
 
 const R = 8, EARTH = 1.1, MOON = 0.42, INC = 5.145;
@@ -65,6 +67,7 @@ const create = (host: HTMLElement, p0: EclipseSceneProps): SceneHandle<EclipseSc
     sunL.position.copy(sun.position.clone().add(new THREE.Vector3(0, 3, 0)));
     light.position.copy(toSun.clone().multiplyScalar(30));
     earthB.setSun!(sun.position);
+    if (p.ms != null) orientEarth(earth, p.ms);
     earthL.position.set(0, -EARTH - 0.6, 0);
 
     // the Earth's shadow: dark umbra narrowing, faint penumbra widening (schematic)
