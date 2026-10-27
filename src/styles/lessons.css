@@ -277,3 +277,8 @@ svg.full, .viz .full { width: 100%; }
 .evening { width: 100%; display: block; border-radius: var(--r-md); }
 .ev-t { fill: var(--c-text-2); font-size: 12px; }
 .ev-h { fill: var(--c-text); font-size: 14px; font-weight: 600; }
+/* the month in 3D, and next to it the Moon as seen from the Earth */
+.month3d { display: grid; grid-template-columns: minmax(0, 2.2fr) minmax(0, 1fr); gap: var(--sp-4); align-items: start; }
+.month-face .scene-bar { display: none; }
+@media (max-width: 1100px) { .month3d { grid-template-columns: minmax(0, 1fr); } }
+.month-face .scene3d > .note { display: none; }   /* the view from the Earth is fixed: no dragging */
