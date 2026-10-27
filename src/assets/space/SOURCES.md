@@ -15,3 +15,5 @@ Everything here ships inside the app (the site works offline). Files were scaled
 
 The intermediate copies used for scaling came from the open-source project *earth-moon-solar* by Ethan Rogers
 (code MIT; its CREDITS.md lists the same original sources). No code was copied from it.
+
+| `zodiac.json` | Stick figures and IAU boundaries of the twelve zodiac constellations, from **d3-celestial 0.7.35**, Olaf Frohn — https://github.com/ofrohn/d3-celestial ; trimmed by `tools/sources/zodiac-constellations.mjs` | **BSD-3-Clause.** Copyright (c) 2015, Olaf Frohn. |

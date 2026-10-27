@@ -13,6 +13,7 @@ import type { MoonOrbitProps } from '../../scenes/moonOrbit';
 import type { WheelsProps } from '../../scenes/rambamWheels';
 import { NightPicker, useNight } from '../ch14/Blocks';
 import { SignPos } from '../ch14/Wheels14';
+import { Magnifier, ZodiacScene } from './zodiac';
 
 const fx = (on: boolean) => (on ? 'guide-focus' : '');
 const loadWheels = () => import('../../scenes/rambamWheels').then(m => m.default);
@@ -35,7 +36,8 @@ export function EqTable({ tab, title, deg: d0, fold = 180, step = 10, hl }: { ta
       </table></div>
       <p className="m0">
         {f !== deg && <><Num>{deg}°</Num> → <Num>{f}°</Num> · </>}
-        <DM min={tab[r]} /> + (<DM min={tab[r + 1] - tab[r]} />) × <Num>{rem}/{step}</Num> = <strong><DM min={Math.round(interp(tab, f))} /></strong>
+        <DM min={tab[r]} /> + (<DM min={tab[r + 1] - tab[r]} />) × <Num>{rem}/{step}</Num> = <strong><DM min={Math.round(interp(tab, f))} /></strong>{' '}
+        <Magnifier from={0} to={Math.round(interp(tab, f)) / 60} title={<>מנת המסלול: <DM min={Math.round(interp(tab, f))} /></>}>🔍 בתלת־ממד</Magnifier>
       </p>
     </Engine>
   );
@@ -78,6 +80,7 @@ export function TrueMoon({ focus }: { focus?: MoonStep }) {
       <NightPicker night={night} />
       {R ? <Steps rows={rows} focus={focus ? f[focus] : undefined} /> : <p className="note">התאריך לפני העיקר.</p>}
     </Engine>
+    {R && <ZodiacScene sunLon={R.sunTrue / 60} moonLon={R.moonTrue / 60} pointer={{ lon: R.moonTrue / 60 }} hlSign={Math.floor(R.moonTrue / 1800)} note={<>הירח והשמש על גלגל המזלות באותו ערב. <Magnifier from={R.moonAdj / 3600} to={R.moonTrue / 60} title="מאמצע הירח למקומו האמיתי">🔍 הגדלה</Magnifier></>} />}
   </>;
 }
 
@@ -164,6 +167,7 @@ export function Sighting({ focus }: { focus?: SightStep }) {
   ];
   const f = { long1: 0, pre: 1, long2: 2, lat2: 3, circle: 4, long3: 5, long4: 6, geo: 7, arc: 8, verdict: 9 } as const;
   return <>
+    {(focus === 'long1' || focus === 'pre' || !focus) && <ZodiacScene sunLon={R.sunTrue / 60} moonLon={R.moonTrue / 60} hlSign={R.sign} arc={{ from: R.sunTrue / 60, to: R.moonTrue / 60, label: 'האורך הראשון' }} note="הקשת הצהובה: האורך הראשון, מהשמש עד הירח לאורך המזלות." />}
     <Limits arc={R.arc / 60} long1={R.long1 / 60} hl={focus === 'verdict'} />
     <Engine title="חשבון הראייה" sub={night.label} className={fx(!!focus)}>
       <NightPicker night={night} />

@@ -347,3 +347,11 @@ svg.full, .viz .full { width: 100%; }
 .judges i { width: 12px; height: 12px; border-radius: 50%; display: inline-block; }
 .judges i.y { background: #7fce9c; }
 .judges i.n { background: #ef8f76; }
+
+/* the zodiac wheel and the magnifier */
+.zodiac-ctl { display: flex; flex-wrap: wrap; gap: var(--sp-2) var(--sp-4); align-items: center; margin-top: var(--sp-2); }
+.magnifier { width: min(64rem, 100%); max-height: 94vh; overflow: auto; padding: var(--sp-4) var(--sp-5); outline: none; display: grid; gap: var(--sp-3); }
+.mag-btn { font-size: var(--fs-xs); min-height: 1.9rem; padding: 0 var(--sp-2); }
+.s-label.sign { font-weight: 700; font-size: 14px; text-shadow: 0 0 6px #000; }
+.s-label.fine { font-size: 11px; color: #f6e7a6; }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
