@@ -4,6 +4,7 @@ import { D2R, HOUR, R2D, TofMs, localParts, moladMs, moonEcl, moonNode, nrm, sun
 import { ECLIPSE_SEASON_DAYS, type Eclipse, SAROS_DAYS, eclipsesBetween, sarosOf, shadowAxis, visibilityAt } from '../../engines/eclipses';
 import { centralPath, pathRegions, regionsOf, visibilityGrid } from '../../lib/eclipseMap';
 import { FamilyTable, Panorama, SeasonsStrip, WorldMap, sarosFamily } from './eclipseViz';
+import { EclipseObserver } from './EclipseObserver';
 import { Term } from '../../components/Glossary';
 import { Scene3D } from '../../components/Scene3D/Scene3D';
 import { usePlay } from '../../components/Scene3D/usePlay';
@@ -154,6 +155,12 @@ export function Eclipses() {
             play={{ ...player, label: 'הפעל: הירח עובר ליד הצומת' }}
             fallback={<Track e={e} t={t} />} />
         </Viz>
+        {e.kind === 'solar' && (
+          <Viz>
+            <p className="chart-title">מה רואים מהקרקע</p>
+            <EclipseObserver key={e.k} e={e} home={{ lat: p.lat, lon: p.lon, name: city.name }} />
+          </Viz>
+        )}
         <Viz>
           <p className="chart-title">איפה רואים את {name(e)} של <Num>{civ(e.ms)}</Num></p>
           <WorldMap e={e} cells={cells} central={central} home={{ lat: p.lat, lon: p.lon, name: city.name }} family={famDots} />
