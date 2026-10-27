@@ -309,3 +309,11 @@ svg.full, .viz .full { width: 100%; }
 .dms-in { display: flex; align-items: center; gap: var(--sp-1); flex-wrap: wrap; margin: var(--sp-2) 0; direction: ltr; justify-content: flex-end; }
 .dms-in span { direction: rtl; margin-inline-start: var(--sp-2); color: var(--c-text-2); font-size: var(--fs-sm); }
 .dms-in input { width: 4.2rem; text-align: center; }
+
+/* Rambam ch. 9: the 28-year ring beside the week wheel, and the four tekufa hour dials */
+.pair { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: var(--sp-3); align-items: center; }
+.hours4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--sp-2); }
+.hours4 figure { margin: 0; text-align: center; border-radius: var(--r-2, 8px); padding: var(--sp-1); }
+.hours4 figure.hl { outline: 2px solid var(--c-accent, #6cb6ff); }
+.hours4 figcaption { font-size: var(--fs-sm); color: var(--c-text-2); }
+@media (max-width: 520px) { .hours4 { grid-template-columns: repeat(2, 1fr); } }

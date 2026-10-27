@@ -8,6 +8,8 @@ import { GUIDE_14_5, GUIDE_14_6, H14_5, H14_6 } from './ch14/H5to6';
 import { CH6 } from './ch6';
 import { CH7 } from './ch7';
 import { CH8 } from './ch8';
+import { CH9 } from './ch9';
+import { CH10 } from './ch10';
 import { CH11 } from './ch11';
 import { CH12 } from './ch12';
 import { CH13 } from './ch13';
@@ -19,6 +21,8 @@ export const RAMBAM_CHAPTERS: ChapterDef[] = [
   CH6.chapter,
   CH7.chapter,
   CH8.chapter,
+  CH9.chapter,
+  CH10.chapter,
   CH11.chapter,
   CH12.chapter,
   CH13.chapter,
@@ -40,6 +44,8 @@ export const RAMBAM_GUIDES: { ch: number; h: string; guide: GuideDef }[] = [
   ...CH6.guides,
   ...CH7.guides,
   ...CH8.guides,
+  ...CH9.guides,
+  ...CH10.guides,
   ...CH11.guides,
   ...CH12.guides,
   ...CH13.guides,
