@@ -11,7 +11,7 @@ const KH = 'רמב״ם, הלכות קידוש החודש';
 export type LamaFocus = 'wheel' | 'rules' | 'ours';
 
 export const LAMA: GuideDef<LamaFocus> = {
-  draft: true,
+  draft: false,
   steps: [
     {
       title: 'יום המולד הוא יום ראש השנה',
@@ -57,7 +57,7 @@ export const LAMA: GuideDef<LamaFocus> = {
 export type AduFocus = 'rule' | 'wed' | 'fri' | 'why' | 'sun' | 'rambam' | 'try';
 
 export const ADU: GuideDef<AduFocus> = {
-  draft: true,
+  draft: false,
   steps: [
     {
       title: 'הכלל',
@@ -126,7 +126,7 @@ export const ADU: GuideDef<AduFocus> = {
 export type ZakenFocus = 'clock' | 'rule' | 'reason' | 'adu' | 'zih' | 'try';
 
 export const ZAKEN: GuideDef<ZakenFocus> = {
-  draft: true,
+  draft: false,
   steps: [
     {
       title: 'שעון הלוח: היממה מתחילה בערב',
@@ -182,7 +182,7 @@ export const ZAKEN: GuideDef<ZakenFocus> = {
 export type GatradFocus = 'rule' | 'lengths' | 'without' | 'next' | 'chain' | 'fix' | 'try';
 
 export const GATRAD: GuideDef<GatradFocus> = {
-  draft: true,
+  draft: false,
   steps: [
     {
       title: 'הכלל',
@@ -250,7 +250,7 @@ export const GATRAD: GuideDef<GatradFocus> = {
 export type BetuFocus = 'rule' | 'back' | 'prev' | 'prevRh' | 'without' | 'fix' | 'try';
 
 export const BETU: GuideDef<BetuFocus> = {
-  draft: true,
+  draft: false,
   steps: [
     {
       title: 'הכלל',
@@ -314,7 +314,7 @@ export const BETU: GuideDef<BetuFocus> = {
 export type ArgazFocus = 'intro' | 'adu' | 'gatrad' | 'betu' | 'zaken' | 'sum';
 
 export const ARGAZ: GuideDef<ArgazFocus> = {
-  draft: true,
+  draft: false,
   steps: [
     {
       title: 'מה עושים כאן',
