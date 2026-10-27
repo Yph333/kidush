@@ -79,11 +79,11 @@ export function App() {
   const i = cur.index;
 
   return (
-    <div className="app" data-mode={mode} ref={appRef}>
+    <div className="app" data-mode={mode} data-home={i === 0 ? '' : undefined} ref={appRef}>
       <a className="skip" href="#deck">דילוג לתוכן</a>
       <header className="top">
         <button type="button" className="iconbtn map-btn" onClick={() => setState({ mapOpen: true })} aria-label="מפת השיעור">☰</button>
-        <div className="brand">בונים לוח עברי<small>פרק <span className="num">{cur.chapter.num}</span>: {cur.chapter.title}</small></div>
+        <button type="button" className="brand" onClick={() => go(0)} aria-label="בונים לוח עברי: למסך הראשי">בונים לוח עברי{i > 0 && <small>פרק <span className="num">{cur.chapter.num}</span>: {cur.chapter.title}</small>}</button>
         <div className="sp" />
         <div className="top-ctl">
           <YearControl value={demo} onChange={v => setState({ demoYear: v })} label="שנת הדגמה" />

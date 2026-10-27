@@ -15,7 +15,7 @@ main#deck { flex: 1; min-width: 0; overflow: auto; outline: none; scroll-behavio
   background: var(--glass-bg-strong); border-bottom: 1px solid var(--c-line);
   -webkit-backdrop-filter: var(--glass-blur); backdrop-filter: var(--glass-blur);
 }
-.brand { display: inline-flex; align-items: baseline; gap: var(--sp-3); white-space: nowrap; font-size: var(--fs-md); font-weight: var(--fw-bold); color: var(--c-text); letter-spacing: -.01em; }
+.brand { background: none; border: 0; padding: 0; cursor: pointer; display: inline-flex; align-items: baseline; gap: var(--sp-3); white-space: nowrap; font-size: var(--fs-md); font-weight: var(--fw-bold); color: var(--c-text); letter-spacing: -.01em; }
 .brand small { font-size: var(--fs-xs); font-weight: var(--fw-medium); color: var(--c-text-3); }
 .brand small .num { color: var(--c-text-2); }
 .top .sp { flex: 1; }
@@ -68,16 +68,16 @@ main#deck { flex: 1; min-width: 0; overflow: auto; outline: none; scroll-behavio
 
 /* drawer (presentation mode, narrow screens) */
 .scrim { position: fixed; inset: 0; z-index: calc(var(--z-drawer) - 1); background: rgb(2 5 12 / .55); -webkit-backdrop-filter: blur(4px); backdrop-filter: blur(4px); }
-.app[data-mode="present"] .map,
+.app[data-mode="present"] .map, .app[data-home] .map,
 .app .map.open {
   position: fixed; top: 0; bottom: 0; inset-inline-start: 0; z-index: var(--z-drawer); width: min(var(--map-w), 88vw);
   background: var(--glass-bg-strong); -webkit-backdrop-filter: var(--glass-blur); backdrop-filter: var(--glass-blur);
   border-inline-end: 1px solid var(--glass-border); box-shadow: var(--shadow-pop);
   transform: translateX(100%); transition: transform var(--dur-slow) var(--ease-out);
 }
-.app[data-mode="present"] .map:not(.open) { visibility: hidden; }
+.app[data-mode="present"] .map:not(.open), .app[data-home] .map:not(.open) { visibility: hidden; }
 .app .map.open { transform: none; visibility: visible; }
-.app[data-mode="present"] .map-btn, .app .map.open .map-close { display: inline-flex; }
+.app[data-mode="present"] .map-btn, .app[data-home] .map-btn, .app .map.open .map-close { display: inline-flex; }
 @media (max-width: 1100px) {
   .map {
     position: fixed; top: 0; bottom: 0; inset-inline-start: 0; z-index: var(--z-drawer); width: min(var(--map-w), 88vw); visibility: hidden;

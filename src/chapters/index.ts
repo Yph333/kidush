@@ -1,5 +1,5 @@
 import type { ChapterDef, FlatSlide } from './types';
-import { Opening } from './01-yesodot/Opening';
+import { Home } from './01-yesodot/Home';
 import { Units } from './01-yesodot/Units';
 import { Sun } from './02-yom/Sun';
 import { Zmanim } from './02-yom/Zmanim';
@@ -36,7 +36,7 @@ import { SourcePage } from './08-kelim/SourcePage';
 
 export const CHAPTERS: ChapterDef[] = [
   { id: 'yesodot', num: 1, title: 'יסודות', slides: [
-    { id: 'petiha', title: 'פתיחה', Component: Opening },
+    { id: 'petiha', title: 'מסך ראשי', Component: Home },
     { id: 'yehidot', title: 'יום, שעה וחלק', Component: Units },
   ] },
   { id: 'yom', num: 2, title: 'היום', slides: [
