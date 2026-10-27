@@ -7,7 +7,7 @@ describe('guided explanations', () => {
   const entries = Object.entries(GUIDES);
 
   it('exist for the chapter 6 pilot', () => {
-    expect(Object.keys(GUIDES)).toEqual(expect.arrayContaining(['dechiyot/lama', 'dechiyot/adu']));
+    expect(Object.keys(GUIDES)).toEqual(expect.arrayContaining(['dechiyot/lama', 'dechiyot/adu', 'dechiyot/zaken', 'dechiyot/gatrad', 'dechiyot/betu', 'dechiyot/argaz']));
   });
 
   for (const [path, g] of entries) {

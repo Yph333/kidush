@@ -1,10 +1,12 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { EX, P_DAY, P_HOUR, P_MONTH, fmtDur, fmtMolad, isLeap, rh, rhFrom, yearHeb } from '../../engines/calendar';
+import { Guide, useGuide } from '../../components/Guide';
 import { MoladControl, moladParts } from '../../components/MoladControl';
 import { Engine, Slide, Viz } from '../../components/Slide';
 import { Steps } from '../../components/Steps';
 import { Chips, Civil, Legend, Num, Sig, Tag } from '../../components/text';
 import { WeekWheel, dayMark } from '../../components/WeekWheel';
+import { GATRAD as GUIDE, type GatradFocus } from '../../content/guides/dechiyot';
 import { RULE_NAME, dayWord } from '../../lib/format';
 import { OurYear } from './OurYear';
 import { useStore } from '../../state/store';
@@ -14,9 +16,17 @@ const okLen = (n: number, L: boolean) => (L ? n >= 383 && n <= 385 : n >= 353 &&
 const LenTag = ({ n, L }: { n: number; L: boolean }) => (okLen(n, L) ? <Tag tone="ok">תקין</Tag> : <Tag tone="bad">אסור</Tag>);
 const ck = (b: boolean) => (b ? '✓' : '✗');
 
+/** every guide step except the last loads Rambam's case; ROW: the row each step points at */
+const DEMO = { m: { d: 2, h: 9, p: 204 }, leap: false };
+const ROW: Partial<Record<GatradFocus, number>> = { rule: 1, without: 2, next: 3, chain: 5, fix: 6 };
+
 export function Gatrad() {
   const [m, setM] = useState({ d: 2, h: 9, p: 204 });
   const [L, setL] = useState(false);
+  const g = useGuide(GUIDE);
+  const demoOn = !!g.focus && g.focus !== 'try';
+  useEffect(() => { if (demoOn) { setM(DEMO.m); setL(DEMO.leap); } }, [demoOn, g.i]);
+  const f = (on: boolean) => (on ? 'guide-focus' : '');
   const demo = useStore(s => s.demoYear);
   const examples = useMemo(() => findYears(y => y !== demo && rh(y).rules.includes('gatrad'), 5600, 6100, 6), [demo]);
   const t = moladParts(m), PP = m.h * P_HOUR + m.p;
@@ -29,6 +39,7 @@ export function Gatrad() {
     <Slide
       kicker="הדחיות · 3 מתוך 4"
       title="ג״ט ר״ד בשנה פשוטה"
+      guide={<Guide g={g} />}
       text={<>
         <p>בשנה <strong>פשוטה</strong>, אם המולד ביום <strong>ג׳</strong> ב־<strong><Num>9</Num> שעות ו־<Num>204</Num> חלקים</strong> או אחרי, ראש השנה נדחה. יום ד׳ הוא אד״ו, ולכן בפועל ליום ה׳.</p>
         <h3>למה? כי השנה הייתה יוצאת ארוכה מדי</h3>
@@ -39,7 +50,7 @@ export function Gatrad() {
         <p>דוחים כבר עכשיו, ליום ה׳, והשנה יוצאת <Num>354</Num>.</p>
       </>}
       stage={<>
-        <Viz>
+        <Viz className={f(g.focus === 'rule' || g.focus === 'next')}>
           <WeekWheel
             markers={[{ x: t, cls: 'moon', label: 'השנה' }, { x: t2, cls: 'leap', label: 'הבאה' }]}
             arcs={[{ from: t, to: t + ex, cls: 'leap' }]}
@@ -48,10 +59,10 @@ export function Gatrad() {
             center={['+ שנה', fmtDur(ex), ap ? 'גטר״ד חלה' : 'גטר״ד לא חלה']} aria="גטר״ד על גלגל השבוע" />
           <Legend items={[['var(--moon)', 'מולד השנה'], ['var(--leap)', 'מולד השנה הבאה'], ['var(--shift)', 'הקווים: ג׳ ט׳ ר״ד ושבת 18 שעות']]} />
         </Viz>
-        <Engine title="בודק גטר״ד" sub="עם ובלי הדחייה">
+        <Engine title="בודק גטר״ד" sub="עם ובלי הדחייה" className={f(!!g.focus && (g.focus in ROW || g.focus === 'try'))}>
           <MoladControl value={m} onChange={setM}
             extras={<label className="chk"><input type="checkbox" checked={L} onChange={e => setL(e.target.checked)} />השנה מעוברת</label>} />
-          <Steps rows={[
+          <Steps focus={g.focus && ROW[g.focus]} rows={[
             { l: 'מולד השנה', v: <Sig>{fmtMolad(t)}</Sig>, s: <Civil t={t} /> },
             { l: 'תנאי גטר״ד', v: <>יום ג׳ {ck(m.d === 2)} · שנה פשוטה {ck(!L)} · ט׳ ר״ד ומעלה {ck(PP >= 9 * P_HOUR + 204)} · לא מולד זקן {ck(m.h < 18)}</>, c: ap ? 'bad' : '' },
             { l: 'בלי הדחייה: ראש השנה', v: dayWord(no.day), s: no.rules.length ? 'אחרי ' + no.rules.map(k => RULE_NAME[k]).join(', ') : '' },
