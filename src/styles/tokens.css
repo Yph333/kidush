@@ -1,0 +1,110 @@
+/* =====================================================================================================
+   DESIGN TOKENS — the one place the visual language is defined. Every rule in global.css reads from here.
+   Look: dark, clean, scientific. Space-black background, white text, one sky-blue accent, frosted-glass
+   controls, and 3D scenes that sit directly on the page background. Dark only (print overrides at the end).
+   Contrast (checked): text 18:1, text-2 10.7:1, text-3 6.8:1, accent 9.1:1 on --bg; all ≥ 5.5:1 on surfaces.
+   ===================================================================================================== */
+:root {
+  color-scheme: dark;
+
+  /* ---- color: surfaces ---- */
+  --c-bg: #070B14;            /* page / space */
+  --c-bg-glow: #0C1730;       /* the faint glow at the top of the page */
+  --c-surface: #0F1626;       /* content cards (nearly opaque: long text sits here) */
+  --c-surface-2: #162036;     /* inset areas inside a card: facts, inputs */
+  --c-surface-3: #1D2944;     /* hover / selected rows */
+  --c-line: rgb(255 255 255 / .09);
+  --c-line-strong: rgb(255 255 255 / .18);
+
+  /* ---- color: text ---- */
+  --c-text: #F2F5FA;
+  --c-text-2: #B6C0D2;        /* secondary: captions, labels */
+  --c-text-3: #8C98AE;        /* tertiary: hints, axes */
+
+  /* ---- color: accent (interactive) ---- */
+  --c-accent: #5CB8FF;
+  --c-accent-strong: #8ACCFF;
+  --c-accent-ink: #04111E;    /* text on an accent fill (8.8:1) */
+  --c-accent-soft: rgb(92 184 255 / .14);
+
+  /* ---- color: meaning (used by the lessons; keep the hue ↔ meaning mapping) ---- */
+  --c-moon: #EBC66E;   --c-moon-soft: rgb(235 198 110 / .14);    /* molad, the moon, the main result */
+  --c-shift: #FF8B73;  --c-shift-soft: rgb(255 139 115 / .14);   /* postponement, error */
+  --c-leap: #B0A2FF;   --c-leap-soft: rgb(176 162 255 / .15);    /* leap year, secondary value */
+  --c-ok: #7FD99A;     --c-ok-soft: rgb(127 217 154 / .13);      /* correct, allowed */
+  --c-sun: #FFD27A;
+  --c-night: #121B30;  --c-day: #22304F;                         /* night/day bands in diagrams */
+  --c-space: transparent;                                        /* 3D and sky diagrams sit on the page */
+
+  /* chart series (dataviz reference palette, validated on dark surfaces) */
+  --s1: #3987e5; --s2: #d95926; --s3: #199e70; --s4: #c98500;
+
+  /* ---- glass (buttons, controls, bars, menus, dialogs) ---- */
+  --glass-bg: rgb(255 255 255 / .06);
+  --glass-bg-hover: rgb(255 255 255 / .11);
+  --glass-bg-active: rgb(255 255 255 / .16);
+  --glass-bg-strong: rgb(16 24 42 / .72);       /* bars and dialogs: more opaque, text sits on them */
+  --glass-border: rgb(255 255 255 / .14);
+  --glass-border-hover: rgb(255 255 255 / .26);
+  --glass-highlight: inset 0 1px 0 rgb(255 255 255 / .10);
+  --glass-shadow: 0 8px 24px rgb(0 0 0 / .35);
+  --glass-blur: blur(16px) saturate(150%);
+
+  /* ---- type ---- */
+  --font-sans: "IBM Plex Sans Hebrew", "Segoe UI", "Arial Hebrew", Arial, sans-serif;
+  --font-serif: "Frank Ruhl Libre", "David", "Times New Roman", serif;   /* source texts, Hebrew letter-signs */
+  --fs-xs: .75rem;  --fs-sm: .875rem;  --fs-base: 1rem;  --fs-md: 1.125rem;  --fs-lg: 1.375rem;
+  --fs-xl: 1.75rem; --fs-2xl: clamp(2rem, 2.6vw, 2.75rem);  --fs-display: clamp(2.75rem, 5.2vw, 4.75rem);
+  --fw-regular: 400; --fw-medium: 500; --fw-semibold: 600; --fw-bold: 700;
+  --lh-tight: 1.15; --lh-snug: 1.35; --lh-body: 1.7; --lh-source: 1.95;
+  --measure: 38em;   /* comfortable line length for body text */
+
+  /* ---- space (4px grid) ---- */
+  --sp-1: .25rem; --sp-2: .5rem; --sp-3: .75rem; --sp-4: 1rem; --sp-5: 1.5rem; --sp-6: 2rem;
+  --sp-7: 3rem;   --sp-8: 4rem;  --sp-9: 6rem;
+  --gutter: clamp(1rem, 3vw, 3rem);
+
+  /* ---- shape & depth ---- */
+  --r-sm: 8px; --r-md: 12px; --r-lg: 20px; --r-pill: 999px;
+  --shadow-card: 0 1px 0 rgb(255 255 255 / .04) inset, 0 12px 40px rgb(0 0 0 / .35);
+  --shadow-pop: 0 24px 80px rgb(0 0 0 / .55);
+
+  /* ---- focus ---- */
+  --focus-ring: 0 0 0 2px var(--c-bg), 0 0 0 4px var(--c-accent);
+
+  /* ---- motion ---- */
+  --ease-out: cubic-bezier(.2, .7, .2, 1);
+  --dur-fast: 120ms; --dur: 200ms; --dur-slow: 420ms;
+
+  /* ---- layers ---- */
+  --z-bar: 10; --z-drawer: 30; --z-notes: 35; --z-dialog: 40; --z-skip: 50;
+
+  /* ---- layout ---- */
+  --map-w: 17rem;
+  --bar-h: 3.5rem;
+
+  /* ===== legacy names (components and inline SVG still use these) → the tokens above ===== */
+  --bg: var(--c-bg); --panel: var(--c-surface); --panel2: var(--c-surface-2); --ink: var(--c-text);
+  --muted: var(--c-text-2); --line: var(--c-line-strong);
+  --moon: var(--c-moon); --moon-soft: var(--c-moon-soft); --shift: var(--c-shift); --shift-soft: var(--c-shift-soft);
+  --leap: var(--c-leap); --leap-soft: var(--c-leap-soft); --ok: var(--c-ok); --ok-soft: var(--c-ok-soft);
+  --night: var(--c-night); --day: var(--c-day); --space: var(--c-space);
+  --sans: var(--font-sans); --serif: var(--font-serif); --rashi: var(--font-serif);
+}
+
+/* frosted glass costs GPU; people who ask for less transparency get solid controls */
+@media (prefers-reduced-transparency: reduce) {
+  :root { --glass-bg: #141D31; --glass-bg-hover: #1B2640; --glass-bg-active: #22304F; --glass-bg-strong: #101828; --glass-blur: none; }
+}
+
+/* print: ink on paper */
+@media print {
+  :root {
+    color-scheme: light;
+    --c-bg: #fff; --c-surface: #fff; --c-surface-2: #f2f4f8; --c-surface-3: #e8ecf3; --c-line: #d5dbe6; --c-line-strong: #c3cbd9;
+    --c-text: #111; --c-text-2: #444; --c-text-3: #666;
+    --c-moon: #8a6508; --c-moon-soft: #f6ebc8; --c-shift: #b23a22; --c-shift-soft: #f8ddd5;
+    --c-leap: #5a46c8; --c-leap-soft: #e6e1ff; --c-ok: #24704a; --c-ok-soft: #d6eddf;
+    --c-night: #dfe4ee; --c-day: #f7f8fb;
+  }
+}

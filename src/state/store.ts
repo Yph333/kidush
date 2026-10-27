@@ -5,7 +5,6 @@ import { useSyncExternalStore } from 'react';
 import { currentYear } from '../engines/calendar';
 
 export type Mode = 'present' | 'explore';
-export type Theme = 'auto' | 'light' | 'dark';
 
 /** Shared timeline for the sky slides (chapters 3 and 7). */
 export interface AstroState {
@@ -33,7 +32,6 @@ export interface State {
   demoYear: number;
   city: number;
   mode: Mode;
-  theme: Theme;
   /** current slide path, "chapter/slide" */
   slide: string;
   /** slides seen, per demo year */
@@ -54,7 +52,7 @@ const LS_KEY = 'luach.v1';
 const MIN_YEAR = 2, MAX_YEAR = 9998;
 export const clampYear = (y: number): number => Math.max(MIN_YEAR, Math.min(MAX_YEAR, Math.round(y)));
 
-type Persisted = Pick<State, 'demoYear' | 'city' | 'mode' | 'theme' | 'seen' | 'guesses' | 'zPick'>;
+type Persisted = Pick<State, 'demoYear' | 'city' | 'mode' | 'seen' | 'guesses' | 'zPick'>;
 
 function readLS(): Partial<Persisted> {
   try {
@@ -65,7 +63,7 @@ function readLS(): Partial<Persisted> {
 
 function writeLS(s: State): void {
   try {
-    const p: Persisted = { demoYear: s.demoYear, city: s.city, mode: s.mode, theme: s.theme, seen: s.seen, guesses: s.guesses, zPick: s.zPick };
+    const p: Persisted = { demoYear: s.demoYear, city: s.city, mode: s.mode, seen: s.seen, guesses: s.guesses, zPick: s.zPick };
     localStorage.setItem(LS_KEY, JSON.stringify(p));
   } catch { /* storage unavailable: state still works for this session */ }
 }
@@ -100,7 +98,6 @@ function initial(): State {
     demoYear,
     city: hs.city ?? ls.city ?? 0,
     mode: hs.mode ?? ls.mode ?? 'explore',
-    theme: ls.theme ?? 'auto',
     slide: hs.slide,
     seen: ls.seen && typeof ls.seen === 'object' ? ls.seen : {},
     guesses: ls.guesses && typeof ls.guesses === 'object' ? ls.guesses : {},

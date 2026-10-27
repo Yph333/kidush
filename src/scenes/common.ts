@@ -12,7 +12,7 @@ export const COLORS = {
   muted: 0x7d88a8,
   moon: 0xe7c76f,
   shift: 0xef8f76,
-  leap: 0x88c5d8,
+  leap: 0xb0a2ff,
   ok: 0x7fce9c,
   sun: 0xf4c33f,
   earth: 0x3e7cb8,

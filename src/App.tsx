@@ -6,10 +6,8 @@ import { ProgressMap } from './components/ProgressMap';
 import { TeacherNotesPanel } from './components/TeacherNotes';
 import { YearControl } from './components/YearControl';
 import { go, next, prev, startUrlSync } from './state/nav';
-import { type Theme, getState, markSeen, setState, useStore } from './state/store';
+import { getState, markSeen, setState, useStore } from './state/store';
 
-const THEME_NEXT: Record<Theme, Theme> = { auto: 'dark', dark: 'light', light: 'auto' };
-const THEME_LABEL: Record<Theme, string> = { auto: 'ערכה: אוטומטית', dark: 'ערכה: כהה', light: 'ערכה: בהירה' };
 
 function toggleFullscreen() {
   try {
@@ -26,7 +24,6 @@ function isTyping(el: EventTarget | null): boolean {
 export function App() {
   const slidePath = useStore(s => s.slide);
   const mode = useStore(s => s.mode);
-  const theme = useStore(s => s.theme);
   const demo = useStore(s => s.demoYear);
   const city = useStore(s => s.city);
   const notesOpen = useStore(s => s.notesOpen);
@@ -42,11 +39,6 @@ export function App() {
     mainRef.current?.scrollTo?.({ top: 0 });
     document.title = `${cur.title} · בונים לוח עברי`;
   }, [cur.path, cur.title, demo]);
-
-  useEffect(() => {
-    const r = document.documentElement;
-    if (theme === 'auto') delete r.dataset.theme; else r.dataset.theme = theme;
-  }, [theme]);
 
   // moonlight that follows the cursor: --mx/--my drive a faint glow behind the page
   useEffect(() => {
@@ -108,7 +100,6 @@ export function App() {
           </button>
           <button type="button" className="iconbtn" aria-pressed={notesOpen} title="מקש N" onClick={() => setState({ notesOpen: !notesOpen })}>הערות למורה</button>
           <button type="button" className="iconbtn" onClick={() => setState({ glossaryOpen: '*' })}>מילון</button>
-          <button type="button" className="iconbtn" onClick={() => setState({ theme: THEME_NEXT[theme] })} aria-label={THEME_LABEL[theme]} title={THEME_LABEL[theme]}>☾ / ☀</button>
           <button type="button" className="iconbtn fs-btn" onClick={toggleFullscreen} title="מקש F">מסך מלא</button>
         </div>
       </header>
