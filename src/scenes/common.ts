@@ -33,10 +33,10 @@ export interface Stage {
 
 export function createStage(host: HTMLElement, opts: { fov?: number; near?: number; far?: number } = {}): Stage {
   const w = host.clientWidth || 600, h = host.clientHeight || 400;
-  const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
+  const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
   renderer.setPixelRatio(Math.min(2, window.devicePixelRatio || 1));
   renderer.setSize(w, h);
-  renderer.setClearColor(COLORS.bg);
+  renderer.setClearColor(0x000000, 0);   // transparent: the scene sits on the page background
   host.appendChild(renderer.domElement);
 
   const labels = new CSS2DRenderer();

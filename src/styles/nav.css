@@ -23,7 +23,7 @@ main#deck { flex: 1; min-width: 0; overflow: auto; outline: none; scroll-behavio
 .top-ctl .fld { flex-direction: row; align-items: center; gap: var(--sp-2); white-space: nowrap; }
 .top-ctl .yc { flex-wrap: nowrap; }
 .top-ctl .yc input { width: 7rem; min-height: 2.2rem; }
-.top-ctl .yc button { width: 2.2rem; min-height: 2.2rem; }
+.top-ctl .yc button { min-width: 2.2rem; min-height: 2.2rem; }
 .top-ctl .fld select { min-height: 2.2rem; }
 .top-btns { display: flex; gap: var(--sp-2); flex-wrap: wrap; }
 .map-btn { display: none; }

@@ -68,6 +68,8 @@
 .fld select option, .tbtn select option { background: var(--c-surface); color: var(--c-text); }
 .fld input[type=number] { width: 6.5rem; direction: ltr; text-align: center; }
 .fld input[type=time], .fld input[type=date] { direction: ltr; color-scheme: dark; }
+.fld input[type=date] { min-width: 10.5rem; }
+.yc input[type=date] { font-family: var(--font-sans); font-weight: var(--fw-medium); font-size: var(--fs-base); }
 input[type=range] { accent-color: var(--c-accent); }
 .chk { display: flex; align-items: center; gap: var(--sp-2); font-size: var(--fs-sm); color: var(--c-text); cursor: pointer; }
 .chk input, .switch input { width: 1.1rem; height: 1.1rem; accent-color: var(--c-accent); cursor: pointer; }
@@ -76,7 +78,9 @@ input[type=range] { accent-color: var(--c-accent); }
 .yc { display: flex; align-items: center; gap: var(--sp-2); flex-wrap: wrap; }
 .yc input { width: 8rem; text-align: center; font-family: var(--font-serif); font-weight: var(--fw-bold); font-size: var(--fs-md); }
 .yc input.invalid { border-color: var(--c-shift); box-shadow: 0 0 0 3px var(--c-shift-soft); }
-.yc button { width: 2.4rem; padding: 0; font-size: var(--fs-md); }
+.yc button { min-width: 2.4rem; padding: 0 var(--sp-3); font-size: var(--fs-md); }
+.yc button:not(.back-demo):is(:empty, [aria-label]) { padding: 0; }
+.yc button:not([aria-label]) { font-size: var(--fs-sm); }
 .yc button.back-demo { width: auto; padding: 0 var(--sp-3); font-size: var(--fs-xs); color: var(--c-moon); border-color: rgb(235 198 110 / .4); }
 .yc em { font-style: normal; color: var(--c-text-3); font-size: var(--fs-sm); min-width: 3rem; }
 

@@ -8,7 +8,7 @@ import './styles/components.css';
 import './styles/nav.css';
 import './styles/home.css';
 import './styles/lessons.css';
-import './styles/global.css';
+import './styles/scene.css';
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
