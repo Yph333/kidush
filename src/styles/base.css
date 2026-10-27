@@ -1,0 +1,100 @@
+/* =====================================================================================================
+   BASE — document, type, text-level elements. Reads only tokens.css.
+   ===================================================================================================== */
+
+html { font-size: clamp(15px, 0.7vw + 9px, 23px); -webkit-text-size-adjust: 100%; }
+*, *::before, *::after { box-sizing: border-box; }
+html, body, #root { height: 100%; margin: 0; }
+
+/* the page is space: a faint glow at the top, a sparse star field, nothing else. 3D scenes are transparent
+   and sit directly on this, so the models read as part of the page */
+body {
+  background-color: var(--c-bg);
+  background-image:
+    radial-gradient(120% 70% at 50% -20%, var(--c-bg-glow), transparent 60%),
+    radial-gradient(1px 1px at 13% 22%, rgb(255 255 255 / .55), transparent 60%),
+    radial-gradient(1px 1px at 71% 12%, rgb(255 255 255 / .45), transparent 60%),
+    radial-gradient(1.5px 1.5px at 86% 47%, rgb(255 255 255 / .5), transparent 60%),
+    radial-gradient(1px 1px at 34% 68%, rgb(255 255 255 / .35), transparent 60%),
+    radial-gradient(1px 1px at 55% 91%, rgb(255 255 255 / .4), transparent 60%),
+    radial-gradient(1.2px 1.2px at 6% 83%, rgb(255 255 255 / .45), transparent 60%),
+    radial-gradient(1px 1px at 94% 76%, rgb(255 255 255 / .35), transparent 60%),
+    radial-gradient(1px 1px at 47% 35%, rgb(255 255 255 / .3), transparent 60%);
+  background-size: 100% 100%, 480px 480px, 480px 480px, 480px 480px, 480px 480px, 480px 480px, 480px 480px, 480px 480px, 480px 480px;
+  background-attachment: fixed;
+  color: var(--c-text);
+  font-family: var(--font-sans);
+  font-size: var(--fs-base);
+  line-height: var(--lh-body);
+  overflow: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+button, input, select, textarea { font: inherit; color: inherit; }
+img, svg, canvas { max-width: 100%; }
+::selection { background: rgb(92 184 255 / .35); color: var(--c-text); }
+
+/* focus: one visible ring everywhere */
+:focus-visible { outline: none; box-shadow: var(--focus-ring); border-radius: var(--r-sm); }
+.skip { position: absolute; inset-inline-start: -999px; top: var(--sp-2); z-index: var(--z-skip); background: var(--c-accent); color: var(--c-accent-ink); padding: var(--sp-2) var(--sp-4); border-radius: var(--r-pill); font-weight: var(--fw-semibold); }
+.skip:focus { inset-inline-start: var(--sp-2); }
+
+/* scrollbars: thin and dark */
+* { scrollbar-width: thin; scrollbar-color: rgb(255 255 255 / .18) transparent; }
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-thumb { background: rgb(255 255 255 / .16); border-radius: 10px; border: 3px solid transparent; background-clip: padding-box; }
+::-webkit-scrollbar-track { background: transparent; }
+
+/* ---- headings ---- */
+h1, h2, h3, h4 { font-family: var(--font-sans); color: var(--c-text); margin: 0; text-wrap: balance; }
+h1 { font-size: var(--fs-display); font-weight: var(--fw-bold); line-height: 1.05; letter-spacing: -.02em; }
+h2 { font-size: var(--fs-2xl); font-weight: var(--fw-bold); line-height: var(--lh-tight); letter-spacing: -.015em; margin-bottom: var(--sp-5); }
+h3 { font-size: var(--fs-lg); font-weight: var(--fw-semibold); line-height: var(--lh-snug); margin: var(--sp-5) 0 var(--sp-2); }
+h4 { font-size: var(--fs-md); font-weight: var(--fw-semibold); }
+
+/* the small line above a slide title: chapter and position */
+.kicker { color: var(--c-accent); font-size: var(--fs-sm); font-weight: var(--fw-medium); margin: 0 0 var(--sp-2); }
+
+/* ---- running text ---- */
+p { margin: 0 0 var(--sp-4); max-width: var(--measure); color: var(--c-text-2); }
+p.m0 { margin: 0; }
+.text strong, p strong { color: var(--c-text); font-weight: var(--fw-semibold); }
+a { color: var(--c-accent); text-underline-offset: 3px; }
+a:hover { color: var(--c-accent-strong); }
+.note { font-size: var(--fs-sm); color: var(--c-text-3); margin: var(--sp-2) 0 0; }
+.muted { color: var(--c-text-2); }
+.or { color: var(--c-text-3); align-self: center; }
+details { margin: var(--sp-2) 0 var(--sp-4); }
+details summary { cursor: pointer; color: var(--c-accent); font-weight: var(--fw-medium); margin-bottom: var(--sp-2); width: fit-content; }
+details summary:hover { color: var(--c-accent-strong); }
+
+/* numbers are always left-to-right and tabular */
+.num { direction: ltr; unicode-bidi: isolate; font-variant-numeric: tabular-nums; }
+/* Hebrew letter-signs (בהר״ד, גטר״ד): the classical face */
+.sig { font-family: var(--font-serif); font-weight: var(--fw-bold); white-space: nowrap; }
+
+/* ---- source quotations: the tradition's own words, in the serif ---- */
+.src {
+  font-family: var(--font-serif); font-size: var(--fs-md); line-height: var(--lh-source); color: var(--c-text);
+  margin: var(--sp-5) 0; padding: var(--sp-1) var(--sp-5); border-inline-start: 2px solid var(--c-moon); max-width: var(--measure);
+}
+.src cite { display: block; font-family: var(--font-sans); font-style: normal; font-size: var(--fs-xs); color: var(--c-text-3); margin-top: var(--sp-2); }
+.sources { margin-top: var(--sp-6); padding-top: var(--sp-3); border-top: 1px solid var(--c-line); font-size: var(--fs-xs); color: var(--c-text-3); max-width: var(--measure); line-height: 1.6; }
+.sources small { font-size: inherit; }
+.disclaimer { font-size: var(--fs-sm); color: var(--c-text-3); border-inline-start: 2px solid var(--c-line-strong); padding-inline-start: var(--sp-3); margin-top: var(--sp-4); max-width: var(--measure); }
+.src-ref { color: var(--c-text-3); }
+
+/* ---- inline marks ---- */
+.tag { display: inline-block; padding: 0 var(--sp-2); border-radius: var(--r-pill); font-weight: var(--fw-semibold); font-size: .88em; line-height: 1.6; }
+.tag + .tag { margin-inline-start: var(--sp-1); }
+.tag.bad { background: var(--c-shift-soft); color: var(--c-shift); }
+.tag.ok { background: var(--c-ok-soft); color: var(--c-ok); }
+.tag.leap { background: var(--c-leap-soft); color: var(--c-leap); }
+.tag.moon { background: var(--c-moon-soft); color: var(--c-moon); }
+.term { background: none; border: 0; padding: 0; font: inherit; color: inherit; cursor: help; border-bottom: 1px dashed var(--c-accent); transition: color var(--dur-fast); }
+.term:hover { color: var(--c-accent); }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { transition: none !important; animation: none !important; scroll-behavior: auto !important; }
+}
