@@ -59,13 +59,13 @@ export function AstroControls({ v, cityPicker = true }: { v: AstroView; cityPick
           onChange={y => setAstro({ y, mi: Math.min(M.mi, monthsOf(y).length - 1), t: null, playing: false, dSel: null })}
           onReset={() => setAstro({ base: null })} />
         <label className="fld">חודש
-          <select value={M.mi} onChange={e => setAstro({ mi: +e.target.value, t: null, playing: false, dSel: null })}>
+          <select aria-label="חודש" value={M.mi} onChange={e => setAstro({ mi: +e.target.value, t: null, playing: false, dSel: null })}>
             {months.map((m, i) => <option key={m[0]} value={i}>{m[0]}</option>)}
           </select>
         </label>
         {cityPicker && (
           <label className="fld">מקום
-            <select value={CITIES.indexOf(c)} onChange={e => setState({ city: +e.target.value })}>
+            <select aria-label="מקום" value={CITIES.indexOf(c)} onChange={e => setState({ city: +e.target.value })}>
               {CITIES.map((cc, i) => <option key={cc.name} value={i}>{cc.name}</option>)}
             </select>
           </label>

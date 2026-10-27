@@ -62,7 +62,7 @@ export function InclinedOrbit() {
         <Engine>
           <AstroControls v={v} />
           <label className="fld">הגדלת הנטייה בציור
-            <select value={ex} onChange={e => setEx(+e.target.value)}>
+            <select aria-label="הגדלת הנטייה בציור" value={ex} onChange={e => setEx(+e.target.value)}>
               {[1, 2, 3, 5].map(k => <option key={k} value={k}>{k === 1 ? 'בלי הגדלה' : `×${k}`}</option>)}
             </select>
           </label>

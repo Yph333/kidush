@@ -36,7 +36,7 @@ export function Timeline() {
           <div className="ctl">
             <YearControl value={from} onChange={setFrom} label="משנה" />
             <label className="fld">כמה שנים
-              <select value={span} onChange={e => setSpan(+e.target.value)}>
+              <select aria-label="כמה שנים" value={span} onChange={e => setSpan(+e.target.value)}>
                 {SPANS.map(s => <option key={s} value={s}>{s}</option>)}
               </select>
             </label>

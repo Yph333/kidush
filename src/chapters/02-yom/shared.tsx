@@ -38,7 +38,7 @@ export function CityControl() {
   const city = useStore(s => s.city);
   return (
     <label className="fld">מקום
-      <select value={city} onChange={e => setState({ city: +e.target.value })}>
+      <select aria-label="מקום" value={city} onChange={e => setState({ city: +e.target.value })}>
         {CITIES.map((c, i) => <option key={c.name} value={i}>{c.name}</option>)}
       </select>
     </label>

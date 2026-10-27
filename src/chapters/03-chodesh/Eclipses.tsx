@@ -119,7 +119,7 @@ export function Eclipses() {
           <div className="ctl">
             <CityControl />
             <label className="fld">הגדלת הנטייה בציור
-              <select value={ex} onChange={x => setEx(+x.target.value)}>{[1, 2, 3, 5].map(n => <option key={n} value={n}>{n === 1 ? 'בלי' : `×${n}`}</option>)}</select>
+              <select aria-label="הגדלת הנטייה בציור" value={ex} onChange={x => setEx(+x.target.value)}>{[1, 2, 3, 5].map(n => <option key={n} value={n}>{n === 1 ? 'בלי' : `×${n}`}</option>)}</select>
             </label>
           </div>
           <Facts items={[

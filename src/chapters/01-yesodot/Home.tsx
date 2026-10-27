@@ -140,7 +140,7 @@ export function Home() {
             <div className="ctl">
               <YearControl value={y} onChange={v => setState({ demoYear: v })} label="שנת הדגמה" />
               <label className="fld">מקום
-                <select value={city} onChange={e => setState({ city: +e.target.value })}>
+                <select aria-label="מקום" value={city} onChange={e => setState({ city: +e.target.value })}>
                   {CITIES.map((c, i) => <option key={c.name} value={i}>{c.name}</option>)}
                 </select>
               </label>

@@ -65,7 +65,7 @@ export function Excess() {
           <div className="ctl">
             <SlideYear yr={yr} />
             <label className="fld">חודש
-              <select value={mi} onChange={e => setMi(+e.target.value)}>
+              <select aria-label="חודש" value={mi} onChange={e => setMi(+e.target.value)}>
                 {months.map((m, i) => <option key={m[0]} value={i}>{m[0]}</option>)}
               </select>
             </label>
