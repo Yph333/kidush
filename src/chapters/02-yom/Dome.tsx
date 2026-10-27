@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react';
 import { seasons } from '../../engines/astro';
+import { visibleStars } from '../../lib/starSky';
 import { H0_STANDARD, localHM, solarNoon, sunAltAz, sunAt } from '../../engines/zmanim';
 import { Scene3D } from '../../components/Scene3D/Scene3D';
 import { usePlay } from '../../components/Scene3D/usePlay';
@@ -10,6 +11,8 @@ import { CityControl, DateControl, NotARuling, usePick, useZDay } from './shared
 
 const load = () => import('../../scenes/skyDome').then(m => m.default);
 const MIN = 60000;
+/** the time line runs this many minutes before sunrise and after sunset: past dawn and nightfall (−16°), so the stars come out */
+const EDGE = 110;
 const SEASON_COLOR = { eq: 0x88c5d8, summer: 0xef8f76, winter: 0x7fce9c };
 
 /** Sun path from 3 h before sunrise to 3 h after sunset, every 10 minutes. */
@@ -51,9 +54,9 @@ export function Dome() {
   const [show, setShow] = useState({ eq: true, summer: true, winter: true });
   const today = useMemo(() => pathFor(y, m, d, p), [y, m, d, p.lat, p.lon]);
   const [k, setK] = useState<number | null>(null);
-  const span = Math.round((today.set - today.rise) / MIN) + 120;
+  const span = Math.round((today.set - today.rise) / MIN) + 2 * EDGE;
   const kk = k === null ? Math.round(span / 2) : Math.min(span, k);
-  const t = today.rise - 60 * MIN + kk * MIN;
+  const t = today.rise - EDGE * MIN + kk * MIN;
   const player = usePlay(dt => setK(prev => { const v = (prev ?? Math.round(span / 2)) + dt * 90; return v > span ? 0 : v; }));
 
   const seasonPaths = useMemo(() => {
@@ -68,8 +71,10 @@ export function Dome() {
     if (show.summer) paths.push({ key: 'summer', label: 'היום הארוך', color: SEASON_COLOR.summer, points: seasonPaths.summer });
     if (show.eq) paths.push({ key: 'eq', label: 'השוויון', color: SEASON_COLOR.eq, points: seasonPaths.eq });
     if (show.winter) paths.push({ key: 'winter', label: 'היום הקצר', color: SEASON_COLOR.winter, points: seasonPaths.winter });
+    const sun = sunAltAz(t, p);
     return {
-      paths, sun: sunAltAz(t, p),
+      paths, sun,
+      stars: visibleStars(t, p, sun.alt),
       circles: [
         { alt: 0, label: 'האופק' },
         { alt: H0_STANDARD, label: 'זריחה ושקיעה (−0.83°)' },
