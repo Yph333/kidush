@@ -357,3 +357,10 @@ svg.full, .viz .full { width: 100%; }
 .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 .sight-face { max-width: 16rem; margin: var(--sp-2) auto 0; }
 .story-line { min-height: 2.6em; margin: var(--sp-2) 0 0; padding: var(--sp-2) var(--sp-3); border-inline-start: 3px solid var(--c-moon); background: var(--c-moon-soft); border-radius: var(--r-sm); font-size: var(--fs-md); }
+.sketches { display: grid; grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr)); gap: var(--sp-3); }
+.sketch { margin: 0; text-align: center; }
+.sketch svg { width: 100%; border-radius: 8px; }
+.sketch figcaption { color: var(--c-text-2); font-size: var(--fs-sm); }
+.checks { margin: 0; padding-inline-start: 1.2em; }
+.checks li.ok { color: var(--c-ok, #7fce9c); }
+.checks li.bad { color: var(--c-shift, #ef8f76); }
