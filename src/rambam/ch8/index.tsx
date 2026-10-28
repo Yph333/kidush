@@ -2,7 +2,7 @@
 
 import { Num } from '../../components/text';
 import { defineChapter, halacha } from '../define';
-import { HalfDays, MonthLengths, RoshChodesh, TypeSigns, YearTypeByGap } from '../widgets/dechiyot';
+import { HalfDays, MonthLengths, RoshChodesh, TypeSigns, YearFromMolad, YearTypeByGap } from '../widgets/dechiyot';
 import { TopicLink } from '../widgets/TopicLink';
 
 const D = false;   // approved by the content owner (2026-10-28)
@@ -105,7 +105,7 @@ export const CH8 = defineChapter(8, 'חודשים מלאים וחסרים', [
         body: <p>חמישי ← שלישי: <Num>4</Num> ימים, שלמים. שבת ← שלישי: ראשון ושני, <Num>2</Num> ימים, חסרים.</p> },
     ] },
     takeaway: <p>סופרים את הימים שבין שני ראשי השנה, וזה כל החשבון.</p>,
-    stage: () => <YearTypeByGap focus="gap" />,
+    stage: () => <><YearFromMolad /><YearTypeByGap focus="gap" /></>,
   }),
   halacha<'tue' | 'satmon' | 'thu'>({
     h: 'י', title: 'סימנים',
