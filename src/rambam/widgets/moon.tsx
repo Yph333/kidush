@@ -12,8 +12,10 @@ import { Scene3D } from '../../components/Scene3D/Scene3D';
 import { usePlay } from '../../components/Scene3D/usePlay';
 import { Engine, Viz } from '../../components/Slide';
 import { type StepRow, Steps } from '../../components/Steps';
-import { DM, DMS, Num, Tag } from '../../components/text';
+import { DM, DMS, Facts, Num, Tag } from '../../components/text';
 import type { MoonOrbitProps } from '../../scenes/moonOrbit';
+import type { DoubleProps } from '../../scenes/doubleDist';
+import { crank } from '../../engines/ptolemyMoon';
 import type { WheelsProps } from '../../scenes/rambamWheels';
 import { NightPicker, useNight } from '../ch14/Blocks';
 import { SignPos } from '../ch14/Wheels14';
@@ -45,6 +47,37 @@ export function EqTable({ tab, title, deg: d0, fold = 180, step = 10, hl }: { ta
       </p>
     </Engine>
   );
+}
+
+const loadDouble = () => import('../../scenes/doubleDist').then(m => m.default);
+
+/** Why the doubled distance (15:1–3): the moving centre of the moon's big wheel, played or dragged. */
+export function DoubleModel({ D0 = 36 }: { D0?: number }) {
+  const [D, setD] = useState(D0);
+  const player = usePlay(dt => setD(d => (d + dt * 20) % 360));
+  const Dr = Math.round(D), row = R_DBL.find(([a, b]) => Dr >= a && Dr <= b), c = crank(D);
+  const props = useMemo<DoubleProps>(() => ({ D, table: row ? row[2] : NaN, onDrag: (v: number) => { player.stop(); setD(v); } }),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [D]);
+  return <>
+    <Viz>
+      <Scene3D load={loadDouble} props={props} play={{ ...player, label: 'הפעל: הירח מתרחק מהשמש' }} label="למה המרחק הכפול: מרכז הגלגל הגדול של הירח נע"
+        views={[{ id: 'oblique', label: 'מבט אלכסוני' }, { id: 'top', label: 'מלמעלה' }]} fallback={<p className="note">המרחק הכפול <Num>{Dr}°</Num>: מוסיפים כ־<Num>{c.add.toFixed(1)}°</Num>.</p>} />
+      <p className="note">תפסו את הירח וגררו אותו, או הפעילו. מרכז הגלגל הגדול (לבן) זז סביב הארץ נגד הירח; הגובה של הגלגל הקטן נמדד מהנקודה שכנגדו (סגול), לא מהארץ (צהוב). הזווית ביניהן היא התוספת למסלול, והיא תלויה במרחק הכפול. הגלגל הקטן מוגדל.</p>
+    </Viz>
+    <Engine title="המרחק הכפול והתוספת">
+      <label className="fld">המרחק הכפול <Num>{Dr}°</Num>
+        <input type="range" min={0} max={359} value={Dr} onChange={e => { player.stop(); setD(+e.target.value); }} aria-label="המרחק הכפול" />
+      </label>
+      <Facts items={[
+        ['המרחק בין הירח לשמש', <Num>{(D / 2).toFixed(1)}°</Num>],
+        ['המרחק הכפול', <Num>{Dr}°</Num>],
+        ['הזווית בציור', <Num>{c.add.toFixed(2)}°</Num>],
+        ['בטבלה של הרמב״ם (ט״ו, ג)', row ? <Num>{row[2]}°</Num> : <>מחוץ לטבלה (עד <Num>63°</Num>)</>],
+      ]} />
+      <p className="note">הגאומטריה לפי מודל הירח של חכמי יוון (בטלמיוס), שהרמב״ם מזכיר כמקור הטעמים (י״ז, כ״ד). הטבלה שלו היא הזווית הזו, מעוגלת. בליל ראייה המרחק הכפול רק בין <Num>5°</Num> ל־<Num>62°</Num> (ט״ו, ב): הירח סמוך לשמש.</p>
+    </Engine>
+  </>;
 }
 
 /** The doubled distance and what it adds to the course (15:1–3). */
