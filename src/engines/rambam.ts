@@ -87,6 +87,14 @@ export function limitNeed(A: number): number {
   return A <= 10 ? 13 : A <= 11 ? 12 : A <= 12 ? 11 : A <= 13 ? 10 : 9;
 }
 
+/** The limits of sighting (17:15–21) for an arc A and a first longitude L (degrees). */
+export function limitsVerdict(A: number, L: number): { visible: boolean; kind: 'arcAtMost9' | 'arcAbove14' | 'limits'; need?: number } {
+  if (A <= 9) return { visible: false, kind: 'arcAtMost9' };
+  if (A > 14) return { visible: true, kind: 'arcAbove14' };
+  const need = limitNeed(A);
+  return { visible: L >= need, kind: 'limits', need };
+}
+
 /** Latitude course (whole degrees, 0–359) folded into 0–90 for the latitude table. */
 export function foldLatCourse(lc: number): number {
   return lc <= 90 ? lc : lc <= 180 ? 180 - lc : lc <= 270 ? lc - 180 : 360 - lc;
@@ -209,12 +217,10 @@ export function rambam(dayIdx: number): RambamResult {
   if (pre !== 'calc') {
     visible = pre === 'yes';
     reason = pre === 'yes' ? { kind: 'firstLongAbove', hi } : { kind: 'firstLongAtMost', lo };
-  } else if (A <= 9) { visible = false; reason = { kind: 'arcAtMost9' }; }
-  else if (A > 14) { visible = true; reason = { kind: 'arcAbove14' }; }
-  else {
-    const need = limitNeed(A);
-    visible = L >= need;
-    reason = { kind: 'limits', arc, need, long1 };
+  } else {
+    const v = limitsVerdict(A, L);
+    visible = v.visible;
+    reason = v.kind === 'limits' ? { kind: 'limits', arc, need: v.need!, long1 } : { kind: v.kind };
   }
 
   return {

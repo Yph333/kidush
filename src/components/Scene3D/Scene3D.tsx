@@ -81,7 +81,10 @@ export function Scene3D<P>({ load, props, views, fallback, label, height = 440, 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mode, load]);
 
-  useEffect(() => { handle.current?.update(props); }, [props]);
+  useEffect(() => {
+    try { handle.current?.update(props); }
+    catch (e) { setFailure(`עדכון הסצנה נכשל: ${String((e as Error)?.message ?? e)}`); setMode('2d'); }
+  }, [props]);
 
   return (
     <div className="scene3d">

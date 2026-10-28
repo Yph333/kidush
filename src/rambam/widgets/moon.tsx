@@ -7,7 +7,9 @@ import { sightSky } from '../../lib/sightSky';
 import type { WestSkyProps } from '../../scenes/westSky';
 import type { MoonFaceProps } from '../../scenes/moonFace';
 import { gDate, hebDate, yearHeb } from '../../engines/calendar';
-import { CIRCLE_TABLE, R_DBL, R_FOURTH, R_LAT, R_MOON, R_PLAT, R_PLON, SIGHTING_LIMITS, SIGNS, interp, rambam } from '../../engines/rambam';
+import { CIRCLE_TABLE, R_DBL, R_FOURTH, R_LAT, R_MOON, R_PLAT, R_PLON, SIGHTING_LIMITS, SIGNS, interp, limitsVerdict, rambam } from '../../engines/rambam';
+import { firstSightings } from '../../lib/firstSight';
+import { SlideYear, useSlideYear } from '../../components/YearControl';
 import { Scene3D } from '../../components/Scene3D/Scene3D';
 import { usePlay } from '../../components/Scene3D/usePlay';
 import { Engine, Viz } from '../../components/Slide';
@@ -269,13 +271,67 @@ export function SightSky3D({ dayIdx, step, verdict }: { dayIdx: number; step?: S
   );
 }
 
+/**
+ * The limits as a game: drag the point (arc against first longitude), see the verdict, and a sky that matches it
+ * (schematic: the sun just under the western horizon, the moon as high as the arc and as far as the first longitude).
+ */
+export function LimitsPlay({ arc0 = 11.2, long0 = 11.45 }: { arc0?: number; long0?: number }) {
+  const [v, setV] = useState({ a: arc0, l: long0 });
+  const verdict = limitsVerdict(v.a, v.l);
+  const props = useMemo<WestSkyProps>(() => {
+    const sun = { alt: -1, az: 288 }, h = Math.sqrt(Math.max(0, v.l ** 2 - (v.a + 1) ** 2));
+    const moon = { alt: v.a, az: sun.az - h };
+    const path = Array.from({ length: 21 }, (_, k) => ({ alt: sun.alt + (moon.alt - sun.alt) * k / 20, az: sun.az + (moon.az - sun.az) * k / 20 }));
+    return { sun, moon, ecliptic: [], equator: [], paths: [
+      { pts: path, color: GOLD, label: 'האורך הראשון' },
+      { pts: [{ alt: 0, az: moon.az }, moon], color: CYAN, label: 'קשת הראייה' },
+    ], moonLabel: verdict.visible ? 'ייראה' : 'לא ייראה' };
+  }, [v, verdict.visible]);
+  return <>
+    <Limits arc={v.a} long1={v.l} hl onPick={(a, l) => setV({ a, l })} />
+    <Engine title="נסו בעצמכם">
+      <p>גררו את הנקודה בתרשים. קשת הראייה <Num>{v.a.toFixed(1)}°</Num>, האורך הראשון <Num>{v.l.toFixed(1)}°</Num>: {verdict.visible ? <Tag tone="ok">ייראה</Tag> : <Tag tone="bad">לא ייראה</Tag>}
+        {' '}{verdict.kind === 'arcAtMost9' ? <>(קשת עד <Num>9°</Num>)</> : verdict.kind === 'arcAbove14' ? <>(קשת מעל <Num>14°</Num>)</> : <>(בקשת כזו צריך אורך ראשון <Num>{verdict.need}°</Num> לפחות)</>}</p>
+    </Engine>
+    <Viz>
+      <Scene3D load={loadWest} props={props} height={420} label="השמיים במערב לפי הנקודה שבחרתם" views={[{ id: 'west', label: 'מבט מערבה' }, { id: 'out', label: 'מבחוץ' }]} fallback={<p className="note">הירח <Num>{v.a.toFixed(1)}°</Num> מעל האופק.</p>} />
+      <p className="note">ציור סכמטי: השמש מעט מתחת לאופק, הירח בגובה הקשת וברחק האורך הראשון ממנה. הירח מוגדל.</p>
+    </Viz>
+  </>;
+}
+
+/** For each month of a year: the first evening of sighting by the Rambam (ch. 17) and by a modern criterion. */
+export function YearSightings() {
+  const yr = useSlideYear(), rows = useMemo(() => firstSightings(yr.y), [yr.y]);
+  const day = (d: number | null) => { if (d === null) return '—'; const h = hebDate(d); return <>ליל {h.d} ב{h.name}</>; };
+  const same = rows.filter(r => r.rambam !== null && r.rambam === r.modern).length;
+  return (
+    <Engine title={<>הרמב״ם מול החשבון של היום, {yearHeb(yr.y)}</>} sub="הערב הראשון שבו הירח החדש נראה בירושלים">
+      <div className="ctl"><SlideYear yr={yr} /></div>
+      <div className="table-wrap"><table className="kt"><thead><tr><th>חודש</th><th>לפי הרמב״ם</th><th>לפי היום (Odeh)</th><th /></tr></thead>
+        <tbody>{rows.map(r => <tr key={r.mi}><td>{r.name}</td><td>{day(r.rambam)}</td><td>{day(r.modern)}</td>
+          <td>{r.rambam === null || r.modern === null ? '' : r.rambam === r.modern ? <Tag tone="ok">אותו ערב</Tag> : <Tag tone="leap">{r.rambam < r.modern ? 'הרמב״ם ערב לפני' : 'הרמב״ם ערב אחרי'}</Tag>}</td></tr>)}</tbody></table></div>
+      <p className="note">בשנה הזו: <Num>{same}</Num> מתוך <Num>{rows.length}</Num> באותו ערב. ״ליל״: הערב שמתחיל את היום הזה. הקריטריון של היום (Odeh) מניח שמיים בהירים ועין בלי עזרים.</p>
+    </Engine>
+  );
+}
+
 /** The limits of sighting (17:15–21): arc against first longitude, the staircase, and tonight's point. */
-export function Limits({ arc, long1, hl }: { arc?: number; long1?: number; hl?: boolean }) {
+export function Limits({ arc, long1, hl, onPick }: { arc?: number; long1?: number; hl?: boolean; onPick?: (arc: number, long1: number) => void }) {
   const W = 340, H = 240, x = (a: number) => 40 + ((a - 8) / 8) * (W - 60), y = (l: number) => H - 30 - ((l - 7) / 9) * (H - 50);
+  // the chart's coordinates back to arc and first longitude, for dragging the point
+  const pick = (e: React.PointerEvent<SVGSVGElement>) => {
+    const r = e.currentTarget.getBoundingClientRect(), px = ((e.clientX - r.left) / r.width) * W, py = ((e.clientY - r.top) / r.height) * H;
+    const a = 8 + ((px - 40) / (W - 60)) * 8, l = 7 + ((H - 30 - py) / (H - 50)) * 9;
+    onPick?.(Math.max(8, Math.min(16, Math.round(a * 10) / 10)), Math.max(7, Math.min(16, Math.round(l * 10) / 10)));
+  };
   const steps = SIGHTING_LIMITS.map(([a, need], i) => ({ a0: i === 0 ? 9 : SIGHTING_LIMITS[i - 1][0], a1: a, need }));
   return (
     <Viz className={fx(!!hl)}>
-      <svg viewBox={`0 0 ${W} ${H}`} direction="ltr" role="img" aria-label="קיצי הראייה: קשת הראייה מול האורך הראשון">
+      <svg viewBox={`0 0 ${W} ${H}`} direction="ltr" role="img" aria-label="קיצי הראייה: קשת הראייה מול האורך הראשון"
+        style={onPick ? { cursor: 'crosshair', touchAction: 'none' } : undefined}
+        onPointerDown={onPick ? e => { (e.target as Element).setPointerCapture?.(e.pointerId); pick(e); } : undefined}
+        onPointerMove={onPick ? e => { if (e.buttons) pick(e); } : undefined}>
         <rect x={x(8)} y={y(16)} width={x(9) - x(8)} height={y(7) - y(16)} fill="var(--c-shift-soft)" />
         <rect x={x(14)} y={y(16)} width={x(16) - x(14)} height={y(7) - y(16)} fill="var(--c-ok-soft)" />
         {steps.map(s => <g key={s.a1}>

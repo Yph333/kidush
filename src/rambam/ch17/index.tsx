@@ -2,7 +2,7 @@
 
 import { Num } from '../../components/text';
 import { defineChapter, halacha } from '../define';
-import { CircleTable, FourthTable, Limits, PlatTable, PlonTable, Sighting } from '../widgets/moon';
+import { CircleTable, FourthTable, Limits, LimitsPlay, PlatTable, PlonTable, Sighting, YearSightings } from '../widgets/moon';
 
 const D = false;   // approved by the content owner (2026-10-28)
 const TAURUS = 1;
@@ -186,7 +186,7 @@ export const CH17 = defineChapter(17, 'חשבון הראייה', [
         body: <p>בין <Num>9°</Num> ל־<Num>14°</Num> ההכרעה תלויה בשני מספרים יחד: קשת הראייה (כמה הירח גבוה) והאורך הראשון (כמה הסהר עבה). בתרשים: מדרגות.</p> },
     ] },
     takeaway: <p>בין <Num>9</Num> ל־<Num>14</Num>: הקשת והאורך הראשון יחד.</p>,
-    stage: () => <Limits hl />,
+    stage: () => <LimitsPlay />,
   }),
   ...([
     ['יז', '9–10', 'ויהיה האורך הראשון י״ג מעלות או יותר. ודאי יראה', 9, 10, 13],
@@ -201,7 +201,7 @@ export const CH17 = defineChapter(17, 'חשבון הראייה', [
         body: <p>קשת מעל <Num>{a0}°</Num> ועד <Num>{a1}°</Num>: ייראה אם האורך הראשון <Num>{need}°</Num> או יותר. ככל שהקשת גדולה, מספיק אורך קטן יותר.</p> },
     ] },
     takeaway: <p>קשת <Num>{t}</Num> → אורך ראשון לפחות <Num>{need}°</Num>.</p>,
-    stage: () => <Limits arc={(a0 + a1) / 2} long1={need} hl />,
+    stage: () => <LimitsPlay key={h} arc0={(a0 + a1) / 2} long0={need} />,
   })),
   halacha<'verdict'>({
     h: 'כב', title: 'הדוגמה: ייראה',
@@ -216,10 +216,10 @@ export const CH17 = defineChapter(17, 'חשבון הראייה', [
     h: 'כג', title: 'ירח לא ידע מבואו',
     guide: { draft: D, steps: [
       { title: 'עקלקלות', focus: 'crooked', mark: ['שהירח עקלקלות גדולות יש במעגלותיו. ולפיכך אמרו חכמים שמש ידע מבואו ירח לא ידע מבואו', 'פעמים בא בארוכה פעמים בא בקצרה'],
-        body: <p>כל ההוספות והגרעונות מראים כמה מסלול הירח מסובך. לכן ״שמש ידע מבואו, ירח לא ידע מבואו״, ופעמים הקשת ארוכה ופעמים קצרה. נסו ערבים שונים בבורר הלילה ותראו.</p> },
+        body: <p>כל ההוספות והגרעונות מראים כמה מסלול הירח מסובך. לכן ״שמש ידע מבואו, ירח לא ידע מבואו״, ופעמים הקשת ארוכה ופעמים קצרה. בטבלה: לכל חודש בשנה, הערב הראשון שבו הירח נראה לפי הרמב״ם ולפי החשבון של היום. ״הדרכים הקרובים״ שלו מסכימים ברוב החודשים.</p> },
     ] },
     takeaway: <p>הירח מסובך; החשבון של הרמב״ם הוא ״דרכים קרובים״, פשוטים יחסית.</p>,
-    stage: () => <Sighting />,
+    stage: () => <><YearSightings /><Sighting /></>,
   }),
   halacha<'proof'>({
     h: 'כד', title: 'טעם החשבונות',
