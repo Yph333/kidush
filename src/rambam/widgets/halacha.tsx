@@ -8,6 +8,7 @@ import { allFullDrift, avivRule, fullMonths, heightsJoin, leapCourt, messengerDa
 import { DAY_NAME, P_DAY, P_MONTH, dayOfCivil, gem, monthStart, monthsOf, yearHeb } from '../../engines/calendar';
 import { R_DECL, SIGNS, moonFromEquator, rambam, rambamDecl } from '../../engines/rambam';
 import { LAND } from '../../lib/eclipseMap';
+import BORDERS from '../../assets/terrain/borders.json';
 import { monthModel } from '../../lib/month';
 import { EarthMoonZoom, OrbitTopDown, PhaseStrip, SkyPanorama } from '../../components/astro/visuals';
 import type { MonthProps } from '../../scenes/monthSystem';
@@ -117,6 +118,7 @@ export function RegionMap({ places, box: box0, ring, route, hl, note }: {
       <svg viewBox={`0 0 ${MW} ${MH}`} direction="ltr" role="img" aria-label="מפת ארץ ישראל וסביבתה">
         <rect width={MW} height={MH} fill="#16243f" />
         <path d={land} fill="#3a4a3a" stroke="#6b7d6b" strokeWidth="0.6" />
+        {(BORDERS.lines as [number, number][][]).map((l, i) => <polyline key={i} points={l.map(([x, y]) => xy(x, y).join(',')).join(' ')} fill="none" stroke="#d9d2c5" strokeOpacity=".6" strokeWidth="0.8" />)}
         {ring && <><circle cx={jx} cy={jy} r={rr} fill="#88c5d822" stroke="#88c5d8" strokeDasharray="5 4" />
           <text x={jx} y={jy - rr - 6} textAnchor="middle" fontSize="12" fill="#88c5d8">{ring.label}</text></>}
         {pts.length > 1 && <polyline points={pts.map(p => xy(p.lon, p.lat).join(',')).join(' ')} fill="none" stroke="#ffb36b" strokeWidth="2.5" strokeDasharray="7 5" />}
@@ -130,7 +132,7 @@ export function RegionMap({ places, box: box0, ring, route, hl, note }: {
         ); })}
         <circle cx={jx} cy={jy} r="5" fill="#fff" stroke="#000" />
       </svg>} />
-      <p className="note">{note ?? 'קווי החוף בקירוב.'} תבליט: גובה מוגדל{props3d.map === 'israel' ? ' פי 7' : ' פי 12'}, לפי נתוני SRTM ו־ETOPO. {places.some(p => p.approx) && 'סימן שאלה: מקום משוער.'}</p>
+      <p className="note">{note ?? 'קווי החוף בקירוב.'} קווים ונקודות באפור: גבולות וערים של היום, להתמצאות. תבליט: גובה מוגדל{props3d.map === 'israel' ? ' פי 7' : ' פי 12'}, לפי נתוני SRTM ו־ETOPO. {places.some(p => p.approx) && 'סימן שאלה: מקום משוער.'}</p>
     </Viz>
   );
 }

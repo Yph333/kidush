@@ -50,3 +50,5 @@
 .scene-fail { color: var(--c-shift); }
 /* the viewer hid the labels (Scene3D: "הסתרת הטקסט") */
 .scene-host.no-labels .scene-labels { display: none; }
+/* today's cities on the maps: faint, for orientation only */
+.s-label.modern { font-size: 10px; color: #b8bcc8; background: rgb(10 14 26 / .45); font-weight: 400; }

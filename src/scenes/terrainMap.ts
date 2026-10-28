@@ -5,6 +5,8 @@ import type { SceneHandle, SceneModule } from '../components/Scene3D/types';
 import { type TerrainGrid, decodeTerrain, elevationAt, hypsometric } from '../lib/terrain';
 import IL from '../assets/terrain/israel.json';
 import RG from '../assets/terrain/region.json';
+import BORDERS from '../assets/terrain/borders.json';
+import { MODERN_PLACES } from '../content/modernPlaces';
 import { THREE, clearGroup, createStage, line } from './common';
 
 export interface MapPin { name: string; lat: number; lon: number; color: number; hl?: boolean; approx?: boolean; area?: boolean }
@@ -14,6 +16,8 @@ export interface TerrainProps {
   route?: [number, number][];
   /** a circle around Jerusalem, km */
   ring?: { km: number; label: string };
+  /** today's borders and cities, faint, for orientation (default on) */
+  modern?: boolean;
   /** the area to frame (lon0, lat0, lon1, lat1); the whole map if absent */
   frame?: [number, number, number, number];
 }
@@ -78,6 +82,26 @@ const create = (host: HTMLElement, p0: TerrainProps): SceneHandle<TerrainProps> 
       }
       const l = label(q.name + (q.approx ? ' (?)' : ''), q.hl ? 'strong' : 'small');
       l.position.copy(top); l.position.y += 0.45 * K; dyn.add(l);
+    }
+    if (p.modern !== false) {
+      // today's borders, draped on the ground, and today's cities (grey), unless a place of the halacha is there
+      const [bx0, by0, bx1, by1] = grid(p.map).box, inside = (x: number, y: number) => x > bx0 && x < bx1 && y > by0 && y < by1;
+      for (const l of BORDERS.lines as [number, number][][]) {
+        const pts: THREE.Vector3[] = [];
+        for (let i = 0; i < l.length; i++) {
+          const [a, b] = [l[i], l[i + 1] ?? l[i]], n = i + 1 < l.length ? Math.max(1, Math.ceil(Math.hypot(b[0] - a[0], b[1] - a[1]) / grid(p.map).step / 2)) : 1;
+          for (let k = 0; k < n; k++) { const x = a[0] + ((b[0] - a[0]) * k) / n, y = a[1] + ((b[1] - a[1]) * k) / n; if (inside(x, y)) pts.push(at(x, y, 0.06 * K)); else if (pts.length) { dyn.add(line(pts.splice(0), 0xd9d2c5, { opacity: 0.75 })); } }
+        }
+        if (pts.length > 1) dyn.add(line(pts, 0xd9d2c5, { opacity: 0.75 }));
+      }
+      for (const c of MODERN_PLACES) {
+        if (!(c.map === 'both' || c.map === p.map) || !inside(c.lon, c.lat)) continue;
+        if (p.pins.some(q => Math.hypot(q.lon - c.lon, q.lat - c.lat) < 0.15)) continue;
+        const v = at(c.lon, c.lat, 0.08 * K);
+        const d = new THREE.Mesh(new THREE.SphereGeometry(0.07 * K, 10, 8), new THREE.MeshBasicMaterial({ color: 0xb8bcc8 }));
+        d.position.copy(v); dyn.add(d);
+        const l = label(c.name, 'modern'); l.position.copy(v); l.position.y += 0.3 * K; dyn.add(l);
+      }
     }
     if (p.route && p.route.length > 1) {
       // the route draped on the ground: sampled along each leg
