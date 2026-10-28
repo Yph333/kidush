@@ -31,10 +31,14 @@
 /* ---------- SVG diagram vocabulary (shared by the lessons' pictures) ---------- */
 svg.full, .viz .full { width: 100%; }
 .wheel { width: min(100%, 20rem); }
+.wheel.pickable { cursor: grab; touch-action: none; }
+.wheel.pickable:active { cursor: grabbing; }
+.wz-shift { fill: var(--c-shift); opacity: .9; }
+.wz-leap { fill: var(--c-leap); opacity: .95; }
 .ring { width: min(100%, 18rem); }
 .wn { fill: var(--c-night); } .wd { fill: var(--c-day); }
 .wn.bad, .wd.bad { fill: rgb(255 139 115 / .26); }
-.wn.ok, .wd.ok { fill: rgb(127 217 154 / .24); }
+.wn.ok, .wd.ok { fill: rgb(127 217 154 / .42); }
 .wl { font-family: var(--font-serif); font-weight: 700; font-size: 22px; text-anchor: middle; dominant-baseline: central; fill: var(--c-text); }
 .wsep { stroke: var(--c-bg); stroke-width: 3; }
 .wtick { stroke: var(--c-text-3); stroke-width: 1; }

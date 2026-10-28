@@ -1,6 +1,6 @@
 // The week as a ring: 7 days, each split into night (first half) and day. Moladot and dechiyot drawn on it.
 
-import { useId } from 'react';
+import { type PointerEvent, useId, useRef } from 'react';
 import { P_DAY, P_HOUR, P_WEEK } from '../engines/calendar';
 import { wk } from '../lib/format';
 
@@ -12,8 +12,12 @@ export interface WheelProps {
   ticks?: { x: number; cls: Tone }[];
   /** per-weekday highlight: '' | 'bad' | 'ok' */
   days?: ('' | 'bad' | 'ok' | undefined)[];
+  /** stretches of the week drawn as a band just inside the ring (e.g. where a dechiya applies) */
+  zones?: { from: number; to: number; cls: 'shift' | 'leap' }[];
   center?: [string?, string?, string?];
   aria?: string;
+  /** when given, the viewer can drag (or tap) on the ring: called with the position in the week, in parts */
+  onPick?: (x: number) => void;
 }
 
 const R = 150, r0 = 95;
@@ -29,10 +33,25 @@ const TONES: Tone[] = ['moon', 'shift', 'leap', 'ok'];
 /** Helper: highlight one weekday. */
 export const dayMark = (i: number, cls: 'ok' | 'bad' = 'ok') => { const a: WheelProps['days'] = []; a[((i % 7) + 7) % 7] = cls; return a; };
 
-export function WeekWheel({ markers = [], arcs = [], ticks = [], days = [], center = [], aria = 'גלגל השבוע' }: WheelProps) {
+export function WeekWheel({ markers = [], arcs = [], ticks = [], days = [], zones = [], center = [], aria = 'גלגל השבוע', onPick }: WheelProps) {
   const id = 'w' + useId().replace(/[^a-zA-Z0-9]/g, '');
+  const svg = useRef<SVGSVGElement>(null), held = useRef(false);
+  const pick = (e: PointerEvent) => {
+    const m = svg.current?.getScreenCTM();
+    if (!m || !onPick) return;
+    const q = new DOMPoint(e.clientX, e.clientY).matrixTransform(m.inverse());
+    if (Math.hypot(q.x, q.y) < 40) return;   // the middle shows the result, not a position
+    const f = (((Math.atan2(q.y, q.x) + Math.PI / 2) / (2 * Math.PI)) % 1 + 1) % 1;
+    onPick(Math.floor(f * P_WEEK) % P_WEEK);
+  };
+  const drag = onPick ? {
+    onPointerDown: (e: PointerEvent<SVGSVGElement>) => { held.current = true; e.currentTarget.setPointerCapture(e.pointerId); pick(e); },
+    onPointerMove: (e: PointerEvent) => { if (held.current) pick(e); },
+    onPointerUp: () => { held.current = false; },
+    onPointerCancel: () => { held.current = false; },
+  } : {};
   return (
-    <svg className="wheel" viewBox="-240 -212 480 424" role="img" aria-label={aria}>
+    <svg ref={svg} className={`wheel${onPick ? ' pickable' : ''}`} viewBox="-240 -212 480 424" role="img" aria-label={aria} {...drag}>
       <defs>
         {TONES.map(c => (
           <marker key={c} id={id + c} viewBox="0 0 10 10" refX="7" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
@@ -63,6 +82,7 @@ export function WeekWheel({ markers = [], arcs = [], ticks = [], days = [], cent
           </g>
         );
       })}
+      {zones.map((z, i) => z.to > z.from && <path key={i} d={sect(z.from, z.to, r0 - 9, r0 - 1)} className={`wz-${z.cls}`} />)}
       {ticks.map((t, i) => {
         const x = wk(t.x), [a, b] = P(x, r0), [c, d] = P(x, R + 6);
         return <line key={i} x1={a} y1={b} x2={c} y2={d} className={`st-${t.cls}`} strokeWidth="2.5" strokeDasharray="5 3" />;
