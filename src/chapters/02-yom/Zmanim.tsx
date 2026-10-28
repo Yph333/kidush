@@ -1,7 +1,7 @@
 import { Fragment, useId } from 'react';
 import { type ZPlace, localHM, shaahZmanit, sunAltAz, zman } from '../../engines/zmanim';
 import { skyTone } from '../../lib/skyColor';
-import { GROUP_NAME, DAY_GRA, DAY_MGA_16_1, DAY_MGA_72, ZMANIM, type ZmanGroup } from '../../content/zmanimOpinions';
+import { GROUP_NAME, DAY_GRA, DAY_MGA_16_1, DAY_MGA_72, ZMANIM, type ZmanGroup, unverified } from '../../content/zmanimOpinions';
 import { Term } from '../../components/Glossary';
 import { Engine, Slide, Viz } from '../../components/Slide';
 import { Num } from '../../components/text';
@@ -98,7 +98,7 @@ export function Zmanim() {
                             </button>
                           ))}
                         </div>
-                        <div className="zdef">{cur.definition} <span className="src-ref">מקור: {cur.source}</span>{cur.note && <span className="note"> · {cur.note}</span>}</div>
+                        <div className="zdef">{cur.definition} {!unverified(cur.source) && <span className="src-ref">מקור: {cur.source}</span>}{cur.note && <span className="note"> · {cur.note}</span>}</div>
                       </td>
                       <td className="ztime"><T ms={ms} /></td>
                     </tr>
