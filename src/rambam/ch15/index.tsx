@@ -5,7 +5,7 @@ import { R_MOON } from '../../engines/rambam';
 import { defineChapter, halacha } from '../define';
 import { DoubleTable, EqTable, TrueMoon } from '../widgets/moon';
 
-const D = true;
+const D = false;   // approved by the content owner (2026-10-28)
 
 export const CH15 = defineChapter(15, 'מקום הירח האמיתי', [
   halacha<'mean' | 'dist' | 'dbl'>({

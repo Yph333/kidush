@@ -67,9 +67,12 @@ Expected chain (all match the Rambam's text):
 - 9:5–7 (`src/engines/rambamCh9.test.ts`): 4930, Shmuel: Nisan Thursday night 6 h; Tammuz Thursday 1½ h (day);
   Tishrei Thursday 9 h; Tevet Friday night 4½ h; next Nisan start of Friday. Day of the month: 8·11 + 7 = 95 → 5 →
   Monday → +3 → 8 Nisan, which is also the exact day from the absolute tekufa.
-- 9:6 — OPEN (content owner): in a leap year "תתחיל למנות מראש חדש אדר שני" read literally gives a day of Adar II on the
-  right weekday, four weeks before the exact tekufa (e.g. 4932: count → 27 Adar II). The engine reports the literal count
-  and the exact date side by side; the 9:6 page flags it.
+- 9:6 — RESOLVED (content owner, 2026-10-28): the Rambam's count is shown as written, and in a leap year a second row,
+  tagged as this site's addition, gives the date. In his era (4850–5050) the count from Adar II is exact whenever the
+  tekufa falls in Adar II (e.g. 4932: 27 Adar II); when the tekufa falls in early Nisan the count lands on the same
+  weekday four weeks earlier (e.g. 4900: count 6 Adar II, tekufa 5 Nisan). The addition: carry the count from Adar II
+  on into Nisan, and a result in the first half of Adar II means four weeks later (a leap year's tekufa falls between
+  mid Adar II and mid Nisan, 4:2). It gives the exact date in every leap year 4850–5050 (test in rambamCh9.test.ts).
 - 10:1–5: Rav Adda's constants are computed in rega'im (exact); 19 years = 235 months exactly; the way of 10:5 agrees with
   the absolute tekufa to the rega. The tekufa can precede molad Nisan by up to about two weeks; the engine reads which
   side from the absolute tekufa (the Rambam's remainder alone does not say).

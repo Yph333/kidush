@@ -7,7 +7,7 @@ import { defineChapter, halacha } from '../define';
 import { Decompose, MotionTable } from '../ch14/Blocks';
 import { EqTable, HeadCalc, LatCalc, OrbitScene } from '../widgets/moon';
 
-const D = true;
+const D = false;   // approved by the content owner (2026-10-28)
 const EXAMPLE = rambamD0() + 29;
 const LatTable = ({ deg }: { deg: number }) => <EqTable tab={R_LAT} title="לוח מנת מסלול הרוחב" deg={deg} fold={90} hl />;
 

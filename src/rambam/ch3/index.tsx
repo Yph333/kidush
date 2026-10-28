@@ -3,15 +3,19 @@
 import { defineChapter, halacha } from '../define';
 import { Messengers, PLACES, Points, RegionMap, SixMonths, TimeStrip, TwoWays } from '../widgets/halacha';
 
-const D = true;
+const D = false;   // approved by the content owner (2026-10-28)
 // hours from the start of night 30 (18:00)
 const DAY30 = (hl?: string) => <TimeStrip title="ליל שלושים ויום שלושים" from={0} to={24} hl={hl}
   marks={[{ t: 21.5, label: 'מנחה (בערך)', k: 'mincha' }, { t: 24, label: 'שקיעה', k: 'sunset' }]}
   spans={[{ a: 12, b: 21.5, label: 'מקבלים עדות', tone: 'ok', k: 'before' }, { a: 21.5, b: 24, label: 'אחר המנחה', tone: 'leap', k: 'after' }]} />;
+// the beacon chain of Mishnah Rosh HaShanah 2:4: Mount of Olives; Sartaba = Qarn Sartaba (Alexandrion);
+// Gerofina: in Transjordan, in the Gilead (place uncertain); Hauran: the mountain of Hauran (Jabal al-Arab, peak
+// uncertain); Beit Baltin: no accepted identification, so not drawn. The chain ends toward Babylon.
 const BEACONS = [
-  { name: 'הר המשחה', lat: 31.78, lon: 35.24, kind: 'beacon' as const },
-  { name: 'סרטבא', lat: 32.1, lon: 35.46, kind: 'beacon' as const },
-  { name: 'חוורן', lat: 32.7, lon: 36.4, kind: 'beacon' as const, approx: true },
+  { name: 'הר המשחה', lat: 31.778, lon: 35.244, kind: 'beacon' as const },
+  { name: 'סרטבא', lat: 32.099, lon: 35.459, kind: 'beacon' as const },
+  { name: 'גריפינא', lat: 32.35, lon: 35.78, kind: 'beacon' as const, approx: true },
+  { name: 'חוורן', lat: 32.66, lon: 36.71, kind: 'beacon' as const, approx: true },
   { name: 'בבל', lat: 32.54, lon: 44.42, kind: 'abroad' as const },
 ];
 
@@ -96,7 +100,7 @@ export const CH3 = defineChapter(3, 'העדים, הזמנים והשלוחים',
         body: <p>הכותים הדליקו משואות בזמן הלא נכון; מאז שולחים שלוחים. השלוחים לא מחללים שבת ויום טוב: מחללים רק כדי לקדש, לא כדי להודיע.</p> },
     ] },
     takeaway: <p>ממשואות לשלוחים; השלוחים לא מחללים שבת.</p>,
-    stage: f => f === 'beacons' ? <RegionMap box={[33.5, 29.5, 45.5, 35.5]} places={[...BEACONS]} route={BEACONS.map(b => b.name)} hl={['הר המשחה', 'בבל']} note="השרשרת לפי המשנה (ראש השנה ב, ד), חלקית; מקומות ההרים בקירוב. קווי החוף בקירוב." /> : <Messengers hl="both" />,
+    stage: f => f === 'beacons' ? <RegionMap box={[33.5, 29.5, 45.5, 35.5]} places={[...BEACONS]} route={BEACONS.map(b => b.name)} hl={['הר המשחה', 'בבל']} note="השרשרת לפי המשנה (ראש השנה ב, ד): הר המשחה (הר הזיתים), סרטבא (קרן סרטבה), גריפינא (בהרי הגלעד, משוער), חוורן (הר החוורן, משוער). לבית בלתין אין זיהוי מקובל, ולכן הקו נמשך ישר לבבל. קווי החוף בקירוב." /> : <Messengers hl="both" />,
   }),
   halacha<'six' | 'elul'>({
     h: 'ט', title: 'ששה חדשים',

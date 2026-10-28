@@ -4,7 +4,7 @@ import { Num, Sig } from '../../components/text';
 import { defineChapter, halacha } from '../define';
 import { SunCalc, SunTable, TrueTekufot } from '../widgets/astro';
 
-const D = true;
+const D = false;   // approved by the content owner (2026-10-28)
 
 export const CH13 = defineChapter(13, 'מקום השמש האמיתי', [
   halacha<'mean' | 'apo' | 'course'>({

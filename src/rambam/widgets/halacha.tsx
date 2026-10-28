@@ -135,7 +135,7 @@ export function RegionMap({ places, box: box0, ring, route, hl, note }: {
   );
 }
 
-/** Places of chapter 5:11 and around (coordinates of the known sites; ancient sites by their common identification). */
+/** Places of chapter 5:11 and around: coordinates of the known sites; ancient sites by their usual identification, `approx` where it is uncertain. */
 export const PLACES: Record<string, MapPlace> = {
   ירושלים: { name: 'ירושלים', lat: 31.78, lon: 35.23, kind: 'city' },
   אושא: { name: 'אושא', lat: 32.79, lon: 35.11, kind: 'il' },
@@ -147,7 +147,11 @@ export const PLACES: Record<string, MapPlace> = {
   אשקלון: { name: 'אשקלון', lat: 31.67, lon: 34.57, kind: 'syria' },
   מצרים: { name: 'מצרים', lat: 30.04, lon: 31.24, kind: 'abroad' },
   עמון: { name: 'עמון', lat: 31.95, lon: 35.93, kind: 'abroad' },
-  מואב: { name: 'מואב', lat: 31.3, lon: 35.75, kind: 'abroad', approx: true },
+  // Moab by its capital, Kir Moab (al-Karak)
+  מואב: { name: 'מואב (קיר מואב)', lat: 31.18, lon: 35.7, kind: 'abroad' },
+  // Luz = Beit El, at Beitin; Nov: north-east of Jerusalem, by the usual identification near Mount Scopus (uncertain)
+  לוז: { name: 'לוז (בית אל)', lat: 31.93, lon: 35.24, kind: 'il' },
+  נוב: { name: 'נוב', lat: 31.8, lon: 35.25, kind: 'il', approx: true },
   בבל: { name: 'בבל', lat: 32.54, lon: 44.42, kind: 'abroad' },
 };
 

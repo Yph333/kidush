@@ -3,7 +3,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   CYCLE_EXCESS, P_DAY, P_HOUR, P_MONTH, RAV_ADDA_YEAR, SHMUEL_YEAR, TEKUFA_LEAD, YEAR_EXCESS,
-  hebDate, monthStart, tekufaDay, tekufaNisanRavAdda, tekufaNisanShmuel, tekufaSteps, tekufotShmuel,
+  hebDate, isLeap, monthStart, tekufaDay, tekufaNisanRavAdda, tekufaNisanShmuel, tekufaSteps, tekufotShmuel,
 } from './calendar';
 
 const dhp = (d: number, h: number, p: number) => d * P_DAY + h * P_HOUR + p;
@@ -63,14 +63,23 @@ describe('ch. 9: Shmuel', () => {
     expect(n).toBeGreaterThan(100);
     expect(four / 201).toBeLessThan(0.1);
   });
-  it('9:6: in a leap year, the count from Adar II lands on the right weekday, four weeks before the tekufa', () => {
-    // Flagged for the content owner: read literally, "מראש חדש אדר שני" gives a day of Adar II;
-    // the tekufa itself is 28 days later (in Nisan). Counting from Nisan gives it directly.
-    for (const y of [4900, 4908, 4916, 4927, 4935, 4946, 4957]) {
+  it('9:6: in a leap year the count from Adar II is exact when the tekufa falls in Adar II (e.g. 4932: 27 Adar II)', () => {
+    const t = tekufaDay(4932);
+    expect([t.from, t.day, t.actual.name, t.actual.d]).toEqual(['אדר ב׳', 27, 'אדר ב׳', 27]);
+  });
+  it('9:6: when the tekufa falls in early Nisan, the count lands on the same weekday four weeks before (e.g. 4900)', () => {
+    const t = tekufaDay(4900);
+    expect([t.day, t.actual.name, t.actual.d]).toEqual([6, 'ניסן', 5]);
+  });
+  it('9:6 (site addition): carried into Nisan, and four weeks on from the first half of Adar II: the actual day, every leap year of his era', () => {
+    let n = 0;
+    for (let y = 4850; y <= 5050; y++) {
       const t = tekufaDay(y);
-      expect(t.from).toBe('אדר ב׳');
-      expect(t.actual).toEqual({ name: 'ניסן', d: t.day - 1 });
+      if (!t.leap) { expect(isLeap(y)).toBe(false); continue; }
+      n++;
+      expect([t.leap.name, t.leap.d]).toEqual([t.actual.name, t.actual.d]);
     }
+    expect(n).toBeGreaterThan(60);
   });
 });
 

@@ -4,7 +4,7 @@ import { Num } from '../../components/text';
 import { defineChapter, halacha } from '../define';
 import { EXAMPLE_YEAR, SeasonsScene, TekufaCalc, TekufaDay, TekufaHours, TekufaWeek, YearCompare } from '../widgets/tekufot';
 
-const D = true;
+const D = false;   // approved by the content owner (2026-10-28)
 
 export const CH9 = defineChapter(9, 'התקופות לפי שמואל', [
   halacha<'quarter' | 'less' | 'nations'>({
@@ -88,7 +88,7 @@ export const CH9 = defineChapter(9, 'התקופות לפי שמואל', [
       { title: 'עד יום התקופה', focus: 'land', mark: ['אם יגיע ליום התקופה מוטב ואם לאו הוסיף יום או שני ימים או ג׳ ימים על המנין עד שיגיע ליום התקופה'],
         body: <p>יודעים כבר באיזה יום בשבוע התקופה (הלכה ד). אם המניין לא נפל עליו, מוסיפים ימים עד שמגיעים.</p> },
       { title: 'בשנה מעוברת', focus: 'leap', mark: ['ואם תהיה השנה מעוברת תתחיל למנות מראש חדש אדר שני'],
-        body: <p>בשנה מעוברת מתחילים מראש חודש אדר שני. בבורר: נסו שנה מעוברת, למשל ד׳תתקל״ב (<Num>4932</Num>).</p> },
+        body: <p>בשנה מעוברת מתחילים מראש חודש אדר שני. בבורר: ד׳תתקל״ב (<Num>4932</Num>), שבה התקופה בסוף אדר שני והחשבון יוצא בדיוק; וד׳תת״ק (<Num>4900</Num>), שבה התקופה בתחילת ניסן. לשנה כזו הוספנו שורה נפרדת, מסומנת כתוספת שלנו.</p> },
     ] },
     takeaway: <p>(שנים × <Num>11</Num> + <Num>7</Num>) בלי שלושים, מראש חודש ניסן, ומשלימים ליום התקופה.</p>,
     stage: f => <TekufaDay focus={f === 'leap' ? 'result' : f} y={f === 'leap' ? 4932 : undefined} />,

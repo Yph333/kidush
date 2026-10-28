@@ -5,7 +5,7 @@ import { defineChapter, halacha } from '../define';
 import { Limits, Sighting } from '../widgets/moon';
 import { AllFull, BandGlobe, FullMonthsBars, NightThirty, Points, TwoWays } from '../widgets/halacha';
 
-const D = true;
+const D = false;   // approved by the content owner (2026-10-28)
 
 export const CH18 = defineChapter(18, 'מה שהחשבון לא רואה', [
   halacha<'clouds' | 'place'>({

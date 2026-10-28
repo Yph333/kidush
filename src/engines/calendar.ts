@@ -460,6 +460,13 @@ export interface TekufaDay {
   day: number;
   /** the tekufa's actual date (from the absolute tekufa, 9:3), for comparison */
   actual: { name: string; d: number };
+  /**
+   * Leap years only, an addition of this site (not the Rambam's words): the count from Adar II carried on into Nisan
+   * when it passes the 29 days of Adar II; and when it falls in the first half of Adar II, four weeks later (the same
+   * weekday) in Nisan, because in a leap year tekufat Nisan falls between the middle of Adar II and the middle of
+   * Nisan (4:2). In his era this is the actual date every year. Null in a common year.
+   */
+  leap: { name: string; d: number; shifted: boolean } | null;
 }
 
 /**
@@ -473,5 +480,10 @@ export function tekufaDay(y: number): TekufaDay {
   const landWd = (start + rem - 1) % 7, tekWd = Math.floor(tekufotShmuel(y).nisan / 24) % 7;
   const added = (tekWd - landWd + 7) % 7;
   const act = hebDate(Math.floor(tekufaNisanShmuel(y) / P_DAY));
-  return { years, days, rem, from: L ? 'אדר ב׳' : 'ניסן', startWd, landWd, tekWd, added, day: rem + added, actual: { name: act.name, d: act.d } };
+  let leap: TekufaDay['leap'] = null;
+  if (L) {
+    const at = start + rem + added - 1, h = hebDate(at), shifted = h.name === 'אדר ב׳' && h.d < 15, f = shifted ? hebDate(at + 28) : h;
+    leap = { name: f.name, d: f.d, shifted };
+  }
+  return { years, days, rem, from: L ? 'אדר ב׳' : 'ניסן', startWd, landWd, tekWd, added, day: rem + added, actual: { name: act.name, d: act.d }, leap };
 }

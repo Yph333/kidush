@@ -6,7 +6,7 @@ import { YearBars } from '../widgets/calendar';
 import { Sighting } from '../widgets/moon';
 import { MonthMoons, NightThirty, PLACES, Points, RegionMap, TwoWays } from '../widgets/halacha';
 
-const D = true;
+const D = false;   // approved by the content owner (2026-10-28)
 
 export const CH1 = defineChapter(1, 'חודשי הלבנה ושני החמה', [
   halacha<'months' | 'moon' | 'years'>({

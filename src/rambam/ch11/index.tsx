@@ -6,7 +6,7 @@ import { defineChapter, halacha } from '../define';
 import { DmsCalc, Eccentric, EpochFacts, JerusalemGlobe, RambamVsModern, SignFinder, TonightsQuestion } from '../widgets/astro';
 import { MeanVsTrue } from '../widgets/calendar';
 
-const D = true;
+const D = false;   // approved by the content owner (2026-10-28)
 
 export const CH11 = defineChapter(11, 'יסודות חשבון הראייה', [
   halacha<'q'>({

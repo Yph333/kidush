@@ -11,7 +11,7 @@ import { ZodiacScene } from '../widgets/zodiac';
 /** the equator on the zodiac wheel, with the slant of one degree of the zodiac */
 const Slant = ({ at, note }: { at: number; note?: string }) => <ZodiacScene view="decl" equator stars={false} pointer={{ lon: at }} hlSign={Math.floor(at / 30) % 12} decl={{ lon: at, lat: 0, hl: 'decl', labels: { decl: 'הנטייה' } }} note={note ?? 'המקווקו התכלת: הקו השווה. הקשת הצהובה: כמה המעלה המסומנת רחוקה ממנו.'} />;
 
-const D = true;
+const D = false;   // approved by the content owner (2026-10-28)
 const EXAMPLE = rambamD0() + 29;
 
 export const CH19 = defineChapter(19, 'לאן הירח נוטה', [

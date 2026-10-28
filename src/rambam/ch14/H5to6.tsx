@@ -15,7 +15,7 @@ import { SignPos } from './Wheels14';
 type F5 = 'idea' | 'zero' | 'plus' | 'thirty' | 'autumn' | 'minus' | 'example' | 'try';
 
 const GUIDE5: GuideDef<F5> = {
-  draft: true,
+  draft: false,
   steps: [
     {
       title: 'תיקון לפי השמש',
@@ -131,7 +131,7 @@ export function H14_5() {
 type F6 = 'result' | 'third' | 'name' | 'chain';
 
 const GUIDE6: GuideDef<F6> = {
-  draft: true,
+  draft: false,
   steps: [
     {
       title: 'אחרי התיקון',

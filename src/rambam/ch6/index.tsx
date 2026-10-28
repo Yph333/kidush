@@ -7,7 +7,7 @@ import {
   AddRemainder, CycleBoxes, CycleCompare, CycleRemainder, Divisors, MeanVsTrue, MonthMolads, Remainder, YearBars, YearMolad,
 } from '../widgets/calendar';
 
-const D = true;   // draft until the content owner approves
+const D = false;   // approved by the content owner (2026-10-28)
 
 export const CH6 = defineChapter(6, 'המולד ושאריות הזמן', [
   halacha<'calc' | 'molad' | 'ibur'>({
