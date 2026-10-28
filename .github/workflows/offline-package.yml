@@ -6,7 +6,7 @@ name: Offline package (Windows)
 
 on:
   push:
-    branches: [main, claude/brave-planck-roikrn]
+    branches: [main]
   workflow_dispatch:
 
 permissions:
@@ -53,7 +53,7 @@ jobs:
           tag_name: offline-${{ github.run_number }}
           name: חבילה מלאה ללא אינטרנט (Windows) ${{ github.run_number }}
           body: |
-            כל הפרויקט עם כל הספריות כבר מותקנות. מתקינים Node.js, מחלצים את הקובץ, ולוחצים פעמיים על start.bat או על dist-single\index.html.
+            כל הפרויקט עם כל הספריות כבר מותקנות. מתקינים Node.js, מחלצים את הקובץ, ולוחצים פעמיים על open-3d.bat (תלת־ממד גם בלי כרטיס מסך), או על start.bat.
             הוראות מלאות: docs/OFFLINE.md
           files: ${{ runner.temp }}\luach-offline-windows.zip
           make_latest: true
