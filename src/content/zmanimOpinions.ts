@@ -40,6 +40,8 @@ export const DAY_MGA_72 = { start: off(rise(), -72), end: off(set(), 72), label:
 export const DAY_MGA_16_1 = { start: below('rise', 16.1), end: below('set', 16.1), label: 'מעלות השחר עד צאת הכוכבים, 16.1° (מג״א)' };
 
 const TODO = 'TODO: verify';
+/** an attribution still to be checked: kept here for the record, not shown on the site */
+export const unverified = (src: string): boolean => src.startsWith('TODO');
 
 export const ZMANIM: ZmanOpinion[] = [
   // עלות השחר

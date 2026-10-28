@@ -15,7 +15,8 @@
     "oracle:zmanim": "java -cp tools/kosherjava/lib/zmanim-2.5.0.jar tools/kosherjava/Oracle.java > tests/zmanim-oracle.json",
     "horizons": "node tools/horizon/build-profiles.mjs",
     "sources:rambam": "node tools/sources/fetch-rambam.mjs",
-    "review": "node -e \"process.env.REVIEW=1;require('child_process').execSync('npx playwright test e2e/review.spec.ts --project=desktop',{stdio:'inherit',env:process.env})\""
+    "review": "node -e \"process.env.REVIEW=1;require('child_process').execSync('npx playwright test e2e/review.spec.ts --project=desktop',{stdio:'inherit',env:process.env})\"",
+    "check:offline": "vite build --mode single && playwright test e2e/offline.spec.ts --project=desktop"
   },
   "dependencies": {
     "@fontsource/frank-ruhl-libre": "^5.3.0",
