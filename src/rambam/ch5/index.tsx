@@ -1,7 +1,7 @@
 // Kiddush HaChodesh ch. 5: from sighting to the fixed calculation, and the second day of Yom Tov.
 
 import { defineChapter, halacha } from '../define';
-import { FixedVsSighting, Messengers, PLACES, Points, RegionMap, TwoWays } from '../widgets/halacha';
+import { FixedVsSighting, Messengers, MessengersWalk, PLACES, Points, RegionMap, TwoWays } from '../widgets/halacha';
 
 const D = false;   // approved by the content owner (2026-10-28)
 const IL = ['ירושלים', 'אושא', 'שפרעם', 'לוז', 'יבנה', 'נוב', 'טבריא'].map(n => PLACES[n]);
@@ -49,7 +49,7 @@ export const CH5 = defineChapter(5, 'החשבון ויום טוב שני', [
         body: <p>בזמן הראייה: מקומות ששלוחי תשרי מגיעים אליהם, יום אחד. השאר: שני ימים מספק.</p> },
     ] },
     takeaway: <p>אז: לפי השלוחים.</p>,
-    stage: () => <Messengers hl="tishrei" />,
+    stage: () => <MessengersWalk />,
   }),
   halacha<'custom'>({
     h: 'ה', title: 'היום: מנהג אבותיהם',

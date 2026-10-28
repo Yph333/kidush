@@ -1,13 +1,20 @@
 // Kiddush HaChodesh ch. 3: witnesses on Shabbat, the time limit, the feast, beacons and messengers.
 
 import { defineChapter, halacha } from '../define';
-import { Messengers, PLACES, Points, RegionMap, SixMonths, TimeStrip, TwoWays } from '../widgets/halacha';
+import { BeaconsPlay, Messengers, MessengersWalk, Points, SixMonths, TimeStrip, TwoWays } from '../widgets/halacha';
 
 const D = false;   // approved by the content owner (2026-10-28)
 // hours from the start of night 30 (18:00)
 const DAY30 = (hl?: string) => <TimeStrip title="ליל שלושים ויום שלושים" from={0} to={24} hl={hl}
   marks={[{ t: 21.5, label: 'מנחה (בערך)', k: 'mincha' }, { t: 24, label: 'שקיעה', k: 'sunset' }]}
-  spans={[{ a: 12, b: 21.5, label: 'מקבלים עדות', tone: 'ok', k: 'before' }, { a: 21.5, b: 24, label: 'אחר המנחה', tone: 'leap', k: 'after' }]} />;
+  spans={[{ a: 12, b: 21.5, label: 'מקבלים עדות', tone: 'ok', k: 'before' }, { a: 21.5, b: 24, label: 'אחר המנחה', tone: 'leap', k: 'after' }]}
+  story={[
+    { t: 0.5, text: 'ליל שלושים: העדים ראו, ויוצאים לדרך. מי שמרחק לילה ויום או פחות, הולך (ג, א).' },
+    { t: 12, text: 'בוקר יום שלושים: בית דין מקבלים עדות.' },
+    { t: 21.5, text: 'מנחה: בזמן המקדש מפסיקים לקבל עדות, כדי שיהיה זמן למוסף ולתמיד (ג, ה).' },
+    { t: 22.2, text: 'עדים שבאו אחרי המנחה: נוהגים היום קודש ולמחר קודש, והמוסף למחר (ג, ו).' },
+    { t: 23.5, text: 'אחרי החורבן, תקנת רבן יוחנן בן זכאי: מקבלים עדות כל היום, עד השקיעה (ג, ו).' },
+  ]} />;
 // the beacon chain of Mishnah Rosh HaShanah 2:4: Mount of Olives; Sartaba = Qarn Sartaba (Alexandrion);
 // Gerofina: in Transjordan, in the Gilead (place uncertain); Hauran: the mountain of Hauran (Jabal al-Arab, peak
 // uncertain); Beit Baltin: no accepted identification, so not drawn. The chain ends toward Babylon.
@@ -100,7 +107,7 @@ export const CH3 = defineChapter(3, 'העדים, הזמנים והשלוחים',
         body: <p>הכותים הדליקו משואות בזמן הלא נכון; מאז שולחים שלוחים. השלוחים לא מחללים שבת ויום טוב: מחללים רק כדי לקדש, לא כדי להודיע.</p> },
     ] },
     takeaway: <p>ממשואות לשלוחים; השלוחים לא מחללים שבת.</p>,
-    stage: f => f === 'beacons' ? <RegionMap box={[33.5, 29.5, 45.5, 35.5]} places={[...BEACONS]} route={BEACONS.map(b => b.name)} hl={['הר המשחה', 'בבל']} note="השרשרת לפי המשנה (ראש השנה ב, ד): הר המשחה (הר הזיתים), סרטבא (קרן סרטבה), גריפינא (בהרי הגלעד, משוער), חוורן (הר החוורן, משוער). לבית בלתין אין זיהוי מקובל, ולכן הקו נמשך ישר לבבל. קווי החוף בקירוב." /> : <Messengers hl="both" />,
+    stage: f => f === 'beacons' ? <BeaconsPlay places={[...BEACONS]} note="השרשרת לפי המשנה (ראש השנה ב, ד): הר המשחה (הר הזיתים), סרטבא (קרן סרטבה), גריפינא (בהרי הגלעד, משוער), חוורן (הר החוורן, משוער). לבית בלתין אין זיהוי מקובל, ולכן הקו נמשך ישר לבבל. קווי החוף בקירוב." /> : <Messengers hl="both" />,
   }),
   halacha<'six' | 'elul'>({
     h: 'ט', title: 'ששה חדשים',
@@ -133,7 +140,7 @@ export const CH3 = defineChapter(3, 'העדים, הזמנים והשלוחים',
         body: <p>מקומות רחוקים: שני ימים, מספק.</p> },
     ] },
     takeaway: <p>הגיעו השלוחים: יום אחד; לא הגיעו: שניים.</p>,
-    stage: () => <RegionMap places={[PLACES['ירושלים'], PLACES['טבריא'], PLACES['דמשק'], PLACES['מצרים'], PLACES['בבל']]} ring={{ km: 520, label: 'כעשרה ימי הליכה (הערכה)' }} note="העיגול: הערכה גסה של עשרה ימי הליכה, לפי ה׳, י (ירושלים–מצרים כשמונה ימים). קווי החוף בקירוב." />,
+    stage: () => <MessengersWalk />,
   }),
   halacha<'shavuot'>({
     h: 'יב', title: 'שלא לחלוק במועדות',

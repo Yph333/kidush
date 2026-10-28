@@ -16,6 +16,10 @@ export interface TerrainProps {
   route?: [number, number][];
   /** a circle around Jerusalem, km */
   ring?: { km: number; label: string };
+  /** beacons lit one after another along `stops`: `t` stops lit so far (fractional: the next is catching) */
+  fires?: { stops: [number, number][]; t: number };
+  /** messengers walking out of Jerusalem toward each place, `km` walked so far */
+  walkers?: { to: [number, number][]; km: number };
   /** today's borders and cities, faint, for orientation (default on) */
   modern?: boolean;
   /** the area to frame (lon0, lat0, lon1, lat1); the whole map if absent */
@@ -101,6 +105,33 @@ const create = (host: HTMLElement, p0: TerrainProps): SceneHandle<TerrainProps> 
         const d = new THREE.Mesh(new THREE.SphereGeometry(0.07 * K, 10, 8), new THREE.MeshBasicMaterial({ color: 0xb8bcc8 }));
         d.position.copy(v); dyn.add(d);
         const l = label(c.name, 'modern'); l.position.copy(v); l.position.y += 0.3 * K; dyn.add(l);
+      }
+    }
+    if (p.fires) {
+      const { stops, t } = p.fires;
+      stops.forEach(([lon, lat], i) => {
+        if (i >= t) return;
+        const base = at(lon, lat), f = new THREE.Mesh(new THREE.ConeGeometry(0.22 * K, 0.7 * K, 16), new THREE.MeshBasicMaterial({ color: 0xffa040 }));
+        f.position.copy(base); f.position.y += 0.45 * K; dyn.add(f);
+        const glow = new THREE.Mesh(new THREE.SphereGeometry(0.5 * K, 16, 12), new THREE.MeshBasicMaterial({ color: 0xffc070, transparent: true, opacity: 0.35, depthWrite: false }));
+        glow.position.copy(f.position); dyn.add(glow);
+        // the light travelling to the next hill
+        if (i + 1 < stops.length) {
+          const q = Math.min(1, t - i - 1 + 1e-9 < 0 ? Math.max(0, t - i) : 1), [lon2, lat2] = stops[i + 1];
+          if (q > 0) dyn.add(line([at(lon, lat, 0.8 * K), at(lon + (lon2 - lon) * Math.min(1, t - i), lat + (lat2 - lat) * Math.min(1, t - i), 0.8 * K)], 0xffc070, {}));
+        }
+      });
+    }
+    if (p.walkers) {
+      const J = [35.23, 31.78];
+      for (const [lon, lat] of p.walkers.to) {
+        const dKm = Math.hypot((lon - J[0]) * 111 * Math.cos((J[1] * Math.PI) / 180), (lat - J[1]) * 111), f = Math.min(1, p.walkers.km / dKm);
+        const w = at(J[0] + (lon - J[0]) * f, J[1] + (lat - J[1]) * f, 0.25 * K);
+        const m = new THREE.Mesh(new THREE.SphereGeometry(0.16 * K, 12, 10), new THREE.MeshBasicMaterial({ color: f >= 1 ? 0x7fce9c : 0xffffff }));
+        m.position.copy(w); dyn.add(m);
+        const pts: THREE.Vector3[] = [];
+        for (let k = 0; k <= 30; k++) { const g = (f * k) / 30; pts.push(at(J[0] + (lon - J[0]) * g, J[1] + (lat - J[1]) * g, 0.12 * K)); }
+        dyn.add(line(pts, 0xffffff, { opacity: 0.7 }));
       }
     }
     if (p.route && p.route.length > 1) {
