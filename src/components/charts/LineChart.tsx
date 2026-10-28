@@ -96,13 +96,17 @@ export function LineChart({
         <g clipPath={`url(#${id})`}>
           {series.map(s => <path key={s.key} d={path(s.values)} fill="none" stroke={s.color} strokeWidth={s.faint ? 1 : 2} strokeOpacity={s.faint ? 0.3 : 1} strokeLinejoin="round" />)}
         </g>
-        {series.filter(s => !s.faint).map(s => {
-          // direct label at the right (first) end of the line, in the right margin
-          let i = 0;
-          while (i < s.values.length - 1 && (s.values[i] === null || !Number.isFinite(s.values[i]!))) i++;
-          const v = s.values[i];
-          return v == null ? null : <text key={s.key} x={X(i) + 6} y={Y(v) + 4} className="dlabel">{s.label}</text>;
-        })}
+        {(() => {
+          // direct labels at the right (first) end of each line, in the right margin, pushed apart when lines end close together
+          const ls = series.filter(s => !s.faint).map(s => {
+            let i = 0;
+            while (i < s.values.length - 1 && (s.values[i] === null || !Number.isFinite(s.values[i]!))) i++;
+            const v = s.values[i];
+            return v == null ? null : { key: s.key, label: s.label, x: X(i) + 6, y: Y(v) + 4 };
+          }).filter(l => l !== null).sort((a, b) => a.y - b.y);
+          for (let k = 1; k < ls.length; k++) if (ls[k].y - ls[k - 1].y < 13) ls[k].y = ls[k - 1].y + 13;
+          return ls.map(l => <text key={l.key} x={l.x} y={l.y} className="dlabel">{l.label}</text>);
+        })()}
         {h !== null && <>
           <line x1={X(h)} x2={X(h)} y1={padT} y2={H - padB} className="crosshair" />
           {series.map(s => s.values[h] != null && <circle key={s.key} cx={X(h)} cy={Y(s.values[h]!)} r="4" fill={s.color} stroke="var(--panel)" strokeWidth="2" />)}

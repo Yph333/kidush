@@ -31,10 +31,14 @@
 /* ---------- SVG diagram vocabulary (shared by the lessons' pictures) ---------- */
 svg.full, .viz .full { width: 100%; }
 .wheel { width: min(100%, 20rem); }
+.wheel.pickable { cursor: grab; touch-action: none; }
+.wheel.pickable:active { cursor: grabbing; }
+.wz-shift { fill: var(--c-shift); opacity: .9; }
+.wz-leap { fill: var(--c-leap); opacity: .95; }
 .ring { width: min(100%, 18rem); }
 .wn { fill: var(--c-night); } .wd { fill: var(--c-day); }
 .wn.bad, .wd.bad { fill: rgb(255 139 115 / .26); }
-.wn.ok, .wd.ok { fill: rgb(127 217 154 / .24); }
+.wn.ok, .wd.ok { fill: rgb(127 217 154 / .42); }
 .wl { font-family: var(--font-serif); font-weight: 700; font-size: 22px; text-anchor: middle; dominant-baseline: central; fill: var(--c-text); }
 .wsep { stroke: var(--c-bg); stroke-width: 3; }
 .wtick { stroke: var(--c-text-3); stroke-width: 1; }
@@ -357,3 +361,10 @@ svg.full, .viz .full { width: 100%; }
 .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 .sight-face { max-width: 16rem; margin: var(--sp-2) auto 0; }
 .story-line { min-height: 2.6em; margin: var(--sp-2) 0 0; padding: var(--sp-2) var(--sp-3); border-inline-start: 3px solid var(--c-moon); background: var(--c-moon-soft); border-radius: var(--r-sm); font-size: var(--fs-md); }
+.sketches { display: grid; grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr)); gap: var(--sp-3); }
+.sketch { margin: 0; text-align: center; }
+.sketch svg { width: 100%; border-radius: 8px; }
+.sketch figcaption { color: var(--c-text-2); font-size: var(--fs-sm); }
+.checks { margin: 0; padding-inline-start: 1.2em; }
+.checks li.ok { color: var(--c-ok, #7fce9c); }
+.checks li.bad { color: var(--c-shift, #ef8f76); }

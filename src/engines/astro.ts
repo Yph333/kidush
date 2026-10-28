@@ -342,5 +342,7 @@ export function sunLongitudeTime(ms: number, target: number): number {
 
 /** The four seasons of a Gregorian year: [March equinox, June solstice, September equinox, December solstice]. */
 export function seasons(year: number): [number, number, number, number] {
-  return [0, 90, 180, 270].map((lon, i) => sunLongitudeTime(Date.UTC(year, 2 + 3 * i, 21), lon)) as [number, number, number, number];
+  // not Date.UTC(year, …): it reads the years 0–99 as 1900–1999, and the long timeline reaches back past year 1
+  const guess = (m: number) => { const d = new Date(0); d.setUTCFullYear(year, m, 21); return d.getTime(); };
+  return [0, 90, 180, 270].map((lon, i) => sunLongitudeTime(guess(2 + 3 * i), lon)) as [number, number, number, number];
 }

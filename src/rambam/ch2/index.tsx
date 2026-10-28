@@ -1,7 +1,7 @@
 // Kiddush HaChodesh ch. 2: the witnesses and how they are examined.
 
 import { defineChapter, halacha } from '../define';
-import { Heights, NightThirty, Points, TimeStrip, TwoWays } from '../widgets/halacha';
+import { Heights, NightThirty, Points, TimeStrip, TwoWays, WitnessGame } from '../widgets/halacha';
 
 const D = false;   // approved by the content owner (2026-10-28)
 // hours from the start of the night that begins day 29 (18:00)
@@ -58,10 +58,10 @@ export const CH2 = defineChapter(2, 'עדות החודש', [
       { title: 'החשבון יודע מראש', focus: 'calc', mark: ['ויודעין הלבנה כשתראה בחדש זה אם תהיה בצפון השמש או בדרומה ואם תהיה רחבה או קצרה ולהיכן יהיו ראשי קרניה נוטין'],
         body: <p>מהחשבון יודעים איך ייראה הסהר: צפונה או דרומה מהשמש, רחב או צר, ולאן הקרניים.</p> },
       { title: 'שואלים את העדים', focus: 'ask', mark: ['כיצד ראיתם אותה בצפון או בדרום. להיכן היו קרניה נוטות. כמה היתה גבוהה בראיית עיניכם וכמה היתה רחבה'],
-        body: <p>שואלים את העדים את אותן שאלות. מתאים לחשבון: מקבלים. בכלי: השמיים בליל שלושים של כל חודש, כפי שהעדים היו רואים.</p> },
+        body: <p>שואלים את העדים את אותן שאלות. מתאים לחשבון: מקבלים. נסו בעצמכם: אתם העדים. בחרו חודש, תארו את הסהר, ובית הדין יבדוק מול השמיים של אותו ערב.</p> },
     ] },
     takeaway: <p>העדות צריכה להתאים לחשבון: צפון או דרום, רוחב, קרניים, גובה.</p>,
-    stage: f => <NightThirty focus={f === 'calc' ? 'sky' : 'seen'} />,
+    stage: f => f === 'ask' ? <WitnessGame /> : <NightThirty focus="sky" />,
   }),
   halacha<'not' | 'join'>({
     h: 'ה', title: 'במים, בעבים; כמה קומות',

@@ -57,3 +57,29 @@ export function movingAverage(v: number[], w = 19): number[] {
     return sum / (b - a);
   });
 }
+
+export interface CyclePoint {
+  /** first Hebrew year of the 19-year cycle */
+  y: number;
+  gy: number;
+  /** Pesach averaged over the cycle, and its earliest and latest; days after the true equinox */
+  pesach: number;
+  pesachMin: number;
+  pesachMax: number;
+  /** Shmuel's and Rav Adda's tekufat Nisan in the cycle's middle year */
+  shmuel: number;
+  ravAdda: number;
+}
+
+/** One point per 19-year cycle, for the long view (e.g. from Sinai to today): cycles that start in [from, to]. */
+export function cycleSeries(from: number, to: number): CyclePoint[] {
+  const out: CyclePoint[] = [];
+  for (let s = from - ((from - 1) % 19); s <= to; s += 19) {
+    const pts = yearSeries(s, 19), ps = pts.map(p => p.pesach), mid = pts[9];
+    out.push({
+      y: s, gy: pts[0].gy, pesach: ps.reduce((a, b) => a + b, 0) / 19, pesachMin: Math.min(...ps), pesachMax: Math.max(...ps),
+      shmuel: mid.shmuel, ravAdda: mid.ravAdda,
+    });
+  }
+  return out;
+}

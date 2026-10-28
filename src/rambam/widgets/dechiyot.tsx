@@ -3,13 +3,14 @@
 
 import { type ReactNode, useMemo, useState } from 'react';
 import {
-  DAY_LETTER, DAY_NAME, P_DAY, P_HOUR, TYPE_NAME, fmtMolad, isLeap, keviut, monthsOf, rh, rhFrom, yearHeb, yearLen, yearType,
+  DAY_LETTER, DAY_NAME, P_DAY, P_HOUR, P_WEEK, TYPE_NAME, fmtMolad, isLeap, keviut, monthsOf, rh, rhFrom, yearHeb, yearLen, yearType,
 } from '../../engines/calendar';
 import { MoladControl, type MoladValue, moladParts } from '../../components/MoladControl';
+import { usePlay } from '../../components/Scene3D/usePlay';
 import { Engine, Viz } from '../../components/Slide';
 import { type StepRow, Steps } from '../../components/Steps';
 import { Civil, Legend, Num, Sig, Tag } from '../../components/text';
-import { WeekWheel, dayMark } from '../../components/WeekWheel';
+import { WeekWheel } from '../../components/WeekWheel';
 import { SlideYear, useSlideYear } from '../../components/YearControl';
 import { RULE_NAME, dayWord } from '../../lib/format';
 
@@ -34,12 +35,30 @@ export function DechiyaCheck({ start, leap = false, prevLeap = false, focus, tit
     { l: 'ראש השנה', v: dayWord(r.day), s: r.rules.length ? r.rules.map(k => RULE_NAME[k]).join(' ← ') : 'ביום המולד', c: 'final' },
   ];
   const row = { zaken: 1, gatrad: 2, betu: 3, adu: 4, result: 5 } as const;
+  // the molad as a position in the week, so it can be dragged on the wheel or run forward
+  const setX = (x: number) => { const w = ((Math.round(x) % P_WEEK) + P_WEEK) % P_WEEK, d = Math.floor(w / P_DAY), q = w - d * P_DAY; setM({ d, h: Math.floor(q / P_HOUR), p: q % P_HOUR }); };
+  const wx = m.d * P_DAY + PP;
+  const run = usePlay(dt => setX(wx + dt * P_DAY * 0.6));
+  const G = 2 * P_DAY + 9 * P_HOUR + 204, B = 1 * P_DAY + 15 * P_HOUR + 589;
+  const zones = [
+    ...Array.from({ length: 7 }, (_, i) => ({ from: i * P_DAY + 18 * P_HOUR, to: (i + 1) * P_DAY, cls: 'shift' as const })),
+    ...(!L ? [{ from: G, to: 2 * P_DAY + 18 * P_HOUR, cls: 'leap' as const }] : []),
+    ...(PL ? [{ from: B, to: 1 * P_DAY + 18 * P_HOUR, cls: 'leap' as const }] : []),
+  ];
+  const rd = r.day % 7;
+  const days: ('' | 'bad' | 'ok')[] = Array.from({ length: 7 }, (_, i) => (i === rd ? 'ok' : [0, 3, 5].includes(i) ? 'bad' : ''));
+  // the push: from the molad to the start (the evening) of the day Rosh Hashanah is fixed on
+  const arcs = rd !== m.d ? [{ from: wx, to: wx + (((rd * P_DAY - wx) % P_WEEK) + P_WEEK) % P_WEEK, cls: 'shift' as const }] : [];
   return <>
     <Viz>
-      <WeekWheel markers={[{ x: t, cls: 'moon', label: 'המולד' }]} days={dayMark(r.day)}
-        ticks={[{ x: 2 * P_DAY + 9 * P_HOUR + 204, cls: 'shift' }, { x: 1 * P_DAY + 15 * P_HOUR + 589, cls: 'shift' }]}
-        center={['ראש השנה', dayWord(r.day), r.rules.length ? 'נדחה' : 'ביום המולד']} aria="המולד וראש השנה על גלגל השבוע" />
-      <Legend items={[['var(--moon)', 'המולד'], ['var(--ok-soft)', 'יום ראש השנה'], ['var(--shift)', 'הקווים: ג׳ ט׳ ר״ד וב׳ ט״ו תקפ״ט']]} />
+      <WeekWheel markers={[{ x: t, cls: 'moon', label: 'המולד' }]} days={days} zones={zones} arcs={arcs} onPick={setX}
+        ticks={[{ x: G, cls: 'shift' }, { x: B, cls: 'shift' }]}
+        center={['ראש השנה', dayWord(r.day), r.rules.length ? 'נדחה' : 'ביום המולד']} aria="המולד וראש השנה על גלגל השבוע; אפשר לגרור את המולד" />
+      <Legend items={[['var(--moon)', 'המולד: גוררים אותו על הגלגל'], ['var(--ok-soft)', 'יום ראש השנה'], ['var(--shift-soft)', 'אד״ו'], ['var(--shift)', 'פס פנימי: זקן (18 שעות ומעלה)'], ['var(--leap)', 'פס פנימי: גטר״ד / בטו תקפט']]} />
+      <div className="ctl">
+        <button type="button" className="btn pri play-btn" aria-pressed={run.playing} onClick={run.toggle}>{run.playing ? '❚❚ עצור' : '▶ המולד זז בשבוע'}</button>
+        <input type="range" min={0} max={P_WEEK - 18} step={18} value={wx - (wx % 18)} onChange={e => setX(+e.target.value)} aria-label="מקום המולד בשבוע" />
+      </div>
     </Viz>
     <Engine title={title} sub="בסדר של הרמב״ם" className={fx(!!focus)}>
       <MoladControl value={m} onChange={setM} extras={<>

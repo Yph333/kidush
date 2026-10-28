@@ -4,7 +4,7 @@ import { Term } from '../../components/Glossary';
 import { Num, Sig } from '../../components/text';
 import { defineChapter, halacha } from '../define';
 import {
-  AddRemainder, CycleBoxes, CycleCompare, CycleRemainder, Divisors, MeanVsTrue, MonthMolads, Remainder, YearBars, YearMolad,
+  AddRemainder, CycleBoxes, CycleCompare, CycleRemainder, Divisors, HourZoom, MeanVsTrue, MonthMolads, Remainder, YearBars, YearMolad,
 } from '../widgets/calendar';
 
 const D = false;   // approved by the content owner (2026-10-28)
@@ -34,7 +34,7 @@ export const CH6 = defineChapter(6, 'המולד ושאריות הזמן', [
         body: <p>כי <Num>1080</Num> מתחלק בלי שארית לחצי, רביע, שמינית, שליש, שתות, תשיעית, חומש ועישור. רק שביעית אין לו.</p> },
     ] },
     takeaway: <p>שעה = <Num>1080</Num> חלקים, כי המספר מתחלק לכל השברים הנפוצים.</p>,
-    stage: f => <Divisors hl={f === 'why' ? [2, 3, 4, 5, 6, 8, 9, 10] : undefined} />,
+    stage: f => <><HourZoom key={f} level={f === 'why' ? 'hour' : 'day'} /><Divisors hl={f === 'why' ? [2, 3, 4, 5, 6, 8, 9, 10] : undefined} /></>,
   }),
   halacha<'month' | 'count'>({
     h: 'ג', title: 'חודשה של לבנה',

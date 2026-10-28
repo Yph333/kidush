@@ -46,6 +46,13 @@ describe('Odeh, Jerusalem', () => {
 });
 
 describe('moon node and seasons', () => {
+  it('seasons in the years 0–99 and before year 1 are in that year (not 1900–1999)', () => {
+    for (const y of [-1312, 0, 50, 99, 100]) {
+      const d = new Date(seasons(y)[0]);
+      expect(d.getUTCFullYear()).toBe(y);
+      expect(d.getUTCMonth()).toBe(2);   // March, proleptic Gregorian
+    }
+  });
   it('mean ascending node, Meeus example 47.a (1992-04-12 0h TD): 274.400656°', () => {
     // TD − UT ≈ 59 s in 1992; Meeus uses JDE 2448724.5
     const ms = Date.UTC(1992, 3, 12) - 59000;

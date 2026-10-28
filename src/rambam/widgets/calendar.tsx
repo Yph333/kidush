@@ -10,7 +10,7 @@ import { MoladControl, type MoladValue } from '../../components/MoladControl';
 import { Scene3D } from '../../components/Scene3D/Scene3D';
 import { Engine, Viz } from '../../components/Slide';
 import { type StepRow, Steps } from '../../components/Steps';
-import { Civil, DHP, Facts, Legend, Num, Sig } from '../../components/text';
+import { Civil, DHP, Facts, Legend, Num, Sig, Tag } from '../../components/text';
 import { WeekWheel } from '../../components/WeekWheel';
 import { SlideYear, useSlideYear } from '../../components/YearControl';
 import { NUM, hrs } from '../../lib/format';
@@ -67,6 +67,49 @@ export function Divisors({ hl }: { hl?: number[] }) {
         <div className="bad"><b>שביעית</b><span><Num>1080 ÷ 7 ≈ 154.3</Num></span></div>
       </div>
       <p className="note">חלק אחד = <Num>3⅓</Num> שניות. <Num>18</Num> חלקים = דקה.</p>
+    </Engine>
+  );
+}
+
+/**
+ * 6:2 in pictures: the day of 24 hours, one hour opened into its 1080 parts (18 to a minute), one minute into its 18
+ * parts. And why 1080: split the hour into halves, thirds, quarters … tenths, and every piece ends on a whole part.
+ */
+export function HourZoom({ level: l0 = 'hour' }: { level?: 'day' | 'hour' | 'minute' }) {
+  const [level, setLevel] = useState(l0), [div, setDiv] = useState(0);
+  const C = 160, R = 130, pt = (f: number, r: number): [number, number] => [C + r * Math.sin(f * 2 * Math.PI), C - r * Math.cos(f * 2 * Math.PI)];
+  const tick = (f: number, len: number, w = 1, col = 'var(--c-text-2)') => { const [x1, y1] = pt(f, R), [x2, y2] = pt(f, R - len); return <line x1={x1} y1={y1} x2={x2} y2={y2} stroke={col} strokeWidth={w} />; };
+  const n = level === 'day' ? 24 : level === 'hour' ? 1080 : 18;
+  const sectors = level === 'hour' && div > 0 ? Array.from({ length: div }, (_, i) => {
+    const a = i / div, b = (i + 1) / div, [x1, y1] = pt(a, R + 12), [x2, y2] = pt(b, R + 12), big = b - a > 0.5 ? 1 : 0;
+    return <path key={i} d={`M${C} ${C}L${x1} ${y1}A${R + 12} ${R + 12} 0 ${big} 1 ${x2} ${y2}Z`} fill={i % 2 ? 'var(--c-leap-soft, #b0a2ff33)' : 'var(--c-moon-soft, #e7c76f33)'} />;
+  }) : null;
+  const exact = div > 0 && 1080 % div === 0;
+  return (
+    <Engine title="שעה, חלקים" sub="מגדילים: יום, שעה, דקה">
+      <div className="seg" role="group" aria-label="רמת הגדלה">
+        {([['day', 'יממה: 24 שעות'], ['hour', 'שעה: 1080 חלקים'], ['minute', 'דקה: 18 חלקים']] as const).map(([v, t]) =>
+          <button key={v} type="button" aria-pressed={level === v} onClick={() => setLevel(v)}>{t}</button>)}
+      </div>
+      <svg viewBox="0 0 320 320" className="season-wheel" role="img" aria-label="שעון: יממה, שעה וחלקיה">
+        {sectors}
+        <circle cx={C} cy={C} r={R} fill="none" stroke="var(--c-line-strong)" />
+        {Array.from({ length: n }, (_, i) => {
+          const f = i / n;
+          if (level === 'day') return <g key={i}>{tick(f, i % 6 ? 10 : 18, i % 6 ? 1 : 2)}{i % 3 === 0 && (() => { const [x, y] = pt(f, R - 30); return <text x={x} y={y + 4} fontSize="12" textAnchor="middle" fill="var(--c-text-2)">{i}</text>; })()}</g>;
+          if (level === 'hour') return <g key={i}>{tick(f, i % 90 === 0 ? 22 : i % 18 === 0 ? 12 : 4, i % 18 === 0 ? 1.4 : 0.4, i % 18 === 0 ? 'var(--c-text)' : 'var(--c-text-3)')}{i % 90 === 0 && (() => { const [x, y] = pt(f, R - 36); return <text x={x} y={y + 4} fontSize="11" textAnchor="middle" fill="var(--c-text-2)">{i}</text>; })()}</g>;
+          return <g key={i}>{tick(f, 18, 1.5, 'var(--c-text)')}{(() => { const [x, y] = pt(f + 0.5 / n, R - 32); return <text x={x} y={y + 4} fontSize="11" textAnchor="middle" fill="var(--c-text-2)">{i + 1}</text>; })()}</g>;
+        })}
+        {level === 'day' && (() => { const [x, y] = pt(0.5 / 24, R + 4); return <circle cx={x} cy={y} r="6" fill="var(--c-moon)" />; })()}
+        <text x={C} y={C - 6} textAnchor="middle" fontSize="15" fill="var(--c-text)">{level === 'day' ? '24 שעות' : level === 'hour' ? 'שעה אחת' : 'דקה אחת'}</text>
+        <text x={C} y={C + 14} textAnchor="middle" fontSize="12" fill="var(--c-text-2)">{level === 'day' ? 'שעה מסומנת: מגדילים אותה' : level === 'hour' ? '1080 חלקים · קו ארוך: דקה (18)' : '18 חלקים · חלק = 3⅓ שניות'}</text>
+      </svg>
+      {level === 'hour' && <>
+        <div className="seg" role="group" aria-label="לחלק את השעה">
+          {[2, 3, 4, 5, 6, 8, 9, 10, 7].map(k => <button key={k} type="button" aria-pressed={div === k} onClick={() => setDiv(div === k ? 0 : k)}>{k === 7 ? 'שביעית' : `1/${k}`}</button>)}
+        </div>
+        {div > 0 && <p className="m0">כל חלק של השעה: <Num>{`1080 ÷ ${div} = ${exact ? 1080 / div : (1080 / div).toFixed(1)}`}</Num> חלקים {exact ? <Tag tone="ok">מספר שלם</Tag> : <Tag tone="bad">לא יוצא שלם</Tag>}</p>}
+      </>}
     </Engine>
   );
 }

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { movingAverage, talUmatarEvening, yearPoint, yearSeries } from './longTimeline';
+import { cycleSeries, movingAverage, talUmatarEvening, yearPoint, yearSeries } from './longTimeline';
 
 const iso = (d: Date) => d.toISOString().slice(0, 10);
 
@@ -50,5 +50,20 @@ describe('movingAverage', () => {
   it('the 19-year average of Pesach drifts like Rav Adda (~1 day per 216 years)', () => {
     const s = yearSeries(5000, 760).map(p => p.pesach), m = movingAverage(s);
     expect((m[750] - m[10]) / 740 * 216).toBeCloseTo(1, 0);
+  });
+  it('cycles from Sinai: each starts a 19-year cycle; Rav Adda keeps Pesach within its cycle, Shmuel runs ahead', () => {
+    const c = cycleSeries(2448, 5787);
+    expect(c[0].y).toBe(2433);                       // 2433 = 128 × 19 + 1
+    expect(c.every(p => (p.y - 1) % 19 === 0)).toBe(true);
+    expect(c[c.length - 1].y).toBe(5777);
+    const last = c[c.length - 1];
+    expect(last.pesachMin).toBeLessThan(last.pesach);
+    expect(last.pesachMax).toBeGreaterThan(last.pesach);
+    expect(last.pesachMax - last.pesachMin).toBeGreaterThan(25);   // Pesach jumps by about a month inside a cycle
+    // over ~3300 years: Shmuel drifts ~26 days later, Rav Adda ~15
+    expect(last.shmuel - c[0].shmuel).toBeGreaterThan(24);
+    expect(last.shmuel - c[0].shmuel).toBeLessThan(28);
+    expect(last.ravAdda - c[0].ravAdda).toBeGreaterThan(13);
+    expect(last.ravAdda - c[0].ravAdda).toBeLessThan(17);
   });
 });

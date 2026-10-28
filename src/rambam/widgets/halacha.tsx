@@ -8,9 +8,10 @@ import { allFullDrift, avivRule, fullMonths, heightsJoin, leapCourt, messengerDa
 import { DAY_NAME, P_DAY, P_MONTH, dayOfCivil, gem, monthStart, monthsOf, yearHeb } from '../../engines/calendar';
 import { R_DECL, SIGNS, moonFromEquator, rambam, rambamDecl } from '../../engines/rambam';
 import { LAND } from '../../lib/eclipseMap';
+import { type Height, type Horns, type Side, type Width, crescentAt } from '../../lib/witness';
 import BORDERS from '../../assets/terrain/borders.json';
 import { monthModel } from '../../lib/month';
-import { EarthMoonZoom, OrbitTopDown, PhaseStrip, SkyPanorama } from '../../components/astro/visuals';
+import { EarthMoonZoom, MoonGlyph, OrbitTopDown, PhaseStrip, SkyPanorama } from '../../components/astro/visuals';
 import type { MonthProps } from '../../scenes/monthSystem';
 import type { MoonFaceProps } from '../../scenes/moonFace';
 import { Scene3D } from '../../components/Scene3D/Scene3D';
@@ -306,6 +307,67 @@ export function MonthMoons({ day: d0 = 1 }: { day?: number }) {
       </Viz>
       <MoonFace3D ms={t} />
     </div>
+  </>;
+}
+
+// ---------------------------------------------------------------------------------------------------- 2:4 (the game)
+
+const SIDE_T: Record<Side, string> = { north: 'בצפון השמש (ימינה)', south: 'בדרום השמש (שמאלה)' };
+const WIDTH_T: Record<Width, string> = { thin: 'דק מאוד', medium: 'בינוני', thick: 'רחב' };
+const HORNS_T: Record<Horns, string> = { up: 'כלפי מעלה', left: 'נוטות שמאלה', right: 'נוטות ימינה' };
+const HEIGHT_T: Record<Height, string> = { low: 'נמוך', mid: 'בינוני', high: 'גבוה' };
+
+/** A crescent drawn from a witness's words, facing west: the sun under the horizon, the moon above it. */
+function WitnessSketch({ c, title }: { c: { side: Side; width: Width; horns: Horns; height: Height }; title: string }) {
+  const W = 220, H = 170, sx = 110, x = sx + (c.side === 'north' ? 34 : -34), y = c.height === 'low' ? 110 : c.height === 'mid' ? 78 : 42;
+  const k = c.width === 'thin' ? 0.03 : c.width === 'medium' ? 0.08 : 0.16, rot = c.horns === 'up' ? 90 : c.horns === 'left' ? 55 : 125;
+  return (
+    <figure className="sketch">
+      <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label={title} direction="ltr">
+        <rect width={W} height={H - 30} fill="#1b2a4c" /><rect y={H - 30} width={W} height="30" fill="#1E2A1F" />
+        <circle cx={sx} cy={H - 20} r="9" fill="#ffb36b" opacity=".7" />
+        <text x={W / 2} y={H - 4} textAnchor="middle" fontSize="10" fill="#e8ecf6">מערב</text>
+        <text x={W - 6} y={H - 4} textAnchor="end" fontSize="10" fill="#e8ecf6">צפון</text><text x="6" y={H - 4} fontSize="10" fill="#e8ecf6">דרום</text>
+        <MoonGlyph cx={x} cy={y} r={16} k={k} rot={rot} />
+      </svg>
+      <figcaption>{title}</figcaption>
+    </figure>
+  );
+}
+
+/** 2:4 as a game: build the crescent you saw, then the court checks it against the sky of that evening. */
+export function WitnessGame() {
+  const yr = useSlideYear(), months = monthsOf(yr.y), [mi, setMi] = useState(1);
+  const M = useMemo(() => monthModel(yr.y, mi, JLM), [yr.y, mi]);
+  const truth = useMemo(() => (M.first ? crescentAt(M.first.tb, JLM) : null), [M]);
+  const [g, setG] = useState<{ side: Side; width: Width; horns: Horns; height: Height }>({ side: 'south', width: 'thin', horns: 'up', height: 'low' });
+  const [shown, setShown] = useState(false);
+  const pick = <K extends keyof typeof g>(k: K, v: (typeof g)[K]) => { setShown(false); setG(x => ({ ...x, [k]: v })); };
+  const group = <K extends keyof typeof g>(k: K, label: string, opts: Record<string, string>) => (
+    <div className="fld"><span>{label}</span><div className="seg" role="group" aria-label={label}>
+      {Object.entries(opts).map(([v, t]) => <button key={v} type="button" aria-pressed={g[k] === v} onClick={() => pick(k, v as (typeof g)[K])}>{t}</button>)}
+    </div></div>
+  );
+  const items: [keyof typeof g, string, Record<string, string>][] = [['side', 'איפה ביחס לשמש', SIDE_T], ['width', 'כמה רחב', WIDTH_T], ['horns', 'לאן הקרניים', HORNS_T], ['height', 'כמה גבוה', HEIGHT_T]];
+  const ok = truth ? items.filter(([k]) => g[k] === truth[k]).length : 0;
+  const ev = M.first ? localParts(M.first.ss) : null;
+  return <>
+    <Engine title="אתם העדים" sub={<>ראיתם את הירח החדש {ev ? <>בערב <Num>{`${ev.d}.${ev.m + 1}.${ev.y}`}</Num></> : null}. ספרו לבית הדין מה ראיתם.</>}>
+      <div className="ctl"><SlideYear yr={yr} />
+        <label className="fld">חודש <select value={mi} onChange={e => { setShown(false); setMi(+e.target.value); }}>{months.map(([n], i) => <option key={i} value={i}>{n}</option>)}</select></label>
+      </div>
+      {items.map(([k, l, o]) => <div key={k}>{group(k, l, o)}</div>)}
+      <button type="button" className="btn pri" onClick={() => setShown(true)} disabled={!truth}>בית הדין בודק</button>
+    </Engine>
+    <div className="sketches">
+      <WitnessSketch c={g} title="מה שאתם מתארים" />
+      {shown && truth && <WitnessSketch c={truth} title="מה שהחשבון אומר" />}
+    </div>
+    {shown && truth && <Engine title={ok === 4 ? 'העדות מכוונת לחשבון: מקבלים' : ok >= 3 ? 'כמעט: בית הדין חוקר עוד' : 'העדות אינה מכוונת: אין מקבלים'}>
+      <ul className="checks">{items.map(([k, l, o]) => <li key={k} className={g[k] === truth[k] ? 'ok' : 'bad'}>{l}: אמרתם {o[g[k]]}; {g[k] === truth[k] ? 'נכון' : <>בחשבון: {o[truth[k]]}</>}</li>)}</ul>
+      <p className="note">החשבון: הירח בגובה <Num>{truth.alt.toFixed(1)}°</Num>, מואר <Num>{(truth.k * 100).toFixed(1)}%</Num>, בזמן הטוב לראייה (Odeh). ״נמוך״: עד <Num>5°</Num>; ״גבוה״: מעל <Num>12°</Num>. דק: עד <Num>2%</Num> מואר. החלוקה שלנו, להמחשה.</p>
+      {M.first && <div className="month3d"><Viz><SkyPanorama ms={M.first.tb} c={JLM} /></Viz><MoonFace3D ms={M.first.tb} title="הסהר באותו ערב" /></div>}
+    </Engine>}
   </>;
 }
 

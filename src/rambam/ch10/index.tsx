@@ -3,7 +3,7 @@
 import { Num } from '../../components/text';
 import { defineChapter, halacha } from '../define';
 import { TrueTekufot } from '../widgets/astro';
-import { SeasonsScene, TekufaCalc, YearCompare } from '../widgets/tekufot';
+import { SeasonsScene, TekufaCalc, TekufaDrift, YearCompare } from '../widgets/tekufot';
 
 const D = false;   // approved by the content owner (2026-10-28)
 const NOW = 5787;
@@ -81,9 +81,9 @@ export const CH10 = defineChapter(10, 'התקופות לפי רב אדא', [
       { title: 'מהלך אמצעי', focus: 'mean', mark: ['וחשבון שתי תקופות האלו שביארנו דרכם הכל בקירוב הוא ובמהלך השמש האמצעי לא במקומה האמיתי'],
         body: <p>שני החשבונות הם בקירוב, לפי המהלך האמצעי של השמש, לא לפי מקומה האמיתי (פרק י״ג).</p> },
       { title: 'כשני ימים קודם', focus: 'two', mark: ['אבל במקום השמש האמיתי תהיה תקופת ניסן בזמנים אלו בכמו שני ימים קודם שתי התקופות'],
-        body: <p>לפי המקום האמיתי, תקופת ניסן ״בזמנים אלו״ כשני ימים לפני. בכלי: תקופות שמואל מול השמש האמיתית של הרמב״ם, בשנה שבבורר. נסו את שנת הדוגמה ד׳תתק״ל ואת השנה הנוכחית: הפער גדל עם השנים.</p> },
+        body: <p>לפי המקום האמיתי, תקופת ניסן ״בזמנים אלו״ כשני ימים לפני. בכלי: תקופות שמואל מול השמש האמיתית של הרמב״ם, בשנה שבבורר. נסו את שנת הדוגמה ד׳תתק״ל ואת השנה הנוכחית: הפער גדל עם השנים. בגרף שמתחת אפשר לגרור את השנה ממתן תורה ועד היום.</p> },
     ] },
     takeaway: <p>התקופה האמיתית קודמת לחשבונות האלה; בזמן הרמב״ם בכיומיים.</p>,
-    stage: () => <TrueTekufot />,
+    stage: () => <><TrueTekufot /><TekufaDrift /></>,
   }),
 ]);
