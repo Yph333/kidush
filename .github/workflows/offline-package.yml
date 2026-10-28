@@ -6,7 +6,7 @@ name: Offline package (Windows)
 
 on:
   push:
-    branches: [main, claude/brave-planck-roikrn]
+    branches: [main]
   workflow_dispatch:
 
 permissions:
