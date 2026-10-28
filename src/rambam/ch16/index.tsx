@@ -25,7 +25,7 @@ export const CH16 = defineChapter(16, 'הראש, הזנב ורוחב הירח', 
         body: <p>הראש נע בקצב שווה, ״אחורנית״: מטלה לדגים ומדגים לדלי, נגד סדר המזלות. סיבוב שלם בכ־<Num>18.6</Num> שנים.</p> },
     ] },
     takeaway: <p>מסלול הירח נוטה ממסלול השמש; נקודות המפגש: ראש וזנב, והן נעות לאחור.</p>,
-    stage: f => <OrbitScene dayIdx={EXAMPLE} hl={!!f} />,
+    stage: f => <OrbitScene dayIdx={EXAMPLE} hl={!!f} years={f === 'move' || f === 'names'} />,
   }),
   halacha<'table' | 'root'>({
     h: 'ב', title: 'מהלך הראש',

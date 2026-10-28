@@ -5,7 +5,8 @@ import { type ReactNode, useEffect, useMemo, useState } from 'react';
 import { CITIES, dayOfMs } from '../../engines/astro';
 import { cyclePos, gDate, hebDate, tekufotAbsolute, yearHeb, P_DAY } from '../../engines/calendar';
 import { type Dms, addDms, inSign, subDms, toSec } from '../../engines/dms';
-import { RB, R_SUN, SIGNS, interp, rambam, rambamD0, secOf } from '../../engines/rambam';
+import { RB, R_SUN, SIGNS, interp, rambam, rambamD0, secOf, sunEquation } from '../../engines/rambam';
+import { usePlay } from '../../components/Scene3D/usePlay';
 import { Magnifier, ZodiacScene } from './zodiac';
 import { Scene3D } from '../../components/Scene3D/Scene3D';
 import { Engine, Viz } from '../../components/Slide';
@@ -38,7 +39,7 @@ export function Eccentric({ hl, apogee = 86.75, ecc = 0.18, meanLon: m0, eqMin =
     raf = requestAnimationFrame(f);
     return () => cancelAnimationFrame(raf);
   }, [playing]);
-  const props = useMemo<EccentricProps>(() => ({ meanLon, apogee, ecc, hl, eqMin }), [meanLon, apogee, ecc, hl, eqMin]);
+  const props = useMemo<EccentricProps>(() => ({ meanLon, apogee, ecc, hl, eqMin, onDrag: m0 === undefined ? (a: number) => { setPlaying(false); setLon(a); } : undefined }), [meanLon, apogee, ecc, hl, eqMin, m0]);
   const top = (() => {
     const S = 13, c = 170, C = [Math.cos(apogee * Math.PI / 180) * ecc * S * 9, -Math.sin(apogee * Math.PI / 180) * ecc * S * 9];
     const B = [C[0] + Math.cos(meanLon * Math.PI / 180) * S * 9, C[1] - Math.sin(meanLon * Math.PI / 180) * S * 9];
@@ -56,9 +57,55 @@ export function Eccentric({ hl, apogee = 86.75, ecc = 0.18, meanLon: m0, eqMin =
       <Scene3D load={loadEcc} props={props} label="גלגל שאין הארץ באמצעו: המקום האמצעי והמקום האמיתי"
         play={play && m0 === undefined ? { playing, toggle: () => setPlaying(x => !x), label: 'הפעל' } : undefined}
         views={[{ id: 'oblique', label: 'מבט אלכסוני' }, { id: 'top', label: 'מלמעלה' }]} fallback={top} />
-      <p className="note">{note ?? 'ציור סכמטי: המרחק בין מרכז הגלגל לארץ מוגדל כדי שייראה.'}</p>
+      <p className="note">{note ?? 'ציור סכמטי: המרחק בין מרכז הגלגל לארץ מוגדל כדי שייראה.'}{m0 === undefined && ' אפשר לתפוס את השמש ולגרור אותה על הגלגל.'}</p>
     </Viz>
   );
+}
+
+/**
+ * The sun through the year on its eccentric (13): play it or drag it, and watch the course, the table's correction
+ * and the true place change together; the curve of the correction is drawn as the sun goes round.
+ */
+export function SunWheel({ course, setCourse }: { course: number; setCourse: (c: number) => void }) {
+  const apo = secOf(RB.root.apo) / 3600, mean = (apo + course) % 360;
+  const e = sunEquation(course * 3600), signed = e.sign * e.eq, tru = (mean + signed / 60 + 360) % 360;
+  const [trail, setTrail] = useState<number[]>([]);
+  const player = usePlay(dt => setCourse(((course + dt * 24) % 360 + 360) % 360));
+  useEffect(() => { setTrail(t => (t.includes(e.round) ? t : [...t, e.round])); }, [e.round]);
+  const props = useMemo<EccentricProps>(() => ({ meanLon: mean, apogee: apo, ecc: 0.17, hl: 'both', eqMin: e.eq, onDrag: (a: number) => { player.stop(); setCourse(((a - apo) % 360 + 360) % 360); } }),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [mean, apo, e.eq]);
+  const W = 360, H = 150, X = (c: number) => 20 + (c / 360) * (W - 30), Y = (m: number) => H / 2 - (m / 130) * (H / 2 - 12);
+  const curve = Array.from({ length: 361 }, (_, c) => { const q = sunEquation(c * 3600); return `${c ? 'L' : 'M'}${X(c).toFixed(1)} ${Y(q.sign * q.eq).toFixed(1)}`; }).join('');
+  return <>
+    <Viz>
+      <Scene3D load={loadEcc} props={props} label="השמש על גלגל שאין הארץ באמצעו, לאורך השנה"
+        play={{ ...player, label: 'הפעל: השמש סביב השנה' }}
+        views={[{ id: 'oblique', label: 'מבט אלכסוני' }, { id: 'top', label: 'מלמעלה' }]} fallback={<p className="note">המסלול <Num>{e.round}°</Num>.</p>} />
+      <p className="note">תפסו את השמש וגררו אותה, או הפעילו. הקו הסגול: המקום האמצעי (מהמרכז); הצהוב: המקום האמיתי (מהארץ). המרחק ביניהם: מנת המסלול.</p>
+    </Viz>
+    <Engine title="מה משתנה כשהשמש זזה">
+      <label className="fld">המסלול <Num>{e.round}°</Num>
+        <input type="range" min={0} max={359} value={Math.round(course)} onChange={e2 => { player.stop(); setCourse(+e2.target.value); }} aria-label="המסלול במעלות" />
+      </label>
+      <Facts items={[
+        ['אמצע השמש', <Num>{mean.toFixed(1)}°</Num>],
+        ['המסלול (אמצע פחות גובה)', <Num>{e.round}°</Num>],
+        ['מנת המסלול', <>{e.sign < 0 ? 'גורעים ' : e.sign > 0 ? 'מוסיפים ' : ''}<DM min={e.eq} /></>],
+        ['המקום האמיתי', <Num>{tru.toFixed(1)}°</Num>],
+      ]} />
+      <svg viewBox={`0 0 ${W} ${H}`} className="full" direction="ltr" role="img" aria-label="מנת המסלול לפי המסלול, לאורך כל הגלגל">
+        <line x1={X(0)} x2={X(360)} y1={Y(0)} y2={Y(0)} stroke="var(--c-text-3)" />
+        {[0, 90, 180, 270, 360].map(c => <text key={c} x={X(c)} y={H - 2} fontSize="10" textAnchor="middle" fill="var(--c-text-3)">{c}°</text>)}
+        <text x={X(90)} y={Y(-130) + 10} fontSize="10" textAnchor="middle" fill="var(--c-text-2)">גורעים</text>
+        <text x={X(270)} y={Y(130) - 2} fontSize="10" textAnchor="middle" fill="var(--c-text-2)">מוסיפים</text>
+        <path d={curve} fill="none" stroke="var(--c-text-3)" strokeDasharray="3 3" />
+        {trail.map(c => { const q = sunEquation(c * 3600); return <circle key={c} cx={X(c)} cy={Y(q.sign * q.eq)} r="1.6" fill="var(--c-moon)" />; })}
+        <circle cx={X(e.round)} cy={Y(signed)} r="5" fill="var(--c-sun, #f4c33f)" stroke="#000" />
+      </svg>
+      <p className="note">הגרף: כמה גורעים (למעלה) או מוסיפים (למטה) בכל מקום בגלגל. הנקודות הצהובות: איפה השמש כבר עברה. השיא בערך ב־<Num>90°</Num> וב־<Num>270°</Num>; ב־<Num>0°</Num> וב־<Num>180°</Num> אין מנה.</p>
+    </Engine>
+  </>;
 }
 
 // ---------------------------------------------------------------------------------------------------- 11:1
@@ -224,9 +271,11 @@ export function SunCalc({ focus }: { focus?: 'mean' | 'apo' | 'course' | 'round'
 
 /** The table of the sun's correction (13:4), with interpolation between rows (13:7–8). */
 export function SunTable({ deg: d0 = 65, hl }: { deg?: number; hl?: boolean }) {
-  const [deg, setDeg] = useState(d0);
+  const [degF, setDegF] = useState(d0);
+  const setDeg = (v: number) => setDegF(((v % 360) + 360) % 360), deg = Math.round(degF) % 360;
   const f = deg > 180 ? 360 - deg : deg, r = Math.min(17, Math.floor(f / 10)), rem = f - r * 10;
-  return (
+  return (<>
+    <SunWheel course={degF} setCourse={setDeg} />
     <Engine title="לוח מנת מסלול השמש" sub="כל עשר מעלות; בין השורות לפי החשבון" className={fx(!!hl)}>
       <label className="fld">המסלול <Num>{deg}°</Num>
         <input type="range" min={0} max={359} value={deg} onChange={e => setDeg(+e.target.value)} aria-label="המסלול במעלות" />
@@ -240,7 +289,7 @@ export function SunTable({ deg: d0 = 65, hl }: { deg?: number; hl?: boolean }) {
         <Magnifier from={0} to={Math.round(interp(R_SUN, f)) / 60} title={<>מנת המסלול: <DM min={Math.round(interp(R_SUN, f))} /></>}>🔍 בתלת־ממד</Magnifier>
       </p>
     </Engine>
-  );
+  </>);
 }
 
 /** The true tekufot of a year by the Rambam's sun (13:11), against Shmuel's (ch. 9). */

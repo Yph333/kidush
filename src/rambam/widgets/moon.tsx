@@ -6,9 +6,10 @@ import { CITIES, TofMs, moonEcl, moonNode, sunEcl } from '../../engines/astro';
 import { sightSky } from '../../lib/sightSky';
 import type { WestSkyProps } from '../../scenes/westSky';
 import type { MoonFaceProps } from '../../scenes/moonFace';
-import { gDate } from '../../engines/calendar';
+import { gDate, hebDate, yearHeb } from '../../engines/calendar';
 import { CIRCLE_TABLE, R_DBL, R_FOURTH, R_LAT, R_MOON, R_PLAT, R_PLON, SIGHTING_LIMITS, SIGNS, interp, rambam } from '../../engines/rambam';
 import { Scene3D } from '../../components/Scene3D/Scene3D';
+import { usePlay } from '../../components/Scene3D/usePlay';
 import { Engine, Viz } from '../../components/Slide';
 import { type StepRow, Steps } from '../../components/Steps';
 import { DM, DMS, Num, Tag } from '../../components/text';
@@ -107,7 +108,11 @@ export function HeadCalc({ focus }: { focus?: HeadStep }) {
 }
 
 /** The moon's inclined orbit for the evening that begins a Hebrew day: real sky positions, the Rambam's head. */
-export function OrbitScene({ dayIdx, hl }: { dayIdx: number; hl?: boolean }) {
+export function OrbitScene({ dayIdx: d0, hl, years }: { dayIdx: number; hl?: boolean; years?: boolean }) {
+  // `years`: play or slide over 19 years and watch the head go backwards through the signs (16:1–2)
+  const [off, setOff] = useState(0);
+  const player = usePlay(dt => setOff(o => (o + dt * 120) % 6940));
+  const dayIdx = d0 + Math.floor(off);
   const props = useMemo<MoonOrbitProps>(() => {
     const R = rambam(dayIdx), t = eveningMs(dayIdx);
     const { T } = TofMs(t), s = sunEcl(T), m = moonEcl(T);
@@ -115,8 +120,15 @@ export function OrbitScene({ dayIdx, hl }: { dayIdx: number; hl?: boolean }) {
   }, [dayIdx]);
   return (
     <Viz className={fx(!!hl)}>
-      <Scene3D load={loadOrbit} props={props} label="מסלול הירח הנטוי, הראש והזנב" views={[{ id: 'oblique', label: 'מבט אלכסוני' }, { id: 'side', label: 'מהצד, לאורך המישור' }, { id: 'top', label: 'מלמעלה' }]} fallback={<p className="note">מסלול הירח נוטה כ־5° ממסלול השמש.</p>} />
-      <p className="note">ההדמיה לפי החשבון המודרני של אותו ערב; המשולש הירוק: הראש לפי הרמב״ם. הנטייה מוגדלת פי <Num>3</Num>.</p>
+      <Scene3D load={loadOrbit} props={props} play={years ? { ...player, label: 'הפעל: שנים' } : undefined} label="מסלול הירח הנטוי, הראש והזנב" views={[{ id: 'oblique', label: 'מבט אלכסוני' }, { id: 'side', label: 'מהצד, לאורך המישור' }, { id: 'top', label: 'מלמעלה' }]} fallback={<p className="note">מסלול הירח נוטה כ־5° ממסלול השמש.</p>} />
+      {years && (() => { const R = rambam(dayIdx), h = hebDate(dayIdx); return (
+        <div className="ctl">
+          <label className="fld">שנים מהעיקר <Num>{(off / 365.25).toFixed(1)}</Num>
+            <input type="range" min={0} max={6939} value={Math.floor(off)} onChange={e => { player.stop(); setOff(+e.target.value); }} aria-label="ימים מהעיקר" />
+          </label>
+          <span>{h.d} ב{h.name} {yearHeb(h.y)} · הראש לפי הרמב״ם: <SignPos sec={R.head * 60} /></span>
+        </div>); })()}
+      <p className="note">ההדמיה לפי החשבון המודרני של אותו ערב; המשולש הירוק: הראש לפי הרמב״ם. הנטייה מוגדלת פי <Num>3</Num>.{years && <> בכ־<Num>18.6</Num> שנים הראש מקיף את כל הגלגל, אחורנית: מטלה לדגים ומדגים לדלי.</>}</p>
     </Viz>
   );
 }

@@ -151,10 +151,7 @@ export function rambam(dayIdx: number): RambamResult {
   const sunMean = nS(secOf(RB.root.sun) + ms.v);
   const apo = nS(secOf(RB.root.apo) + ma.v);
   const sunMaslul = nS(sunMean - apo);
-  const sunMaslulR = Math.round(sunMaslul / 3600) % 360;
-  const m2 = sunMaslulR > 180 ? 360 - sunMaslulR : sunMaslulR;
-  const sunEq = Math.round(interp(R_SUN, m2));
-  const sunSign = sunMaslulR < 180 ? -1 : sunMaslulR > 180 ? 1 : 0;
+  const { round: sunMaslulR, eq: sunEq, sign: sunSign } = sunEquation(sunMaslul);
   const sunTrue = nM(Math.round((sunMean + sunSign * sunEq * 60) / 60));
 
   const moonMean = nS(secOf(RB.root.moon) + mm.v);
@@ -230,6 +227,15 @@ export function rambam(dayIdx: number): RambamResult {
     plon, long2, plat, lat2, circFrac, circle, circAdd, long3, fourthTxt, fourthDelta, long4,
     geo, arc, visible, reason,
   };
+}
+
+/**
+ * The sun's equation for a course (arc-seconds), exactly as inside rambam() (13:4–8): round to whole degrees, fold
+ * past 180, interpolate the table to the minute; subtract below 180°, add above. Also for the teaching visuals.
+ */
+export function sunEquation(courseSec: number): { round: number; folded: number; eq: number; sign: -1 | 0 | 1 } {
+  const round = ((Math.round(courseSec / 3600) % 360) + 360) % 360, folded = round > 180 ? 360 - round : round;
+  return { round, folded, eq: Math.round(interp(R_SUN, folded)), sign: round < 180 ? -1 : round > 180 ? 1 : 0 };
 }
 
 /** Split arc-minutes into sign index and minutes within the sign. */

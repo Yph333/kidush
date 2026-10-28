@@ -60,3 +60,14 @@ describe('Kiddush HaChodesh 12–13', () => {
     expect(Math.round(interp(R_SUN, 67))).toBe(108);
   });
 });
+
+import { sunEquation } from './rambam';
+describe('sunEquation (for the visuals) = the chain', () => {
+  it('matches rambam() over two years of evenings', async () => {
+    const { rambam, rambamD0 } = await import('./rambam');
+    for (let d = rambamD0(); d < rambamD0() + 730; d += 7) {
+      const R = rambam(d), e = sunEquation(R.sunMaslul);
+      expect([e.round, e.eq, e.sign]).toEqual([R.sunMaslulR, R.sunEq, R.sunSign]);
+    }
+  });
+});
