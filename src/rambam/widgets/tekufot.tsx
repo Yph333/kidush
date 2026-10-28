@@ -6,14 +6,16 @@ import {
   hebDate, isLeap, tekufaDay, tekufaSteps, tekufotShmuel, yearHeb,
 } from '../../engines/calendar';
 import { Orbit2D, seasonProps, seasonRows } from '../../chapters/04-shana/Seasons';
+import { LineChart } from '../../components/charts/LineChart';
 import { Ring } from '../../components/Ring';
 import { Scene3D } from '../../components/Scene3D/Scene3D';
 import { Engine, Viz } from '../../components/Slide';
 import { type StepRow, Steps } from '../../components/Steps';
-import { Civil, Num, Tag } from '../../components/text';
+import { Civil, Facts, Num, Tag } from '../../components/text';
 import { WeekWheel } from '../../components/WeekWheel';
 import { YearControl } from '../../components/YearControl';
 import { NUM } from '../../lib/format';
+import { cycleSeries, yearPoint } from '../../lib/longTimeline';
 import type { TekufaKind } from '../../scenes/shared';
 
 const fx = (on: boolean) => (on ? 'guide-focus' : '');
@@ -85,6 +87,57 @@ export function SeasonsScene({ y, kinds = ['true', 'shmuel', 'ravAdda'], at = 2,
       <p className="note">{note ?? <>ירוק: התקופה האמיתית. אדום: שמואל. תכלת: רב אדא. השנה: {yearHeb(y)}. המרחקים לא בקנה מידה.</>}</p>
     </Viz>
   );
+}
+
+// ---------------------------------------------------------------------------------------------------- over the ages
+
+const SINAI = 2448, LAST = 6000;
+/** marks on the long timeline. The year the calendar was fixed is the traditional one (Hillel II, 4119), not a source. */
+const AGES: [number, string][] = [[SINAI, 'מתן תורה'], [4119, 'קביעת הלוח (?)'], [4938, 'הרמב״ם'], [5787, 'היום']];
+const civ = (gy: number) => (gy > 0 ? `${gy}` : `${1 - gy} לפנה״ס`);
+
+/**
+ * From Sinai to today: Shmuel's and Rav Adda's tekufat Nisan, and Pesach, in days after the true spring equinox.
+ * Shmuel's year is longer than the true one, so his tekufa runs later and later; Rav Adda's (the calendar's own
+ * year) drifts more slowly, and Pesach goes with it. The viewer drags the year; the 3D scene shows that year.
+ */
+export function TekufaDrift({ y0 = 4938, scene = true }: { y0?: number; scene?: boolean }) {
+  const pts = useMemo(() => cycleSeries(SINAI, LAST), []);
+  const [y, setY] = useState(y0);
+  const now = useMemo(() => yearPoint(y), [y]);
+  const idx = (yy: number) => Math.max(0, Math.min(pts.length - 1, Math.floor((yy - pts[0].y) / 19)));
+  const xLabels: [number, string][] = pts.map((p, i) => [i, civ(p.gy)] as [number, string]).filter((_, i) => i % 30 === 0);
+  const d = (v: number) => `${v >= 0 ? '+' : '−'}${Math.abs(v).toFixed(1)}`;
+  return <>
+    <Viz>
+      <p className="chart-title">כמה ימים אחרי יום השוויון באביב (האמיתי): ממתן תורה ועד היום</p>
+      <LineChart aria="תקופת ניסן של שמואל ושל רב אדא, ופסח, בימים אחרי השוויון האמיתי, ממתן תורה ועד היום"
+        series={[
+          { key: 'pmin', label: 'פסח מוקדם', color: 'var(--s1)', values: pts.map(p => p.pesachMin), faint: true },
+          { key: 'pmax', label: 'פסח מאוחר', color: 'var(--s1)', values: pts.map(p => p.pesachMax), faint: true },
+          { key: 'pesach', label: 'פסח (ממוצע)', color: 'var(--s1)', values: pts.map(p => p.pesach) },
+          { key: 'shmuel', label: 'שמואל', color: 'var(--s2)', values: pts.map(p => p.shmuel) },
+          { key: 'ravAdda', label: 'רב אדא', color: 'var(--s3)', values: pts.map(p => p.ravAdda) },
+        ]}
+        xLabels={xLabels} yTicks={[-20, -10, 0, 10, 20, 30, 40]} yFmt={v => `${v}`} height={300}
+        tipX={i => `${yearHeb(pts[i].y)}–${yearHeb(pts[i].y + 18)} · ${civ(pts[i].gy)}`}
+        refY={[{ y: 0, label: 'השוויון האמיתי' }]} refX={AGES.map(([yy, l]) => ({ i: idx(yy), label: l + '\u200F' }))}
+        marker={idx(y)} onPick={i => setY(pts[i].y + 9)} />
+      <div className="ctl">
+        <label className="fld grow"><span>השנה: {yearHeb(y)}, <Num>{civ(now.gy)}</Num></span>
+          <input type="range" min={SINAI} max={LAST} value={y} onChange={e => setY(+e.target.value)} aria-label="שנה עברית" />
+        </label>
+        {AGES.map(([yy, l]) => <button key={yy} type="button" className="btn" aria-pressed={y === yy} onClick={() => setY(yy)}>{l}</button>)}
+      </div>
+      <Facts items={[
+        ['תקופת ניסן, שמואל', <><Num>{d(now.shmuel)}</Num> ימים</>],
+        ['תקופת ניסן, רב אדא', <><Num>{d(now.ravAdda)}</Num> ימים</>],
+        [<>פסח {yearHeb(y)}</>, <><Num>{d(now.pesach)}</Num> ימים</>],
+      ]} />
+      <p className="note">הקווים הדקים: פסח המוקדם והמאוחר בכל מחזור של <Num>19</Num> שנה; העבה: הממוצע. שנת שמואל ארוכה מהאמיתית בכ־<Num>11</Num> דקות, ולכן התקופה שלו מאחרת ביום בכל כ־<Num>128</Num> שנה; של רב אדא ביום בכל כ־<Num>216</Num> שנה. השנים שלפני קביעת הלוח מחושבות לאחור, כאילו נהג אז הלוח הקבוע. השוויון: מודל אסטרונומי מקוצר; שנים לפני <Num>1582</Num> בלוח הגרגוריאני (פרולפטי). שנת קביעת הלוח (?) היא לפי המסורת.</p>
+    </Viz>
+    {scene && <SeasonsScene y={y} note={<>ירוק: התקופה האמיתית. אדום: שמואל. תכלת: רב אדא. השנה: {yearHeb(y)}. גוררים את השנה בגרף ורואים איך התקופות מתרחקות מהאמיתית.</>} />}
+  </>;
 }
 
 // ---------------------------------------------------------------------------------------------------- 9:4, 10:5

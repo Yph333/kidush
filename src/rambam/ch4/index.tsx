@@ -2,7 +2,7 @@
 
 import { Num } from '../../components/text';
 import { defineChapter, halacha } from '../define';
-import { SeasonsScene } from '../widgets/tekufot';
+import { SeasonsScene, TekufaDrift } from '../widgets/tekufot';
 import { LeapCourt, Points, TekufaSixteen, ThreeLands, TwoWays } from '../widgets/halacha';
 
 const D = false;   // approved by the content owner (2026-10-28)
@@ -17,7 +17,7 @@ export const CH4 = defineChapter(4, 'עיבור השנה', [
         body: <p>כדי שפסח יהיה באביב. בלי עיבור, פסח היה נודד בין הקיץ לחורף. בהדמיה: כדור הארץ סביב השמש, ותקופת ניסן.</p> },
     ] },
     takeaway: <p>מעברין כדי שפסח יהיה באביב.</p>,
-    stage: () => <SeasonsScene y={5787} kinds={['true']} note="ירוק: ארבע התקופות האמיתיות. ניסן: האביב." />,
+    stage: () => <><SeasonsScene y={5787} kinds={['true']} note="ירוק: ארבע התקופות האמיתיות. ניסן: האביב." /><TekufaDrift y0={5787} scene={false} /></>,
   }),
   halacha<'three' | 'tekufa'>({
     h: 'ב', title: 'על התקופה',
