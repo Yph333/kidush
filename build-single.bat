@@ -3,6 +3,7 @@ rem Build the whole site into one HTML file that opens offline (double-click thi
 rem Output: dist-single\index.html
 setlocal
 cd /d "%~dp0"
+if exist "%~dp0.browsers" set "PLAYWRIGHT_BROWSERS_PATH=%~dp0.browsers"
 title Luach - build single file
 
 where node >nul 2>nul

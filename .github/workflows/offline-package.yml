@@ -1,0 +1,59 @@
+name: Offline package (Windows)
+
+# Builds the whole project for Windows with every library already installed: node_modules (with the Windows
+# native parts), the test browser in .browsers, and the built site in dist-single and dist. The result is one
+# ZIP: unzip it on a computer that has Node.js and everything works with no internet.
+
+on:
+  push:
+    branches: [main, claude/brave-planck-roikrn]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: offline-package
+  cancel-in-progress: true
+
+jobs:
+  package:
+    runs-on: windows-latest
+    env:
+      PLAYWRIGHT_BROWSERS_PATH: ${{ github.workspace }}\.browsers
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm ci
+      - run: npx playwright install chromium
+      - run: npm test
+      - run: npm run build
+      - run: npm run build:single
+      # the package must work as it is: every slide, offline, from the single file
+      - run: npx playwright test e2e/offline.spec.ts --project=desktop
+      - name: Zip
+        shell: pwsh
+        run: |
+          Remove-Item -Recurse -Force test-results, dist-e2e -ErrorAction SilentlyContinue
+          "Built $(Get-Date -Format 'yyyy-MM-dd HH:mm') UTC from commit ${{ github.sha }} with Node $(node -v)" | Out-File -Encoding utf8 PACKAGE-INFO.txt
+          7z a -tzip -mx=5 "$env:RUNNER_TEMP\luach-offline-windows.zip" . "-xr!.git" | Out-Null
+          Get-Item "$env:RUNNER_TEMP\luach-offline-windows.zip" | Select-Object Name, Length
+      - uses: actions/upload-artifact@v4
+        with:
+          name: luach-offline-windows
+          path: ${{ runner.temp }}\luach-offline-windows.zip
+          retention-days: 90
+          compression-level: 0
+      - name: Publish as the latest release
+        if: github.ref == 'refs/heads/main'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: offline-${{ github.run_number }}
+          name: חבילה מלאה ללא אינטרנט (Windows) ${{ github.run_number }}
+          body: |
+            כל הפרויקט עם כל הספריות כבר מותקנות. מתקינים Node.js, מחלצים את הקובץ, ולוחצים פעמיים על start.bat או על dist-single\index.html.
+            הוראות מלאות: docs/OFFLINE.md
+          files: ${{ runner.temp }}\luach-offline-windows.zip
+          make_latest: true

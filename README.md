@@ -3,7 +3,7 @@
 אתר לימודי אינטראקטיבי על הלוח העברי: מחלק של שעה ועד חשבון הרמב״ם, עם זמני היום ומודלים בתלת־ממד.
 
 ## הפעלה
-הכול רץ מקומית ובלי אינטרנט. רשימת ההתקנות המלאה והסבר צעד אחר צעד: [docs/OFFLINE.md](docs/OFFLINE.md).
+הכול רץ מקומית ובלי אינטרנט. **חבילה מלאה ל־Windows עם כל הספריות** (מתקינים רק Node.js): https://github.com/Yph333/kidush/releases/latest/download/luach-offline-windows.zip . הסבר מלא: [docs/OFFLINE.md](docs/OFFLINE.md).
 
 **בלחיצה כפולה (Windows):**
 - `install.bat`: מתקין את כל התלויות (פעם אחת). אם Node.js חסר, נפתח אתר ההורדה שלו.

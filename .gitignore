@@ -11,3 +11,6 @@ tools/kosherjava/lib/
 tools/horizon/cache/
 /design-refs/
 tools/terrain/cache/
+.browsers/
+luach-offline-windows.zip
+PACKAGE-INFO.txt

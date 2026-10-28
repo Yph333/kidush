@@ -4,6 +4,7 @@ rem The server stops by itself when the browser tab is closed, or after 20 minut
 rem To change the idle time, e.g. 45 minutes:  start.bat --idle=45
 setlocal
 cd /d "%~dp0"
+if exist "%~dp0.browsers" set "PLAYWRIGHT_BROWSERS_PATH=%~dp0.browsers"
 title Luach - server (close this window to stop)
 
 where node >nul 2>nul
