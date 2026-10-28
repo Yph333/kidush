@@ -19,6 +19,8 @@ import { type StepRow, Steps } from '../../components/Steps';
 import { DM, Num, Tag } from '../../components/text';
 import { SlideYear, useSlideYear } from '../../components/YearControl';
 import type { EarthPinProps } from '../../scenes/earthPin';
+import type { VisGlobeProps } from '../../scenes/visGlobe';
+import { visibilityGrid } from '../../lib/visibilityMap';
 import type { TerrainProps } from '../../scenes/terrainMap';
 import { NightPicker, useNight } from '../ch14/Blocks';
 import { SignPos } from '../ch14/Wheels14';
@@ -410,6 +412,36 @@ export function FullMonthsBars({ hl }: { hl?: boolean }) {
 }
 
 const loadPin = () => import('../../scenes/earthPin').then(m => m.default);
+const loadVis = () => import('../../scenes/visGlobe').then(m => m.default);
+
+/**
+ * 18:13–16 on the globe: where the new crescent can be seen on the evening it is first seen in Jerusalem (or the
+ * evening before), by a modern criterion. West of the Land of Israel it is seen more easily; east, less.
+ */
+export function VisibilityGlobe({ view }: { view?: string }) {
+  const yr = useSlideYear(), months = monthsOf(yr.y), [mi, setMi] = useState(1), [before, setBefore] = useState(true);
+  const M = useMemo(() => monthModel(yr.y, mi, JLM), [yr.y, mi]);
+  const ev = M.first ? localParts(M.first.ss - (before ? 86400000 : 0)) : null;
+  const cells = useMemo(() => (ev ? visibilityGrid(ev.y, ev.m, ev.d, 6) : []), [ev?.y, ev?.m, ev?.d]);
+  const props = useMemo<VisGlobeProps>(() => ({ cells, step: 6, band: [30, 35] }), [cells]);
+  return (
+    <Viz>
+      <Scene3D load={loadVis} props={props} view={view} label="כדור הארץ: איפה נראה הסהר החדש באותו ערב"
+        views={[{ id: 'israel', label: 'ארץ ישראל' }, { id: 'west', label: 'מערבה' }, { id: 'whole', label: 'כל הכדור' }]}
+        fallback={<p className="note">מפת הראייה דורשת תלת־ממד.</p>} />
+      <div className="ctl">
+        <SlideYear yr={yr} />
+        <label className="fld">חודש <select value={mi} onChange={e => setMi(+e.target.value)}>{months.map(([n], i) => <option key={i} value={i}>{n}</option>)}</select></label>
+        <div className="seg" role="group" aria-label="איזה ערב">
+          <button type="button" aria-pressed={before} onClick={() => setBefore(true)}>ערב לפני שנראה בירושלים</button>
+          <button type="button" aria-pressed={!before} onClick={() => setBefore(false)}>הערב הראשון שנראה בירושלים</button>
+        </div>
+      </div>
+      <p className="note">{ev ? <>ערב <Num>{`${ev.d}.${ev.m + 1}.${ev.y}`}</Num>{before ? ' (ערב לפני שנראה בירושלים)' : ' (הערב הראשון שנראה בירושלים)'}. </> : null}
+        ירוק: נראה בעין; ירקרק: בתנאים טובים; כתום: רק במשקפת; בלי צבע: לא נראה. הקווים: רוחב <Num>30°</Num> ו־<Num>35°</Num>. לפי קריטריון מודרני (Odeh), בקירוב, ברשת של <Num>6°</Num>.</p>
+    </Viz>
+  );
+}
 
 /** The globe with the band 30°–35° north (18:16): east and west of the Land of Israel "מכוונות כנגדה". */
 export function BandGlobe() {

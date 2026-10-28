@@ -3,7 +3,7 @@
 import { Num } from '../../components/text';
 import { defineChapter, halacha } from '../define';
 import { Limits, Sighting } from '../widgets/moon';
-import { AllFull, BandGlobe, FullMonthsBars, NightThirty, Points, TwoWays } from '../widgets/halacha';
+import { AllFull, FullMonthsBars, NightThirty, Points, TwoWays, VisibilityGlobe } from '../widgets/halacha';
 
 const D = false;   // approved by the content owner (2026-10-28)
 
@@ -131,7 +131,7 @@ export const CH18 = defineChapter(18, 'מה שהחשבון לא רואה', [
         body: <p>מערבה, השמש שוקעת מאוחר יותר והירח הספיק להתרחק ממנה. לכן: נראה בארץ ישראל, נראה גם במערב. ולהפך, נראה במערב: אין ראיה שנראה בארץ.</p> },
     ] },
     takeaway: <p>מערבה: רואים יותר בקלות.</p>,
-    stage: () => <BandGlobe />,
+    stage: () => <VisibilityGlobe view="west" />,
   }),
   halacha<'notwest'>({
     h: 'יד', title: 'לא נראה במערב',
@@ -140,7 +140,7 @@ export const CH18 = defineChapter(18, 'מה שהחשבון לא רואה', [
         body: <p>לא נראה אפילו מראשי ההרים במערב: בוודאי לא נראה בארץ ישראל.</p> },
     ] },
     takeaway: <p>לא נראה במערב: לא נראה בארץ.</p>,
-    stage: () => <BandGlobe />,
+    stage: () => <VisibilityGlobe view="west" />,
   }),
   halacha<'east'>({
     h: 'טו', title: 'מזרחה',
@@ -149,7 +149,7 @@ export const CH18 = defineChapter(18, 'מה שהחשבון לא רואה', [
         body: <p>מזרחה הכל הפוך: לא נראה בארץ, לא נראה במזרח. נראה במזרח: נראה בוודאי בארץ.</p> },
     ] },
     takeaway: <p>מזרחה: קשה יותר לראות.</p>,
-    stage: () => <BandGlobe />,
+    stage: () => <VisibilityGlobe view="israel" />,
   }),
   halacha<'band'>({
     h: 'טז', title: 'משלושים עד ל״ה',
@@ -158,6 +158,6 @@ export const CH18 = defineChapter(18, 'מה שהחשבון לא רואה', [
         body: <p>כל זה במקומות באותה רצועת רוחב כמו ארץ ישראל, <Num>30°</Num> עד <Num>35°</Num> צפון. ואין זה אלא ״להגדיל תורה ולהאדירה״: סומכים רק על קידוש בית דין בארץ ישראל.</p> },
     ] },
     takeaway: <p>רצועה <Num>30°–35°</Num>; ובכל מקרה: קידוש ארץ ישראל.</p>,
-    stage: () => <BandGlobe />,
+    stage: () => <VisibilityGlobe view="whole" />,
   }),
 ]);
