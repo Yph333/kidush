@@ -1,9 +1,9 @@
 // Visuals for chapters 7–8: a molad checked against all four dechiyot, the alternating days of 7:7, and the
 // month lengths and year types of chapter 8. Arithmetic from engines/calendar.
 
-import { type ReactNode, useMemo, useState } from 'react';
+import { type ReactNode, useEffect, useMemo, useState } from 'react';
 import {
-  DAY_LETTER, DAY_NAME, P_DAY, P_HOUR, P_WEEK, TYPE_NAME, fmtMolad, isLeap, keviut, monthsOf, rh, rhFrom, yearHeb, yearLen, yearType,
+  DAY_LETTER, DAY_NAME, P_DAY, P_HOUR, P_WEEK, TYPE_NAME, fmtMolad, gem, isLeap, keviut, moladTotal, monthStart, monthsOf, rh, rhFrom, yearHeb, yearLen, yearType,
 } from '../../engines/calendar';
 import { MoladControl, type MoladValue, moladParts } from '../../components/MoladControl';
 import { usePlay } from '../../components/Scene3D/usePlay';
@@ -12,6 +12,7 @@ import { type StepRow, Steps } from '../../components/Steps';
 import { Civil, Legend, Num, Sig, Tag } from '../../components/text';
 import { WeekWheel } from '../../components/WeekWheel';
 import { SlideYear, useSlideYear } from '../../components/YearControl';
+import { holidays } from '../../engines/holidays';
 import { RULE_NAME, dayWord } from '../../lib/format';
 
 const fx = (on: boolean) => (on ? 'guide-focus' : '');
@@ -184,4 +185,72 @@ export function TypeSigns({ hl }: { hl?: number }) {
       </div>
     </Engine>
   );
+}
+
+/**
+ * The whole year built from two moladot (chapters 6–8 together): molad Tishrei of this year and of the next give the
+ * two Rosh Hashanas (with their dechiyot); the days between them give the year's length and so its months; and
+ * from there every day of the year falls into place. Each month shows its molad, its Rosh Chodesh and the festivals.
+ */
+export function YearFromMolad() {
+  const yr = useSlideYear(), y = yr.y;
+  const a = rh(y), b = rh(y + 1), len = b.day - a.day, t = yearType(len), L = isLeap(y), ms = monthsOf(y);
+  const gap = ((len % 7) + 6) % 7;
+  // build the year month by month (or show it all at once)
+  const [shown, setShown] = useState(Infinity), building = shown < ms.length;
+  useEffect(() => {
+    if (!building) return;
+    const id = setTimeout(() => setShown(shown + 1), 650);
+    return () => clearTimeout(id);
+  }, [building, shown]);
+  useEffect(() => setShown(Infinity), [y]);
+  const hol = useMemo(() => {
+    const m = new Map<number, string[]>();
+    for (const h of holidays(y)) if (h.kind === 'yomtov' || h.name.startsWith('פורים') || h.name.startsWith('חנוכה')) m.set(h.day, [...(m.get(h.day) ?? []), h.name]);
+    return m;
+  }, [y]);
+  // the day of each month's molad: often the last day of the month before, so it is marked wherever it falls
+  const moladOn = useMemo(() => new Map(monthsOf(y).map(([n], mi) => [Math.floor(moladTotal(y, mi) / P_DAY), n])), [y]);
+  const rules = (r: typeof a) => (r.rules.length ? r.rules.map(k => RULE_NAME[k]).join(' ← ') : 'ביום המולד');
+  const rows: StepRow[] = [
+    { l: <>מולד תשרי {yearHeb(y)}</>, v: <Sig>{fmtMolad(a.t)}</Sig>, s: <>ראש השנה: {dayWord(a.day)} ({rules(a)})</> },
+    { l: <>מולד תשרי {yearHeb(y + 1)}</>, v: <Sig>{fmtMolad(b.t)}</Sig>, s: <>ראש השנה: {dayWord(b.day)} ({rules(b)})</> },
+    { l: 'הימים שבין שני ראשי השנה', v: <Num>{gap}</Num>, s: <>השנה: <Num>{len}</Num> ימים, {L ? 'מעוברת' : 'פשוטה'}</> },
+    { l: 'ומכאן החודשים', v: t ? <>{TYPE_NAME[t]}: חשוון <Num>{ms[1][1]}</Num>, כסלו <Num>{ms[2][1]}</Num></> : '?', s: <>קביעות <Sig>{keviut(y)}</Sig></>, c: 'final' },
+  ];
+  return <>
+    <Engine title={<>בונים את שנת {yearHeb(y)} מהמולד</>} sub="שני מולדות תשרי, ומהם כל השנה">
+      <div className="ctl">
+        <SlideYear yr={yr} />
+        <button type="button" className="btn pri" onClick={() => setShown(building ? Infinity : 0)}>{building ? 'הצג הכול' : '▶ בונים חודש אחרי חודש'}</button>
+      </div>
+      <Steps rows={rows} />
+    </Engine>
+    <Viz>
+      <div className="ycal" aria-label={`לוח שנת ${yearHeb(y)}`}>
+        {ms.map(([name, n], mi) => {
+          const start = monthStart(y, mi), lead = start % 7;
+          const cells = [...Array<null>(lead).fill(null), ...Array.from({ length: n }, (_, i) => start + i)];
+          const on = mi < shown;
+          return (
+            <section key={name} className={`ym${on ? '' : ' off'}`} aria-label={name}>
+              <h4>{name} <Tag tone={n === 30 ? 'ok' : 'leap'}>{n === 30 ? 'מלא' : 'חסר'}</Tag></h4>
+              <p className="ym-molad">מולד: <Sig>{fmtMolad(moladTotal(y, mi))}</Sig></p>
+              <div className="ym-grid">
+                {DAY_LETTER.map(l => <b key={l}>{l}׳</b>)}
+                {on && cells.map((d, i) => d === null ? <span key={i} /> : (
+                  <span key={i} title={[...(hol.get(d) ?? []), ...(moladOn.has(d) ? [`מולד ${moladOn.get(d)}`] : [])].join(', ') || undefined}
+                    className={[d % 7 === 6 ? 'sh' : '', d - start === 0 || d - start === 29 ? 'rc' : '', hol.has(d) ? 'hg' : '', moladOn.has(d) ? 'mo' : ''].join(' ')}>
+                    {gem(d - start + 1)}
+                  </span>
+                ))}
+              </div>
+            </section>
+          );
+        })}
+      </div>
+      <Legend items={[['var(--c-accent)', 'ראש חודש'], ['var(--c-moon)', 'יום המולד'], ['var(--c-moon-soft)', 'חג'], ['var(--c-leap-soft)', 'שבת']]} />
+      <p className="note">ראש חודש: יום א׳ של החודש, ואחרי חודש מלא גם יום ל׳ שלפניו. הנקודה: יום המולד. הוא קרוב לראש החודש, לפעמים יום או יומיים לפניו או אחריו (ואז הנקודה בחודש שלפניו), בגלל החודשים המלאים והחסרים ובגלל הדחיות. מעבר עם העכבר מראה של איזה חודש המולד.</p>
+    </Viz>
+  </>;
 }

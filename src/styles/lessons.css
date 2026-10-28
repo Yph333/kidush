@@ -368,3 +368,19 @@ svg.full, .viz .full { width: 100%; }
 .checks { margin: 0; padding-inline-start: 1.2em; }
 .checks li.ok { color: var(--c-ok, #7fce9c); }
 .checks li.bad { color: var(--c-shift, #ef8f76); }
+
+/* Rambam ch. 8: the year built from the molad */
+.ycal { display: grid; width: 100%; grid-template-columns: repeat(auto-fill, minmax(10.5rem, 1fr)); gap: var(--sp-2); }
+.ym { border: 1px solid var(--c-line); border-radius: var(--r-sm); padding: var(--sp-2); transition: opacity .3s; }
+.ym.off { opacity: .25; }
+.ym h4 { margin: 0; display: flex; gap: var(--sp-2); align-items: center; font-size: var(--fs-sm); }
+.ym-molad { margin: var(--sp-1) 0; font-size: var(--fs-xs); color: var(--c-text-2); }
+.ym-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; text-align: center; font-size: var(--fs-xs); }
+.ym-grid b { color: var(--c-text-3); font-weight: var(--fw-medium); }
+.ym-grid span { padding: 2px 0; border-radius: 4px; min-height: 1.5em; }
+.ym-grid span.sh { background: var(--c-leap-soft); }
+.ym-grid span.hg { background: var(--c-moon-soft); }
+.ym-grid span.rc { box-shadow: inset 0 0 0 1.5px var(--c-accent); }
+.ym-grid span.mo { position: relative; }
+.ym-grid span.mo::after { content: ''; position: absolute; top: 1px; inset-inline-start: 2px; width: 7px; height: 7px; border-radius: 50%; background: var(--c-moon); box-shadow: 0 0 0 1.5px var(--c-bg, #0b1020); }
+@media (prefers-reduced-motion: reduce) { .ym { transition: none; } }
