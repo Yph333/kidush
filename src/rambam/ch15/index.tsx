@@ -3,7 +3,7 @@
 import { Num, Sig } from '../../components/text';
 import { R_MOON } from '../../engines/rambam';
 import { defineChapter, halacha } from '../define';
-import { DoubleTable, EqTable, TrueMoon } from '../widgets/moon';
+import { DoubleModel, DoubleTable, EqTable, TrueMoon } from '../widgets/moon';
 
 const D = false;   // approved by the content owner (2026-10-28)
 
@@ -16,10 +16,10 @@ export const CH15 = defineChapter(15, 'מקום הירח האמיתי', [
       { title: 'המרחק', focus: 'dist', mark: ['ותגרע אמצע השמש מאמצע הירח'],
         body: <p>גורעים את אמצע השמש מאמצע הירח: כמה הירח רחוק מהשמש, במהלכם האמצעי.</p> },
       { title: 'כפול', focus: 'dbl', mark: ['והנשאר תכפול אותו. וזהו הנקרא מרחק הכפול'],
-        body: <p>כופלים אותו: זה <strong>המרחק הכפול</strong>.</p> },
+        body: <p>כופלים אותו: זה <strong>המרחק הכפול</strong>. למה כפול? בהדמיה: מרכז הגלגל הגדול של הירח זז סביב הארץ נגד הירח, ולכן כשהירח מתרחק מהשמש בזווית מסוימת, המרכז מתרחק בזווית שווה לצד השני, ובין שניהם פעמיים המרחק. הפעילו או גררו את הירח.</p> },
     ] },
     takeaway: <p>המרחק הכפול = (אמצע הירח − אמצע השמש) × <Num>2</Num>.</p>,
-    stage: f => <TrueMoon focus={f} />,
+    stage: f => f === 'dbl' ? <><DoubleModel /><TrueMoon focus={f} /></> : <TrueMoon focus={f} />,
   }),
   halacha<'range'>({
     h: 'ב', title: 'בין 5 ל־62',
@@ -28,7 +28,7 @@ export const CH15 = defineChapter(15, 'מקום הירח האמיתי', [
         body: <p>בליל שבו הירח יכול להיראות, המרחק הכפול תמיד בין <Num>5</Num> ל־<Num>62</Num> מעלות. כי החשבון כולו נועד לראייה, והטבלה בהלכה הבאה מכסה רק את התחום הזה.</p> },
     ] },
     takeaway: <p>בליל ראייה: המרחק הכפול בין <Num>5°</Num> ל־<Num>62°</Num>.</p>,
-    stage: () => <><DoubleTable /><TrueMoon focus="dbl" /></>,
+    stage: () => <><DoubleModel D0={30} /><DoubleTable /></>,
   }),
   halacha<'table' | 'name'>({
     h: 'ג', title: 'מה מוסיפים למסלול',
@@ -39,7 +39,7 @@ export const CH15 = defineChapter(15, 'מקום הירח האמיתי', [
         body: <p>אמצע המסלול אחרי התוספת נקרא <strong>המסלול הנכון</strong>.</p> },
     ] },
     takeaway: <p>המסלול הנכון = אמצע המסלול + התוספת לפי המרחק הכפול.</p>,
-    stage: f => <><DoubleTable hl={36} /><TrueMoon focus={f === 'name' ? 'course' : 'add'} /></>,
+    stage: f => <><DoubleTable hl={36} /><DoubleModel /><TrueMoon focus={f === 'name' ? 'course' : 'add'} /></>,
   }),
   halacha<'less' | 'more'>({
     h: 'ד', title: 'גורעים או מוסיפים',

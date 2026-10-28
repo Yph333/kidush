@@ -40,6 +40,9 @@ export function Scene3D<P>({ load, props, views, fallback, label, height = 440, 
     handle.current?.setView(viewProp);
   }, [viewProp]);
   const [spin, setSpin] = useState(false);
+  // the labels sometimes cover the wheels and the stars: the viewer can hide them (and the choice is kept between scenes)
+  const [labels, setLabels] = useState(() => { try { return localStorage.getItem('luach.sceneLabels') !== 'off'; } catch { return true; } });
+  const toggleLabels = () => { const v = !labels; setLabels(v); try { localStorage.setItem('luach.sceneLabels', v ? 'on' : 'off'); } catch { /* storage unavailable */ } };
   // photographic bodies (on) or the schematic look; only scenes that have photographic bodies offer the switch
   const [real, setReal] = useState(true);
   const [canReal, setCanReal] = useState(false);
@@ -78,7 +81,10 @@ export function Scene3D<P>({ load, props, views, fallback, label, height = 440, 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mode, load]);
 
-  useEffect(() => { handle.current?.update(props); }, [props]);
+  useEffect(() => {
+    try { handle.current?.update(props); }
+    catch (e) { setFailure(`עדכון הסצנה נכשל: ${String((e as Error)?.message ?? e)}`); setMode('2d'); }
+  }, [props]);
 
   return (
     <div className="scene3d">
@@ -96,6 +102,11 @@ export function Scene3D<P>({ load, props, views, fallback, label, height = 440, 
           </div>
         )}
         <span className="sp" />
+        {mode === '3d' && (
+          <button type="button" className="btn" aria-pressed={!labels} onClick={toggleLabels} title="הטקסט על המודל: הסתרה והצגה">
+            {labels ? 'הסתרת הטקסט' : 'הצגת הטקסט'}
+          </button>
+        )}
         {mode === '3d' && canReal && (
           <button type="button" className="btn" aria-pressed={real} onClick={() => { setReal(!real); handle.current?.setRealism?.(!real); }}>
             מראה מציאותי
@@ -113,7 +124,7 @@ export function Scene3D<P>({ load, props, views, fallback, label, height = 440, 
         )}
       </div>
       {mode === '3d' ? (
-        <div className="scene-host" ref={host} style={{ height }} role="img" aria-label={label}>
+        <div className={`scene-host${labels ? '' : ' no-labels'}`} ref={host} style={{ height }} role="img" aria-label={label}>
           {status === 'loading' && <div className="scene-loading">טוען את הסצנה…</div>}
         </div>
       ) : (

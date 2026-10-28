@@ -356,3 +356,4 @@ svg.full, .viz .full { width: 100%; }
 .s-label.fine { font-size: 11px; color: #f6e7a6; }
 .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 .sight-face { max-width: 16rem; margin: var(--sp-2) auto 0; }
+.story-line { min-height: 2.6em; margin: var(--sp-2) 0 0; padding: var(--sp-2) var(--sp-3); border-inline-start: 3px solid var(--c-moon); background: var(--c-moon-soft); border-radius: var(--r-sm); font-size: var(--fs-md); }

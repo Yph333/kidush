@@ -78,6 +78,9 @@ export function Wheels14({ hl, emphasis, at }: { hl: WheelsHl; emphasis?: 'days'
           <button type="button" className="btn pri" onClick={() => go(day + 1)}>יום קדימה</button>
           <button type="button" className="btn" onClick={() => go(day + 29)}>+ <Num>29</Num> ימים</button>
           <button type="button" className="btn" onClick={() => go(0)} disabled={N === 0}>חזרה לעיקר</button>
+          <label className="fld">ימים מהעיקר <Num>{NUM(day)}</Num>
+            <input type="range" min={0} max={400} value={Math.min(400, day)} onChange={e => go(+e.target.value)} aria-label="ימים מהעיקר" />
+          </label>
         </div>
         <div className="facts">
           <div><small>ימים מהעיקר</small><b><Num>{NUM(day)}</Num></b></div>

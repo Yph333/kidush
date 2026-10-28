@@ -65,7 +65,7 @@ const create = (host: HTMLElement, p0: WestSkyProps): SceneHandle<WestSkyProps> 
       if (a.alt < -12 && b.alt < -12) continue;
       fixed.add(line([hor(a.alt, a.az), hor(b.alt, b.az)], SIGN_COLORS[Math.floor(a.lon / 30) % 12], { opacity: a.alt < 0 ? 0.35 : 1 }));
     }
-    for (let s = 0; s < 12; s++) {
+    for (let s = 0; s < 12 && p.ecliptic.length; s++) {
       const m = p.ecliptic.reduce((x, y) => (Math.abs(y.lon - (s * 30 + 15)) < Math.abs(x.lon - (s * 30 + 15)) ? y : x));
       if (m.alt < 1) continue;
       const l = label(SIGNS[s], 'sign');

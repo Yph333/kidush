@@ -243,7 +243,20 @@ export interface OdehResult {
 
 export function odeh(evening: boolean, y: number, m: number, d: number, c: Place): OdehResult | null {
   const ss = evening ? sunsetOn(y, m, d, c) : sunriseOn(y, m, d, c);
-  if (ss == null) return null;
+  return ss == null ? null : odehAt(evening, ss, c);
+}
+
+/**
+ * Sunset of a civil date at any longitude: the search window is that place's own afternoon (local mean time), not
+ * Israel's. For world maps of the new crescent (sunsetOn above searches Israel's afternoon).
+ */
+export function sunsetLocal(y: number, m: number, d: number, c: Place): number | null {
+  const L = Date.UTC(y, m, d) - (c.lon / 15) * HOUR;
+  return crossing(t => sunOnly(t, c), L + 12 * HOUR, L + 23 * HOUR, 15 * 60000, -0.833, -1);
+}
+
+/** The Odeh criterion from a given sunset (evening) or sunrise (morning) at a place. */
+export function odehAt(evening: boolean, ss: number, c: Place): OdehResult {
   const ms2 = evening ? moonsetNear(ss, c) : moonriseNear(ss, c);
   const lag = ms2 == null ? null : (evening ? ms2 - ss : ss - ms2);
   const tb = lag != null && lag > 0 ? (evening ? ss + lag * 4 / 9 : ss - lag * 4 / 9) : ss;

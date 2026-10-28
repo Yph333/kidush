@@ -4,7 +4,7 @@
 
 import type { SceneHandle, SceneModule } from '../components/Scene3D/types';
 import { earthBody, onTextureLoad, sunBody } from './bodies';
-import { COLORS, THREE, clearGroup, createStage, dirOf, line, ring, sphere } from './common';
+import { COLORS, THREE, clearGroup, createStage, dirOf, dragAround, line, ring, sphere } from './common';
 
 export interface EccentricProps {
   /** mean longitude (deg): the angle at the centre */
@@ -17,6 +17,8 @@ export interface EccentricProps {
   hl?: 'mean' | 'true' | 'apogee' | 'course' | 'both' | null;
   /** the correction to show on the label, arc-minutes (the Rambam's table value), or null */
   eqMin?: number | null;
+  /** the viewer drags the body: its new mean longitude (deg) */
+  onDrag?: (meanLon: number) => void;
 }
 
 const R = 9;
@@ -48,6 +50,7 @@ const create = (host: HTMLElement, p0: EccentricProps): SceneHandle<EccentricPro
   Object.values(L).forEach(l => scene.add(l));
   const offTex = onTextureLoad(st.render);
   let p = p0;
+  const offDrag = dragAround(st, host, () => (p.onDrag ? sun : null), () => dirOf(p.apogee, 0, p.ecc * R), a => p.onDrag?.(a));
 
   const build = () => {
     clearGroup(dyn);
@@ -94,7 +97,7 @@ const create = (host: HTMLElement, p0: EccentricProps): SceneHandle<EccentricPro
     setView(id) { if (id === 'top') st.look([0, 30, 0.01]); else st.look([10, 16, 20]); },
     setAutoRotate: st.setAutoRotate,
     setRealism(on) { sunB.setRealism(on); earthB.setRealism(on); st.render(); },
-    dispose() { offTex(); st.dispose(); },
+    dispose() { offTex(); offDrag(); st.dispose(); },
   };
 };
 

@@ -8,6 +8,7 @@ import { allFullDrift, avivRule, fullMonths, heightsJoin, leapCourt, messengerDa
 import { DAY_NAME, P_DAY, P_MONTH, dayOfCivil, gem, monthStart, monthsOf, yearHeb } from '../../engines/calendar';
 import { R_DECL, SIGNS, moonFromEquator, rambam, rambamDecl } from '../../engines/rambam';
 import { LAND } from '../../lib/eclipseMap';
+import BORDERS from '../../assets/terrain/borders.json';
 import { monthModel } from '../../lib/month';
 import { EarthMoonZoom, OrbitTopDown, PhaseStrip, SkyPanorama } from '../../components/astro/visuals';
 import type { MonthProps } from '../../scenes/monthSystem';
@@ -17,7 +18,10 @@ import { Engine, Viz } from '../../components/Slide';
 import { type StepRow, Steps } from '../../components/Steps';
 import { DM, Num, Tag } from '../../components/text';
 import { SlideYear, useSlideYear } from '../../components/YearControl';
+import { usePlay } from '../../components/Scene3D/usePlay';
 import type { EarthPinProps } from '../../scenes/earthPin';
+import type { VisGlobeProps } from '../../scenes/visGlobe';
+import { visibilityGrid } from '../../lib/visibilityMap';
 import type { TerrainProps } from '../../scenes/terrainMap';
 import { NightPicker, useNight } from '../ch14/Blocks';
 import { SignPos } from '../ch14/Wheels14';
@@ -50,12 +54,17 @@ export function TwoWays({ title, a, b, hl }: { title: ReactNode; a: [ReactNode, 
 }
 
 /** A strip of times (right to left), with spans and marks: the day of the thirtieth, the witnesses, the court. */
-export function TimeStrip({ title, from, to, spans = [], marks = [], hl }: {
+export function TimeStrip({ title, from, to, spans = [], marks = [], hl, story }: {
   title: ReactNode; from: number; to: number;
   spans?: { a: number; b: number; label: string; tone?: 'ok' | 'bad' | 'moon' | 'leap'; k?: string }[];
   marks?: { t: number; label: string; k?: string }[];
   hl?: string;
+  /** a story to play along the strip: what happens at each moment */
+  story?: { t: number; text: ReactNode }[];
 }) {
+  const [now, setNow] = useState<number | null>(null);
+  const player = usePlay(dt => setNow(n => { const v = (n ?? from) + dt * ((to - from) / 14); return v > to ? from : v; }));
+  const said = story && now !== null ? [...story].reverse().find(e => e.t <= now) : undefined;
   const W = 760, X = (t: number) => W - ((t - from) / (to - from)) * W;
   const night = [];
   for (let h = Math.ceil(from / 24) * 24; h < to; h += 24) night.push(h);   // hours from the start of a night (18:00)
@@ -69,7 +78,13 @@ export function TimeStrip({ title, from, to, spans = [], marks = [], hl }: {
         {spans.map((s, i) => <text key={'t' + i} x={(X(s.a) + X(s.b)) / 2} y="57" textAnchor="middle" fontSize="12" fill="var(--c-text)">{s.label}</text>)}
         {marks.map((m, i) => <g key={i}><line x1={X(m.t)} x2={X(m.t)} y1="22" y2="82" stroke={hl && m.k === hl ? 'var(--c-accent, #6cb6ff)' : 'var(--c-text-2)'} strokeWidth={hl && m.k === hl ? 3 : 1.5} />
           <text x={X(m.t)} y={i % 2 ? 100 : 16} textAnchor="middle" fontSize="11" fill="var(--c-text-2)">{m.label}</text></g>)}
+        {now !== null && <g><line x1={X(now)} x2={X(now)} y1="24" y2="80" stroke="#f6e7a6" strokeWidth="3" /><circle cx={X(now)} cy="24" r="5" fill="#f6e7a6" /></g>}
       </svg>
+      {story && <div className="ctl">
+        <button type="button" className="btn pri" aria-pressed={player.playing} onClick={player.toggle}>{player.playing ? '❚❚ עצור' : '▶ הפעל את הסיפור'}</button>
+        <input type="range" min={from} max={to} step={0.1} value={now ?? from} onChange={e => { player.stop(); setNow(+e.target.value); }} aria-label="הזמן" />
+      </div>}
+      {story && <p className="story-line">{said?.text ?? 'לחצו הפעל, או גררו את הזמן.'}</p>}
     </Viz>
   );
 }
@@ -90,8 +105,9 @@ function useProj(box: Box) {
 export interface MapPlace { name: string; lat: number; lon: number; kind?: 'il' | 'syria' | 'abroad' | 'beacon' | 'land' | 'city'; approx?: boolean }
 
 /** A map of the region (coastlines approximate), with places, an optional ring around Jerusalem and a route. */
-export function RegionMap({ places, box: box0, ring, route, hl, note }: {
+export function RegionMap({ places, box: box0, ring, route, hl, note, fires, walkers, play, children }: {
   places: MapPlace[]; box?: Box; ring?: { km: number; label: string }; route?: string[]; hl?: string[]; note?: ReactNode;
+  fires?: TerrainProps['fires']; walkers?: TerrainProps['walkers']; play?: { playing: boolean; toggle: () => void; label?: string }; children?: ReactNode;
 }) {
   const box: Box = box0 ?? [28, 27.5, 46, 37.5];
   const { land, xy } = useProj(box);
@@ -109,14 +125,16 @@ export function RegionMap({ places, box: box0, ring, route, hl, note }: {
     route: pts.length > 1 ? pts.map(q => [q.lon, q.lat] as [number, number]) : undefined,
     ring,
     frame: box0,
+    fires, walkers,
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }), [JSON.stringify([places, hl, route, ring, inIsrael])]);
+  }), [JSON.stringify([places, hl, route, ring, inIsrael, fires, walkers])]);
   return (
     <Viz className={fx(!!hl?.length)}>
-      <Scene3D load={loadTerrain} props={props3d} label="מפת תבליט בתלת־ממד" views={[{ id: 'oblique', label: 'מבט אלכסוני' }, { id: 'low', label: 'מבט נמוך' }, { id: 'top', label: 'מלמעלה' }]} fallback={
+      <Scene3D load={loadTerrain} props={props3d} play={play} label="מפת תבליט בתלת־ממד" views={[{ id: 'oblique', label: 'מבט אלכסוני' }, { id: 'low', label: 'מבט נמוך' }, { id: 'top', label: 'מלמעלה' }]} fallback={
       <svg viewBox={`0 0 ${MW} ${MH}`} direction="ltr" role="img" aria-label="מפת ארץ ישראל וסביבתה">
         <rect width={MW} height={MH} fill="#16243f" />
         <path d={land} fill="#3a4a3a" stroke="#6b7d6b" strokeWidth="0.6" />
+        {(BORDERS.lines as [number, number][][]).map((l, i) => <polyline key={i} points={l.map(([x, y]) => xy(x, y).join(',')).join(' ')} fill="none" stroke="#d9d2c5" strokeOpacity=".6" strokeWidth="0.8" />)}
         {ring && <><circle cx={jx} cy={jy} r={rr} fill="#88c5d822" stroke="#88c5d8" strokeDasharray="5 4" />
           <text x={jx} y={jy - rr - 6} textAnchor="middle" fontSize="12" fill="#88c5d8">{ring.label}</text></>}
         {pts.length > 1 && <polyline points={pts.map(p => xy(p.lon, p.lat).join(',')).join(' ')} fill="none" stroke="#ffb36b" strokeWidth="2.5" strokeDasharray="7 5" />}
@@ -130,8 +148,52 @@ export function RegionMap({ places, box: box0, ring, route, hl, note }: {
         ); })}
         <circle cx={jx} cy={jy} r="5" fill="#fff" stroke="#000" />
       </svg>} />
-      <p className="note">{note ?? 'קווי החוף בקירוב.'} תבליט: גובה מוגדל{props3d.map === 'israel' ? ' פי 7' : ' פי 12'}, לפי נתוני SRTM ו־ETOPO. {places.some(p => p.approx) && 'סימן שאלה: מקום משוער.'}</p>
+      {children}
+      <p className="note">{note ?? 'קווי החוף בקירוב.'} קווים ונקודות באפור: גבולות וערים של היום, להתמצאות. תבליט: גובה מוגדל{props3d.map === 'israel' ? ' פי 7' : ' פי 12'}, לפי נתוני SRTM ו־ETOPO. {places.some(p => p.approx) && 'סימן שאלה: מקום משוער.'}</p>
     </Viz>
+  );
+}
+
+/** 3:8: the beacons lit one after another, from the Mount of Olives toward Babylon. */
+export function BeaconsPlay({ places, note }: { places: MapPlace[]; note?: ReactNode }) {
+  const [t, setT] = useState(places.length);
+  const player = usePlay(dt => setT(x => (x >= places.length + 1 ? 0 : x + dt * 0.7)));
+  const fires = useMemo(() => ({ stops: places.map(q => [q.lon, q.lat] as [number, number]), t: Math.min(t, places.length) }), [places, t]);
+  return (
+    <RegionMap box={[33.5, 29.5, 45.5, 35.5]} places={places} route={places.map(q => q.name)} hl={places.filter((_, i) => i < t).map(q => q.name)} fires={fires}
+      play={{ ...player, label: 'הדליקו את המשואות' }} note={note}>
+      <p className="m0">{t < 1 ? 'בית דין קידש. מדליקים את המשואה הראשונה…' : t < places.length ? <>דולקת המשואה ב{places[Math.floor(t) - 1].name}</> : <>כל השרשרת דולקת: בבל יודעת שהחודש קודש.</>}</p>
+    </RegionMap>
+  );
+}
+
+/**
+ * The messengers of Tishrei walking out of Jerusalem, day by day, not on Yom Tov, Yom Kippur or Shabbat (3:8–13),
+ * about 52 km a day (5:10: Jerusalem to Egypt eight days). By the 15th: whom they reached keeps one day.
+ */
+export function MessengersWalk({ month = 'tishrei' }: { month?: 'nisan' | 'tishrei' }) {
+  const [wd, setWd] = useState(4), [t, setT] = useState(14);
+  const days = messengerDays(month, wd), PER_DAY = 52;
+  const player = usePlay(dt => setT(x => (x >= 14.99 ? 0 : Math.min(14.99, x + dt * 1.2))));
+  const d = Math.floor(t) + 1, walked = days.filter(x => x.d < d && x.walk).length + (days[Math.min(13, d - 1)]?.walk ? t - Math.floor(t) : 0);
+  const km = walked * PER_DAY;
+  const dest = [PLACES['דמשק'], PLACES['צור'], PLACES['מצרים'], PLACES['בבל'], PLACES['עמון']];
+  const walkers = useMemo(() => ({ to: dest.map(q => [q.lon, q.lat] as [number, number]), km }),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [km]);
+  const dayNow = days[Math.min(13, d - 1)];
+  return (
+    <RegionMap box={[29, 27.5, 45.5, 36]} places={[PLACES['ירושלים'], ...dest]} ring={{ km: Math.max(1, km), label: `${Math.round(walked)} ימי הליכה` }} walkers={walkers}
+      play={{ ...player, label: 'הפעל: השלוחים יוצאים' }} note="השלוחים הולכים כ־52 ק״מ ביום (הערכה לפי ה׳, י: ירושלים–מצרים שמונה ימים). נקודה ירוקה: הגיעו לפני החג.">
+      <div className="ctl">
+        <label className="fld">ראש החודש ביום <select value={wd} onChange={e => setWd(+e.target.value)}>{DAY_NAME.map((n, i) => <option key={i} value={i}>{n}</option>)}</select></label>
+        <label className="fld">יום <Num>{Math.min(15, d)}</Num> ב{month === 'tishrei' ? 'תשרי' : 'ניסן'}
+          <input type="range" min={0} max={14.99} step={0.05} value={t} onChange={e => { player.stop(); setT(+e.target.value); }} aria-label="יום בחודש" />
+        </label>
+      </div>
+      <p className="m0">{d > 14 || t >= 14.9 ? <>ט״ו: החג. הלכו <Num>{Math.round(walked)}</Num> ימים, כ־<Num>{Math.round(km)}</Num> ק״מ. מי שבתוך העיגול: יום טוב אחד; מחוצה לו: שני ימים.</>
+        : dayNow?.walk ? <>יום {gem(d)}: הולכים.</> : <>יום {gem(d)}: {dayNow?.why === 'yt' ? 'יום טוב' : dayNow?.why === 'yk' ? 'יום כיפור' : 'שבת'}, לא הולכים.</>}</p>
+    </RegionMap>
   );
 }
 
@@ -408,6 +470,36 @@ export function FullMonthsBars({ hl }: { hl?: boolean }) {
 }
 
 const loadPin = () => import('../../scenes/earthPin').then(m => m.default);
+const loadVis = () => import('../../scenes/visGlobe').then(m => m.default);
+
+/**
+ * 18:13–16 on the globe: where the new crescent can be seen on the evening it is first seen in Jerusalem (or the
+ * evening before), by a modern criterion. West of the Land of Israel it is seen more easily; east, less.
+ */
+export function VisibilityGlobe({ view }: { view?: string }) {
+  const yr = useSlideYear(), months = monthsOf(yr.y), [mi, setMi] = useState(1), [before, setBefore] = useState(true);
+  const M = useMemo(() => monthModel(yr.y, mi, JLM), [yr.y, mi]);
+  const ev = M.first ? localParts(M.first.ss - (before ? 86400000 : 0)) : null;
+  const cells = useMemo(() => (ev ? visibilityGrid(ev.y, ev.m, ev.d, 6) : []), [ev?.y, ev?.m, ev?.d]);
+  const props = useMemo<VisGlobeProps>(() => ({ cells, step: 6, band: [30, 35] }), [cells]);
+  return (
+    <Viz>
+      <Scene3D load={loadVis} props={props} view={view} label="כדור הארץ: איפה נראה הסהר החדש באותו ערב"
+        views={[{ id: 'israel', label: 'ארץ ישראל' }, { id: 'west', label: 'מערבה' }, { id: 'whole', label: 'כל הכדור' }]}
+        fallback={<p className="note">מפת הראייה דורשת תלת־ממד.</p>} />
+      <div className="ctl">
+        <SlideYear yr={yr} />
+        <label className="fld">חודש <select value={mi} onChange={e => setMi(+e.target.value)}>{months.map(([n], i) => <option key={i} value={i}>{n}</option>)}</select></label>
+        <div className="seg" role="group" aria-label="איזה ערב">
+          <button type="button" aria-pressed={before} onClick={() => setBefore(true)}>ערב לפני שנראה בירושלים</button>
+          <button type="button" aria-pressed={!before} onClick={() => setBefore(false)}>הערב הראשון שנראה בירושלים</button>
+        </div>
+      </div>
+      <p className="note">{ev ? <>ערב <Num>{`${ev.d}.${ev.m + 1}.${ev.y}`}</Num>{before ? ' (ערב לפני שנראה בירושלים)' : ' (הערב הראשון שנראה בירושלים)'}. </> : null}
+        ירוק: נראה בעין; ירקרק: בתנאים טובים; כתום: רק במשקפת; בלי צבע: לא נראה. הקווים: רוחב <Num>30°</Num> ו־<Num>35°</Num>. לפי קריטריון מודרני (Odeh), בקירוב, ברשת של <Num>6°</Num>.</p>
+    </Viz>
+  );
+}
 
 /** The globe with the band 30°–35° north (18:16): east and west of the Land of Israel "מכוונות כנגדה". */
 export function BandGlobe() {

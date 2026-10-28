@@ -188,3 +188,50 @@ export function clearGroup(g: THREE.Object3D): void {
   });
   g.clear();
 }
+
+/**
+ * Drag a body around a centre in the plane of the wheel (y = 0): press on the body, move, and `onAngle` gets the
+ * longitude (deg) of the pointer seen from the centre. Orbit controls pause while dragging. Returns a remover.
+ */
+export function dragAround(st: Stage, host: HTMLElement, body: () => THREE.Object3D | null, centre: () => THREE.Vector3, onAngle: (deg: number) => void): () => void {
+  const ray = new THREE.Raycaster(), ndc = new THREE.Vector2(), plane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0), hit = new THREE.Vector3();
+  const canvas = () => host.querySelector('canvas');
+  const aim = (e: PointerEvent) => {
+    const c = canvas(); if (!c) return false;
+    const r = c.getBoundingClientRect();
+    ndc.set(((e.clientX - r.left) / r.width) * 2 - 1, -((e.clientY - r.top) / r.height) * 2 + 1);
+    ray.setFromCamera(ndc, st.camera);
+    return true;
+  };
+  let dragging = false;
+  const down = (e: PointerEvent) => {
+    const b = body();
+    if (!b || !aim(e)) return;
+    if (!ray.intersectObject(b, true).length) return;
+    dragging = true;
+    st.controls.enabled = false;
+    host.setPointerCapture?.(e.pointerId);
+    host.style.cursor = 'grabbing';
+    e.preventDefault();
+    e.stopPropagation();   // capture phase: the orbit controls never see this press
+  };
+  const move = (e: PointerEvent) => {
+    if (!aim(e)) return;
+    if (!dragging) { const b = body(); host.style.cursor = b && ray.intersectObject(b, true).length ? 'grab' : ''; return; }
+    if (!ray.ray.intersectPlane(plane, hit)) return;
+    const c = centre();
+    onAngle((((Math.atan2(-(hit.z - c.z), hit.x - c.x) * 180) / Math.PI) % 360 + 360) % 360);
+  };
+  const up = (e: PointerEvent) => {
+    if (!dragging) return;
+    dragging = false;
+    st.controls.enabled = true;
+    host.releasePointerCapture?.(e.pointerId);
+    host.style.cursor = '';
+  };
+  host.addEventListener('pointerdown', down, true);
+  host.addEventListener('pointermove', move);
+  host.addEventListener('pointerup', up);
+  host.addEventListener('pointercancel', up);
+  return () => { host.removeEventListener('pointerdown', down, true); host.removeEventListener('pointermove', move); host.removeEventListener('pointerup', up); host.removeEventListener('pointercancel', up); };
+}
