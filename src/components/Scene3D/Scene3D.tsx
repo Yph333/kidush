@@ -131,7 +131,7 @@ export function Scene3D<P>({ load, props, views, fallback, label, height = 440, 
         <div className="scene-2d">{fallback}</div>
       )}
       {mode === '3d' && <p className="note">גוררים כדי לסובב, גלגלת או צביטה כדי להגדיל.</p>}
-      {!hasGL && <p className="note">הדפדפן לא תומך ב־WebGL, או שהוא כבוי (למשל כשהאצת החומרה כבויה), ולכן מוצגת הגרסה הדו־ממדית.</p>}
+      {!hasGL && <p className="note">התלת־ממד לא זמין בדפדפן הזה (WebGL כבוי: אין כרטיס מסך מתאים, או שהאצת החומרה כבויה), ולכן מוצגת הגרסה הדו־ממדית. במחשב עם החבילה המלאה: פותחים את האתר בלחיצה כפולה על <bdi>open-3d.bat</bdi>, והתלת־ממד עובד גם בלי כרטיס מסך.</p>}
       {failure && mode === '2d' && (
         <p className="note scene-fail" role="status">
           לא הצלחנו להציג את התלת־ממד, ולכן מוצגת הגרסה הדו־ממדית. <bdi>{failure}</bdi>{' '}
