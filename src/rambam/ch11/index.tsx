@@ -6,7 +6,7 @@ import { defineChapter, halacha } from '../define';
 import { DmsCalc, Eccentric, EpochFacts, JerusalemGlobe, RambamVsModern, SignFinder, TonightsQuestion } from '../widgets/astro';
 import { MeanVsTrue } from '../widgets/calendar';
 
-const D = true;
+const D = false;   // approved by the content owner (2026-10-28)
 
 export const CH11 = defineChapter(11, 'יסודות חשבון הראייה', [
   halacha<'q'>({
@@ -75,16 +75,20 @@ export const CH11 = defineChapter(11, 'יסודות חשבון הראייה', [
     takeaway: <p>החשבון בנוי פשוט בכוונה: הקירובים מתקזזים.</p>,
     stage: () => <RambamVsModern />,
   }),
-  halacha<'units'>({
+  halacha<'wheel' | 'sign' | 'deg' | 'min'>({
     h: 'ז', title: 'מעלות, מזלות, חלקים ושניות',
     guide: { draft: D, steps: [
-      { title: 'הגלגל: 360 מעלות', focus: 'units', mark: ['הגלגל מוחלק בש״ס מעלות. כל מזל ומזל שלשים מעלות. ומתחיל מתחילת מזל טלה'],
-        body: <p>המעגל מחולק ל־<Num>360</Num> מעלות, ו־<Num>12</Num> מזלות של <Num>30</Num> מעלות, מתחילת מזל טלה.</p> },
-      { title: 'חלקים ושניות', focus: 'units', mark: ['וכל מעלה ומעלה ס׳ חלקים. וכל חלק וחלק ס׳ שניות. וכל שניה ושניה ששים שלישיות'],
-        body: <p>כל מעלה <Num>60</Num> חלקים, כל חלק <Num>60</Num> שניות, וכל שנייה <Num>60</Num> שלישיות. <strong>החלקים כאן הם חלקי מעלה</strong>, לא <Num>1080</Num> חלקי השעה.</p> },
+      { title: 'הגלגל: 360 מעלות', focus: 'wheel', mark: ['הגלגל מוחלק בש״ס מעלות'],
+        body: <p>הגלגל, המעגל שבו נעים השמש והירח סביב הארץ, מחולק ל־<Num>360</Num> מעלות. בהדמיה: כל קו קטן על השפה הוא מעלה.</p> },
+      { title: 'מזל: 30 מעלות', focus: 'sign', mark: ['כל מזל ומזל שלשים מעלות. ומתחיל מתחילת מזל טלה'],
+        body: <p><Num>12</Num> מזלות, כל אחד <Num>30</Num> מעלות, מתחילת טלה. מגדילים מזל אחד: <Num>30</Num> קווים, וכל עשירי ארוך.</p> },
+      { title: 'מעלה: 60 חלקים', focus: 'deg', mark: ['וכל מעלה ומעלה ס׳ חלקים'],
+        body: <p>מגדילים מעלה אחת: <Num>60</Num> חלקים. <strong>החלקים כאן הם חלקי מעלה</strong>, לא <Num>1080</Num> חלקי השעה.</p> },
+      { title: 'חלק: 60 שניות', focus: 'min', mark: ['וכל חלק וחלק ס׳ שניות. וכל שניה ושניה ששים שלישיות'],
+        body: <p>מגדילים חלק אחד: <Num>60</Num> שניות. וכל שנייה <Num>60</Num> שלישיות. אפשר לגלול בהדמיה ולהתקרב או להתרחק בעצמכם, ולשנות את המקום בכלי.</p> },
     ] },
     takeaway: <p>מעגל = <Num>360°</Num>; מזל = <Num>30°</Num>; מעלה = <Num>60</Num> חלקים; חלק = <Num>60</Num> שניות.</p>,
-    stage: () => <SignFinder start={{ d: 0, m: 0, s: 0 }} />,
+    stage: f => <SignFinder start={{ d: 70, m: 30, s: 40 }} view={f === 'wheel' ? 'top' : f === 'sign' ? 'sign' : f === 'deg' ? 'deg' : f === 'min' ? 'min' : undefined} />,
   }),
   halacha<'ex'>({
     h: 'ח', title: 'איפה זה בגלגל',

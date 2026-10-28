@@ -3,8 +3,8 @@
 import { defineChapter, halacha } from '../define';
 import { FixedVsSighting, Messengers, PLACES, Points, RegionMap, TwoWays } from '../widgets/halacha';
 
-const D = true;
-const IL = ['ירושלים', 'אושא', 'שפרעם', 'יבנה', 'טבריא'].map(n => PLACES[n]);
+const D = false;   // approved by the content owner (2026-10-28)
+const IL = ['ירושלים', 'אושא', 'שפרעם', 'לוז', 'יבנה', 'נוב', 'טבריא'].map(n => PLACES[n]);
 const SYRIA = ['צור', 'דמשק', 'אשקלון'].map(n => PLACES[n]);
 const ABROAD = ['מצרים', 'עמון', 'מואב'].map(n => PLACES[n]);
 const RING = { km: 520, label: 'כעשרה ימי הליכה (הערכה)' };

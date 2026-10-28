@@ -282,8 +282,8 @@ test('guided explanation: steps, keyboard inside the card, and the "read" mark i
   await expect(guide.locator('.guide-count')).toHaveText(/צעד\s*3\s*מתוך\s*7/);
   await guide.getByRole('button', { name: /צעד 7:/ }).click();
   await expect(guide.getByRole('button', { name: /לשקף הבא: מולד זקן/ })).toBeVisible();
-  const mapBtn = page.getByRole('button', { name: 'מפת השיעור' });   // phone: the map is a drawer; desktop: always shown
-  if (await mapBtn.isVisible()) await mapBtn.click();
+  // phone: the map is a drawer, opened by ☰; desktop: a column (☰ there folds it away)
+  if (!(await page.locator('.map').isVisible())) await page.getByRole('button', { name: /מפת השיעור/ }).click();
   await expect(page.locator('.map').getByRole('button', { name: /לא אד״ו/ }).locator('.guide-tag')).toBeVisible();
 });
 
@@ -309,6 +309,19 @@ test('Rambam track: a guide step lights up its words, and "next" stays inside th
   await expect(page).toHaveURL(/rambam\/14\/2/);
   await page.goto(`/#/${RAMBAM_PATHS[RAMBAM_PATHS.length - 1]}?y=${YEAR}&city=0&mode=explore`);
   await expect(page.locator('.bot .nb.next')).toBeDisabled();                         // the track's end, not the topics
+});
+
+test('desktop: the lesson map column folds away and comes back', async ({ page }, info) => {
+  test.skip(info.project.name !== 'desktop', 'a drawer on phones');
+  await page.goto(`/#/rambam/10/1?y=${YEAR}&city=0&mode=explore`);
+  const map = page.locator('.map'), btn = page.getByRole('button', { name: /מפת השיעור/ });
+  await expect(map).toBeVisible();
+  await btn.click();
+  await expect(map).toBeHidden();
+  await page.reload();
+  await expect(map).toBeHidden();                                                   // remembered
+  await btn.click();
+  await expect(map).toBeVisible();
 });
 
 test('home: two equal ways in', async ({ page }) => {

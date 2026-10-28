@@ -259,10 +259,15 @@ svg.full, .viz .full { width: 100%; }
 .takeaway { margin: var(--sp-2) 0 var(--sp-5); padding: var(--sp-3) var(--sp-4); border-inline-start: 3px solid var(--c-moon); background: var(--c-moon-soft); border-radius: var(--r-sm); }
 .takeaway b { display: block; color: var(--c-moon); font-size: var(--fs-sm); margin-bottom: var(--sp-1); }
 .takeaway p { margin: 0; }
-@media (min-width: 921px) {
-  /* the visual stays in view while the text column scrolls; the guide is sticky at the top of its column, as on every slide */
-  .slide.halacha-slide > .stage { position: sticky; top: var(--sp-4); align-self: start; }
-}
+/* the halacha on top across the page, in long lines; below: the guide (sticky) beside the visuals */
+.slide.halacha-slide { grid-template-columns: minmax(0, 4fr) minmax(0, 8fr); grid-template-areas: "head head" "src src" "guide stage" "take take"; }
+.halacha-slide > .h-head { grid-area: head; }
+.halacha-slide > .h-head h2 { margin-bottom: 0; }
+.halacha-slide > .rambam-text { grid-area: src; margin: 0; max-width: none; }
+.halacha-slide > .h-guide { grid-area: guide; padding-top: 0; }
+.halacha-slide > .stage { grid-area: stage; }
+.halacha-slide > .h-take { grid-area: take; margin: 0; }
+@media (max-width: 920px) { .slide.halacha-slide { grid-template-columns: minmax(0, 1fr); grid-template-areas: "head" "src" "guide" "stage" "take"; } }
 @media print { .rt-mark { background: none; box-shadow: none; text-decoration: underline; } }
 .turns { margin: var(--sp-4) 0 0; display: flex; align-items: center; gap: var(--sp-4); flex-wrap: wrap; }
 .turns svg { width: 9rem; flex: none; }
@@ -342,3 +347,12 @@ svg.full, .viz .full { width: 100%; }
 .judges i { width: 12px; height: 12px; border-radius: 50%; display: inline-block; }
 .judges i.y { background: #7fce9c; }
 .judges i.n { background: #ef8f76; }
+
+/* the zodiac wheel and the magnifier */
+.zodiac-ctl { display: flex; flex-wrap: wrap; gap: var(--sp-2) var(--sp-4); align-items: center; margin-top: var(--sp-2); }
+.magnifier { width: min(64rem, 100%); max-height: 94vh; overflow: auto; padding: var(--sp-4) var(--sp-5); outline: none; display: grid; gap: var(--sp-3); }
+.mag-btn { font-size: var(--fs-xs); min-height: 1.9rem; padding: 0 var(--sp-2); }
+.s-label.sign { font-weight: 700; font-size: 14px; text-shadow: 0 0 6px #000; }
+.s-label.fine { font-size: 11px; color: #f6e7a6; }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.sight-face { max-width: 16rem; margin: var(--sp-2) auto 0; }

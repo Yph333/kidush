@@ -3,22 +3,26 @@
 
 import { type ReactNode, useMemo, useState } from 'react';
 import { geoEquirectangular, geoPath } from 'd3-geo';
-import { CITIES, type OdehZone, ZONE, civOf, localParts, odeh, sunsetOn } from '../../engines/astro';
+import { CITIES, type OdehZone, TofMs, ZONE, civOf, localParts, nrm, odeh, sky, sunEcl, sunsetOn } from '../../engines/astro';
 import { allFullDrift, avivRule, fullMonths, heightsJoin, leapCourt, messengerDays, tekufaInNisan } from '../../engines/beitdin';
 import { DAY_NAME, P_DAY, P_MONTH, dayOfCivil, gem, monthStart, monthsOf, yearHeb } from '../../engines/calendar';
 import { R_DECL, SIGNS, moonFromEquator, rambam, rambamDecl } from '../../engines/rambam';
 import { LAND } from '../../lib/eclipseMap';
 import { monthModel } from '../../lib/month';
-import { MoonGlyph, PhaseStrip, SkyPanorama } from '../../components/astro/visuals';
+import { EarthMoonZoom, OrbitTopDown, PhaseStrip, SkyPanorama } from '../../components/astro/visuals';
+import type { MonthProps } from '../../scenes/monthSystem';
+import type { MoonFaceProps } from '../../scenes/moonFace';
 import { Scene3D } from '../../components/Scene3D/Scene3D';
 import { Engine, Viz } from '../../components/Slide';
 import { type StepRow, Steps } from '../../components/Steps';
 import { DM, Num, Tag } from '../../components/text';
 import { SlideYear, useSlideYear } from '../../components/YearControl';
 import type { EarthPinProps } from '../../scenes/earthPin';
+import type { TerrainProps } from '../../scenes/terrainMap';
 import { NightPicker, useNight } from '../ch14/Blocks';
 import { SignPos } from '../ch14/Wheels14';
-import { EqTable, eveningMs } from './moon';
+import { EqTable, SightSky3D, eveningMs } from './moon';
+import { ZodiacScene } from './zodiac';
 
 const fx = (on: boolean) => (on ? 'guide-focus' : '');
 const JLM = CITIES[0];
@@ -73,6 +77,7 @@ export function TimeStrip({ title, from, to, spans = [], marks = [], hl }: {
 // ---------------------------------------------------------------------------------------------------- maps
 
 const MW = 520, MH = 420;
+const loadTerrain = () => import('../../scenes/terrainMap').then(m => m.default);
 type Box = [number, number, number, number];   // lon0, lat0, lon1, lat1
 function useProj(box: Box) {
   return useMemo(() => {
@@ -85,17 +90,30 @@ function useProj(box: Box) {
 export interface MapPlace { name: string; lat: number; lon: number; kind?: 'il' | 'syria' | 'abroad' | 'beacon' | 'land' | 'city'; approx?: boolean }
 
 /** A map of the region (coastlines approximate), with places, an optional ring around Jerusalem and a route. */
-export function RegionMap({ places, box = [28, 27.5, 46, 37.5], ring, route, hl, note }: {
+export function RegionMap({ places, box: box0, ring, route, hl, note }: {
   places: MapPlace[]; box?: Box; ring?: { km: number; label: string }; route?: string[]; hl?: string[]; note?: ReactNode;
 }) {
+  const box: Box = box0 ?? [28, 27.5, 46, 37.5];
   const { land, xy } = useProj(box);
   const [jx, jy] = xy(JLM.lon, JLM.lat);
   // a ring of `km` around Jerusalem: one degree of latitude ≈ 111 km
   const rr = ring ? Math.abs(xy(JLM.lon, JLM.lat + ring.km / 111)[1] - jy) : 0;
   const col = (k?: MapPlace['kind']) => k === 'il' ? 'var(--c-ok, #7fce9c)' : k === 'syria' ? 'var(--c-leap, #e7c76f)' : k === 'abroad' ? 'var(--c-shift, #ef8f76)' : k === 'beacon' ? '#ffb36b' : '#e8ecf6';
   const pts = route?.map(n => places.find(p => p.name === n)).filter((p): p is MapPlace => !!p) ?? [];
+  // the 3D relief: Israel in detail when the map stays inside it, otherwise the region from Egypt to Babylon
+  const inIsrael = box[0] >= 33.8 && box[1] >= 29.3 && box[2] <= 36.4 && box[3] <= 33.6;
+  const COLS: Record<string, number> = { il: 0x7fce9c, syria: 0xe7c76f, abroad: 0xef8f76, beacon: 0xffb36b, land: 0x7fce9c, city: 0xffffff };
+  const props3d = useMemo<TerrainProps>(() => ({
+    map: inIsrael || places.every(q => q.lon < 36.6 && q.lat < 33.6 && q.lon > 33.8) ? 'israel' : 'region',
+    pins: places.map(q => ({ name: q.name, lat: q.lat, lon: q.lon, color: COLS[q.kind ?? 'city'], hl: hl?.includes(q.name), approx: q.approx, area: q.kind === 'land' })),
+    route: pts.length > 1 ? pts.map(q => [q.lon, q.lat] as [number, number]) : undefined,
+    ring,
+    frame: box0,
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }), [JSON.stringify([places, hl, route, ring, inIsrael])]);
   return (
     <Viz className={fx(!!hl?.length)}>
+      <Scene3D load={loadTerrain} props={props3d} label="מפת תבליט בתלת־ממד" views={[{ id: 'oblique', label: 'מבט אלכסוני' }, { id: 'low', label: 'מבט נמוך' }, { id: 'top', label: 'מלמעלה' }]} fallback={
       <svg viewBox={`0 0 ${MW} ${MH}`} direction="ltr" role="img" aria-label="מפת ארץ ישראל וסביבתה">
         <rect width={MW} height={MH} fill="#16243f" />
         <path d={land} fill="#3a4a3a" stroke="#6b7d6b" strokeWidth="0.6" />
@@ -111,13 +129,13 @@ export function RegionMap({ places, box = [28, 27.5, 46, 37.5], ring, route, hl,
           </g>
         ); })}
         <circle cx={jx} cy={jy} r="5" fill="#fff" stroke="#000" />
-      </svg>
-      <p className="note">{note ?? 'קווי החוף בקירוב.'} {places.some(p => p.approx) && 'סימן שאלה: מקום משוער.'}</p>
+      </svg>} />
+      <p className="note">{note ?? 'קווי החוף בקירוב.'} תבליט: גובה מוגדל{props3d.map === 'israel' ? ' פי 7' : ' פי 12'}, לפי נתוני SRTM ו־ETOPO. {places.some(p => p.approx) && 'סימן שאלה: מקום משוער.'}</p>
     </Viz>
   );
 }
 
-/** Places of chapter 5:11 and around (coordinates of the known sites; ancient sites by their common identification). */
+/** Places of chapter 5:11 and around: coordinates of the known sites; ancient sites by their usual identification, `approx` where it is uncertain. */
 export const PLACES: Record<string, MapPlace> = {
   ירושלים: { name: 'ירושלים', lat: 31.78, lon: 35.23, kind: 'city' },
   אושא: { name: 'אושא', lat: 32.79, lon: 35.11, kind: 'il' },
@@ -129,7 +147,11 @@ export const PLACES: Record<string, MapPlace> = {
   אשקלון: { name: 'אשקלון', lat: 31.67, lon: 34.57, kind: 'syria' },
   מצרים: { name: 'מצרים', lat: 30.04, lon: 31.24, kind: 'abroad' },
   עמון: { name: 'עמון', lat: 31.95, lon: 35.93, kind: 'abroad' },
-  מואב: { name: 'מואב', lat: 31.3, lon: 35.75, kind: 'abroad', approx: true },
+  // Moab by its capital, Kir Moab (al-Karak)
+  מואב: { name: 'מואב (קיר מואב)', lat: 31.18, lon: 35.7, kind: 'abroad' },
+  // Luz = Beit El, at Beitin; Nov: north-east of Jerusalem, by the usual identification near Mount Scopus (uncertain)
+  לוז: { name: 'לוז (בית אל)', lat: 31.93, lon: 35.24, kind: 'il' },
+  נוב: { name: 'נוב', lat: 31.8, lon: 35.25, kind: 'il', approx: true },
   בבל: { name: 'בבל', lat: 32.54, lon: 44.42, kind: 'abroad' },
 };
 
@@ -163,7 +185,10 @@ export function NightThirty({ focus }: { focus?: 'sky' | 'seen' | 'not' }) {
   const o = odeh(true, a, b, c, JLM), ss = sunsetOn(a, b, c, JLM);
   const seen = !!o && (o.zone === 'A' || o.zone === 'B');
   return <>
-    {ss && <Viz><SkyPanorama ms={o?.tb ?? ss + 20 * 60000} c={JLM} /></Viz>}
+    {ss && <div className="month3d">
+      <Viz><SkyPanorama ms={o?.tb ?? ss + 20 * 60000} c={JLM} /></Viz>
+      <MoonFace3D ms={o?.tb ?? ss + 20 * 60000} title="הסהר באותו ערב" />
+    </div>}
     <Engine title={<>ליל שלושים של {months[mi][0]} {yearHeb(yr.y)}</>} sub="בירושלים, לפי קריטריון מודרני (Odeh)" className={fx(!!focus)}>
       <div className="ctl"><SlideYear yr={yr} />
         <label className="fld">חודש <select value={mi} onChange={e => setMi(+e.target.value)}>{months.map(([n], i) => <option key={i} value={i}>{n}</option>)}</select></label>
@@ -178,10 +203,48 @@ export function NightThirty({ focus }: { focus?: 'sky' | 'seen' | 'not' }) {
   </>;
 }
 
-/** The moon at sunset, each evening of a month (where it hides at the end and appears at the start). */
-export function MonthMoons() {
-  const yr = useSlideYear(), M = useMemo(() => monthModel(yr.y, 0, JLM), [yr.y]);
-  return <Viz><PhaseStrip M={M} t={M.strip[0].ss} /><div className="ctl"><SlideYear yr={yr} /></div></Viz>;
+const loadMonth = () => import('../../scenes/monthSystem').then(m => m.default);
+const loadFace = () => import('../../scenes/moonFace').then(m => m.default);
+
+/** The moon as seen from the Earth at one moment (3D), its lit part and whether it grows. */
+export function MoonFace3D({ ms, height = 230, title = 'כך הירח נראה מכדור הארץ' }: { ms: number; height?: number; title?: ReactNode }) {
+  const sk = sky(ms, JLM);
+  const face = useMemo<MoonFaceProps>(() => ({ sunLam: sk.sunLam, moonLam: sk.moonLam, moonBeta: sk.moonBeta }), [sk.sunLam, sk.moonLam, sk.moonBeta]);
+  return (
+    <Viz className="month-face">
+      <p className="vt">{title}</p>
+      <Scene3D load={loadFace} props={face} label="הירח כפי שהוא נראה מכדור הארץ" views={[]} height={height} fallback={<EarthMoonZoom sk={sk} />} />
+      <p className="note"><Num>{(sk.k * 100).toFixed(1)}%</Num> מואר · {sk.waxing ? 'הולך וגדל' : 'הולך וקטן'}</p>
+    </Viz>
+  );
+}
+
+/** A month of the moon in 3D: the sun, the earth and the moon at sunset of the evening chosen, and how it looks. */
+export function MonthMoons({ day: d0 = 1 }: { day?: number }) {
+  const yr = useSlideYear(), months = monthsOf(yr.y), [mi, setMi] = useState(0), [day, setDay] = useState(d0);
+  const M = useMemo(() => monthModel(yr.y, mi, JLM), [yr.y, mi]);
+  const d = Math.min(day, M.len), t = M.strip[d - 1].ss, sk = sky(t, JLM);
+  const a0 = nrm(sunEcl(TofMs(M.strip[0].ss).T).lam + 180), a1 = nrm(sunEcl(TofMs(M.strip[M.len - 1].ss).T).lam + 180);
+  const month = useMemo<MonthProps>(() => ({ sunLam: sk.sunLam, moonLam: sk.moonLam, moonBeta: sk.moonBeta, arc: [a0, a1], ms: t }), [sk.sunLam, sk.moonLam, sk.moonBeta, a0, a1, t]);
+  return <>
+    <Viz><PhaseStrip M={M} t={t} /></Viz>
+    <div className="ctl">
+      <SlideYear yr={yr} />
+      <label className="fld">חודש <select value={mi} onChange={e => setMi(+e.target.value)}>{months.map(([n], i) => <option key={i} value={i}>{n}</option>)}</select></label>
+      <label className="fld">ערב <Num>{gem(d)}</Num> בחודש
+        <input type="range" min={1} max={M.len} value={d} onChange={e => setDay(+e.target.value)} aria-label="איזה ערב בחודש" />
+      </label>
+    </div>
+    <div className="month3d">
+      <Viz>
+        <Scene3D load={loadMonth} props={month} label="השמש, כדור הארץ והירח בתלת־ממד; הצד המואר של הירח פונה לשמש"
+          views={[{ id: 'oblique', label: 'מבט אלכסוני' }, { id: 'top', label: 'מלמעלה' }, { id: 'earth', label: 'קרוב לכדור הארץ' }]}
+          fallback={<OrbitTopDown M={M} sk={sk} />} />
+        <p className="note">בשקיעה של ערב {gem(d)} ב{months[mi][0]}. לא בקנה מידה.</p>
+      </Viz>
+      <MoonFace3D ms={t} />
+    </div>
+  </>;
 }
 
 // ---------------------------------------------------------------------------------------------------- 2:5
@@ -391,9 +454,6 @@ export function MoonLean({ focus }: { focus?: LeanStep }) {
   if (!R) return <Engine title="לאן הירח נוטה"><NightPicker night={night} /><p className="note">התאריך לפני העיקר.</p></Engine>;
   const m = moonFromEquator(R.moonTrue, R.lat1, R.north);
   const deg = (v: number) => <><Num>{Math.abs(Math.round(v / 60))}°</Num> {v >= 0 ? 'צפון' : 'דרום'}</>;
-  const W = 360, H = 200, cx = W / 2 - (m.dist / 60) * 4, cy = H - 40 - (R.arc / 60) * 9;
-  // the sun is below the western horizon, at the middle; the lit limb faces it, the "פגימה" faces away (east)
-  const rot = (Math.atan2(H - 20 - cy, W / 2 - cx) * 180) / Math.PI - 90;
   const rows: StepRow[] = [
     { l: <>נטיית מעלת הירח (<SignPos sec={R.moonTrue * 60} />)</>, v: deg(m.decl) },
     { l: 'רוחב הירח הראשון', v: deg(m.lat) },
@@ -402,18 +462,13 @@ export function MoonLean({ focus }: { focus?: LeanStep }) {
     { l: 'הגובה: לפי קשת הראייה', v: <DM min={R.arc} /> },
   ];
   const at: Record<LeanStep, number> = { decl: 0, lat: 1, sum: 2, dir: 3, height: 4 };
+  const lat = (R.north ? 1 : -1) * R.lat1 / 60, show = (v: number) => `${Math.abs(Math.round(v / 60))}° ${v >= 0 ? 'צפון' : 'דרום'}`;
   return <>
-    <Viz>
-      <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label="האופק המערבי והירח" direction="ltr">
-        <rect width={W} height={H - 20} fill="#1b2a4c" /><rect y={H - 20} width={W} height="20" fill="#1E2A1F" />
-        <text x={W / 2} y={H - 6} textAnchor="middle" fontSize="11" fill="#e8ecf6">מערב</text>
-        <text x={W - 8} y={H - 6} textAnchor="end" fontSize="11" fill="#e8ecf6">צפון</text>
-        <text x="8" y={H - 6} fontSize="11" fill="#e8ecf6">דרום</text>
-        <circle cx={W / 2} cy={H - 12} r="9" fill="#ffb36b" opacity=".7" />
-        <MoonGlyph cx={cx} cy={cy} r={14} k={0.08} rot={rot} />
-      </svg>
-      <p className="note">מבט מערבה אחרי השקיעה (סכמטי). הצד המואר פונה אל השמש שמתחת לאופק; הפגימה לצד השני.</p>
-    </Viz>
+    {focus === 'decl' || focus === 'lat' || focus === 'sum'
+      ? <ZodiacScene view="decl" equator stars={false} moonLon={R.moonTrue / 60} moonLat={lat} hlSign={Math.floor(R.moonTrue / 1800)}
+          decl={{ lon: R.moonTrue / 60, lat, hl: focus, labels: { decl: `נטיית המעלה: ${show(m.decl)}`, lat: `הרוחב: ${show(m.lat)}`, sum: `מהקו השווה: ${show(m.dist)}` } }}
+          note="המקווקו התכלת: הקו השווה, נוטה ממסלול השמש. הקשת הצהובה: נטיית המעלה של הירח; הסגולה: רוחב הירח; הירוקה: מרחקו מהקו השווה." />
+      : <SightSky3D dayIdx={night.dayIdx} step={focus === 'height' ? 'height' : 'dir'} />}
     <Engine title="לאן הירח נוטה" sub="רמב״ם י״ט, י–ט״ו, בקירוב" className={fx(!!focus)}>
       <NightPicker night={night} />
       <Steps rows={rows} focus={focus ? at[focus] : undefined} />

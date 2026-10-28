@@ -6,7 +6,7 @@ import { defineChapter, halacha } from '../define';
 import { DechiyaCheck, FixPush } from '../widgets/dechiyot';
 import { TopicLink } from '../widgets/TopicLink';
 
-const D = true;
+const D = false;   // approved by the content owner (2026-10-28)
 
 export const CH7 = defineChapter(7, 'קביעת ראש השנה והדחיות', [
   halacha<'rule' | 'how' | 'ex'>({

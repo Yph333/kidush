@@ -6,6 +6,7 @@ import { CITIES, dayOfMs } from '../../engines/astro';
 import { cyclePos, gDate, hebDate, tekufotAbsolute, yearHeb, P_DAY } from '../../engines/calendar';
 import { type Dms, addDms, inSign, subDms, toSec } from '../../engines/dms';
 import { RB, R_SUN, SIGNS, interp, rambam, rambamD0, secOf } from '../../engines/rambam';
+import { Magnifier, ZodiacScene } from './zodiac';
 import { Scene3D } from '../../components/Scene3D/Scene3D';
 import { Engine, Viz } from '../../components/Slide';
 import { type StepRow, Steps } from '../../components/Steps';
@@ -98,10 +99,9 @@ export function RambamVsModern() {
 
 // ---------------------------------------------------------------------------------------------------- 11:7–9
 /** A longitude on the circle of the signs (11:7–9). */
-export function SignFinder({ start = { d: 70, m: 30, s: 40 } }: { start?: Dms }) {
+export function SignFinder({ start = { d: 70, m: 30, s: 40 }, view }: { start?: Dms; view?: string }) {
   const [v, setV] = useState<Dms>(start);
   const sec = toSec(v), { sign, within } = inSign(sec), deg = sec / 3600;
-  const c = 150, R = 130, r = 96, P = (a: number, rad: number) => [c + rad * Math.cos(a * Math.PI / 180), c - rad * Math.sin(a * Math.PI / 180)];
   const num = (k: keyof Dms, max: number) => (
     <label className="fld">{k === 'd' ? 'מעלות' : k === 'm' ? 'חלקים' : 'שניות'}
       <input type="number" min={0} max={max} value={v[k]} onChange={e => setV({ ...v, [k]: Math.max(0, Math.min(max, Math.round(+e.target.value || 0))) })} />
@@ -109,16 +109,7 @@ export function SignFinder({ start = { d: 70, m: 30, s: 40 } }: { start?: Dms })
   );
   return (
     <>
-      <Viz>
-        <svg viewBox="0 0 300 300" className="season-wheel" direction="ltr" role="img" aria-label="גלגל המזלות">
-          {SIGNS.map((n, k) => { const [x1, y1] = P(k * 30, r), [x2, y2] = P(k * 30, R), [tx, ty] = P(k * 30 + 15, (R + r) / 2); return (
-            <g key={n}><line x1={x1} y1={y1} x2={x2} y2={y2} stroke="var(--c-line-strong)" /><text x={tx} y={ty + 4} textAnchor="middle" className="sw-s" fill={k === sign ? 'var(--c-moon)' : undefined} fontWeight={k === sign ? 700 : 400}>{n}</text></g>
-          ); })}
-          <circle cx={c} cy={c} r={R} fill="none" stroke="var(--c-line-strong)" /><circle cx={c} cy={c} r={r} fill="none" stroke="var(--c-line-strong)" />
-          {(() => { const [x, y] = P(deg, R + 4), [x0, y0] = P(deg, 20); return <><line x1={x0} y1={y0} x2={x} y2={y} stroke="var(--c-moon)" strokeWidth="2" /><circle cx={x} cy={y} r="6" fill="var(--c-moon)" /></>; })()}
-          <text x={c} y={c + 4} textAnchor="middle" className="sw-c">מתחילת טלה</text>
-        </svg>
-      </Viz>
+      <ZodiacScene zoom view={view} pointer={{ lon: deg }} hlSign={sign} />
       <Engine title="איפה בגלגל" sub="ש״ס מעלות, כל מזל שלושים">
         <div className="ctl">{num('d', 359)}{num('m', 59)}{num('s', 59)}</div>
         <Steps rows={[
@@ -227,6 +218,7 @@ export function SunCalc({ focus }: { focus?: 'mean' | 'apo' | 'course' | 'round'
       <NightPicker night={night} />
       {R ? <Steps rows={rows} focus={focus ? f[focus] : undefined} /> : <p className="note">התאריך לפני העיקר.</p>}
     </Engine>
+    {R && <ZodiacScene sunLon={R.sunTrue / 60} pointer={{ lon: R.sunTrue / 60 }} hlSign={Math.floor(R.sunTrue / 1800)} note={<>מקום השמש האמיתי באותו ערב על גלגל המזלות. <Magnifier from={R.sunMean / 3600} to={R.sunTrue / 60} title="מאמצע השמש למקומה האמיתי">🔍 הגדלה</Magnifier></>} />}
   </>;
 }
 
@@ -244,7 +236,8 @@ export function SunTable({ deg: d0 = 65, hl }: { deg?: number; hl?: boolean }) {
       </table></div>
       <p className="m0">
         {deg > 180 && <><Num>{`360 − ${deg} = ${f}`}</Num> · </>}
-        בין <Num>{r * 10}°</Num> ל־<Num>{r * 10 + 10}°</Num>: <DM min={R_SUN[r]} /> + (<DM min={R_SUN[Math.min(18, r + 1)] - R_SUN[r]} />) × <Num>{rem}/10</Num> = <strong><DM min={Math.round(interp(R_SUN, f))} /></strong>
+        בין <Num>{r * 10}°</Num> ל־<Num>{r * 10 + 10}°</Num>: <DM min={R_SUN[r]} /> + (<DM min={R_SUN[Math.min(18, r + 1)] - R_SUN[r]} />) × <Num>{rem}/10</Num> = <strong><DM min={Math.round(interp(R_SUN, f))} /></strong>{' '}
+        <Magnifier from={0} to={Math.round(interp(R_SUN, f)) / 60} title={<>מנת המסלול: <DM min={Math.round(interp(R_SUN, f))} /></>}>🔍 בתלת־ממד</Magnifier>
       </p>
     </Engine>
   );

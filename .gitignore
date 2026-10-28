@@ -10,3 +10,4 @@ dist-e2e/
 tools/kosherjava/lib/
 tools/horizon/cache/
 /design-refs/
+tools/terrain/cache/

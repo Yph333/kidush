@@ -182,14 +182,20 @@ export function TekufaDay({ focus, y: y0 }: { focus?: DayStep; y?: number }) {
     { l: <>משליכים <Num>30</Num></>, v: <>נשארו <Num>{D.rem}</Num></> },
     { l: <>מונים <Num>{D.rem}</Num> ימים מראש חודש {D.from} (יום {DAY_NAME[D.startWd]})</>, v: <>יום {DAY_NAME[D.landWd]}</> },
     { l: <>התקופה ביום {DAY_NAME[D.tekWd]} (ט, ד); מוסיפים יום אחר יום</>, v: <>+<Num>{D.added}</Num></>, s: D.added > 3 ? <Tag tone="bad">יותר משלושה: ״פלא גדול״ (ט, ח)</Tag> : undefined },
-    { l: 'תקופת ניסן', v: <>{D.day} ב{D.from}</>, s: ok ? <Tag tone="ok">כמו החשבון המדויק</Tag> : <>בחשבון המדויק (ט, ג): {D.actual.d} ב{D.actual.name}</>, c: 'final' },
+    { l: 'תקופת ניסן, לפי הרמב״ם', v: <>{D.day > 29 && D.from === 'אדר ב׳' ? <>{D.day} ב{D.from} (כלומר {D.day - 29} בניסן)</> : <>{D.day} ב{D.from}</>}</>, s: ok ? <Tag tone="ok">כמו החשבון המדויק</Tag> : <>בחשבון המדויק (ט, ג): {D.actual.d} ב{D.actual.name}</>, c: D.leap ? undefined : 'final' },
+    ...(D.leap ? [{
+      l: <><Tag tone="leap">תוספת: חשבון לשנה מעוברת</Tag> {D.leap.shifted ? <>החשבון יצא בחציו הראשון של אדר שני: התקופה ארבעה שבועות אחר כך, באותו יום בשבוע</> : <>ממשיכים למנות מאדר שני אל ניסן</>}</>,
+      v: <>{D.leap.d} ב{D.leap.name}</>,
+      s: D.leap.name === D.actual.name && D.leap.d === D.actual.d ? <Tag tone="ok">כמו החשבון המדויק</Tag> : <>בחשבון המדויק: {D.actual.d} ב{D.actual.name}</>,
+      c: 'final' as const,
+    }] : []),
   ];
   const at: Record<DayStep, number> = { years: 0, mod: 1, land: 2, add: 3, result: 4 };
   return (
     <Engine title="בכמה בחודש" sub="רמב״ם ט, ו–ח (שמואל)" className={fx(!!focus)}>
       {yr.control}
       <Steps rows={rows} focus={focus ? at[focus] : undefined} />
-      {leap && <p className="note">שנה מעוברת: הרמב״ם כותב למנות מראש חודש אדר שני. היום שמתקבל נופל באותו יום בשבוע כמו התקופה, אבל ארבעה שבועות לפניה. ההבנה המדויקת כאן ממתינה לבדיקה.</p>}
+      {leap && <p className="note">שנה מעוברת: הרמב״ם כותב למנות מראש חודש אדר שני. כשהתקופה נופלת בסוף אדר שני, החשבון שלו יוצא בדיוק. כשהיא נופלת בתחילת ניסן, החשבון נופל על אותו יום בשבוע, ארבעה שבועות לפניה. התוספת שבשורה האחרונה היא שלנו, לא לשון הרמב״ם: בשנה מעוברת התקופה בין אמצע אדר שני לאמצע ניסן (ראו ד, ב), ולכן תוצאה בחציו הראשון של אדר שני פירושה ניסן. השוואה לחשבון המדויק: ט, ג. פירוט: docs/VERIFICATION.md.</p>}
     </Engine>
   );
 }

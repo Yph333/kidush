@@ -3,7 +3,7 @@
 import { defineChapter, halacha } from '../define';
 import { Heights, NightThirty, Points, TimeStrip, TwoWays } from '../widgets/halacha';
 
-const D = true;
+const D = false;   // approved by the content owner (2026-10-28)
 // hours from the start of the night that begins day 29 (18:00)
 const DAY29 = <TimeStrip title="סוף יום כ״ט, ליל שלושים ויום שלושים" from={12} to={60}
   marks={[{ t: 24, label: 'שקיעה: ליל שלושים', k: 'night' }, { t: 24.5, label: 'צאת הכוכבים', k: 'stars' }, { t: 48, label: 'שקיעה: ליל ל״א', k: 'end' }]}

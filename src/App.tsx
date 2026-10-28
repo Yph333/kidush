@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useSyncExternalStore } from 'react';
 import { CITIES } from './engines/astro';
 import { SLIDES, slideByPath, trackSlides } from './chapters';
 import { GlossaryPanel } from './components/Glossary';
@@ -16,6 +16,15 @@ function toggleFullscreen() {
   } catch { /* not supported */ }
 }
 
+/** True while the screen is wide enough for the lesson map to be a column (nav.css: above 1100px). */
+const WIDE = '(min-width: 1101px)';
+function useWide(): boolean {
+  return useSyncExternalStore(
+    cb => { const m = matchMedia(WIDE); m.addEventListener('change', cb); return () => m.removeEventListener('change', cb); },
+    () => matchMedia(WIDE).matches, () => true,
+  );
+}
+
 function isTyping(el: EventTarget | null): boolean {
   const t = el as HTMLElement | null;
   return !!t && (['INPUT', 'SELECT', 'TEXTAREA'].includes(t.tagName) || t.isContentEditable);
@@ -27,6 +36,9 @@ export function App() {
   const demo = useStore(s => s.demoYear);
   const city = useStore(s => s.city);
   const notesOpen = useStore(s => s.notesOpen);
+  const mapHidden = useStore(s => s.mapHidden);
+  const mapOpenNow = useStore(s => s.mapOpen);
+  const wide = useWide();
   const mainRef = useRef<HTMLElement>(null);
   const appRef = useRef<HTMLDivElement>(null);
 
@@ -79,12 +91,15 @@ export function App() {
   const i = cur.index;
   // the bottom bar shows the current track only
   const list = trackSlides(cur.track), ti = list.indexOf(cur);
+  // the map is a column (fold it in place) on wide screens in explore mode; elsewhere a drawer
+  const wideMap = wide && mode === 'explore' && i !== 0;
 
   return (
-    <div className="app" data-mode={mode} data-home={i === 0 ? '' : undefined} ref={appRef}>
+    <div className="app" data-mode={mode} data-home={i === 0 ? '' : undefined} data-map={mapHidden ? 'hidden' : undefined} ref={appRef}>
       <a className="skip" href="#deck">דילוג לתוכן</a>
       <header className="top">
-        <button type="button" className="iconbtn map-btn" onClick={() => setState({ mapOpen: true })} aria-label="מפת השיעור">☰</button>
+        <button type="button" className="iconbtn map-btn" aria-label="מפת השיעור: פתיחה וסגירה" aria-expanded={wideMap ? !mapHidden : mapOpenNow}
+          onClick={() => (wideMap ? setState({ mapHidden: !mapHidden }) : setState({ mapOpen: true }))}>☰</button>
         <button type="button" className="brand" onClick={() => go(0)} aria-label="בונים לוח עברי: למסך הראשי">בונים לוח עברי{i > 0 && <small>{cur.track === 'rambam' ? cur.chapter.title : <>פרק <span className="num">{cur.chapter.num}</span>: {cur.chapter.title}</>}</small>}</button>
         <div className="sp" />
         <div className="top-ctl">

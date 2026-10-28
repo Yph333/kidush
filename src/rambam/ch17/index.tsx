@@ -4,7 +4,7 @@ import { Num } from '../../components/text';
 import { defineChapter, halacha } from '../define';
 import { CircleTable, FourthTable, Limits, PlatTable, PlonTable, Sighting } from '../widgets/moon';
 
-const D = true;
+const D = false;   // approved by the content owner (2026-10-28)
 const TAURUS = 1;
 
 export const CH17 = defineChapter(17, 'חשבון הראייה', [

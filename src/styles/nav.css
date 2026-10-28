@@ -26,7 +26,9 @@ main#deck { flex: 1; min-width: 0; overflow: auto; outline: none; scroll-behavio
 .top-ctl .yc button { min-width: 2.2rem; min-height: 2.2rem; }
 .top-ctl .fld select { min-height: 2.2rem; }
 .top-btns { display: flex; gap: var(--sp-2); flex-wrap: wrap; }
-.map-btn { display: none; }
+.map-btn { display: inline-flex; }
+/* wide screens: the column can be folded away (the ☰ button) */
+@media (min-width: 1101px) { .app[data-map="hidden"]:not([data-mode="present"]):not([data-home]) .map:not(.open) { display: none; } }
 
 /* ---------- lesson map ---------- */
 .map {

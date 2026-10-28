@@ -5,7 +5,7 @@ import { defineChapter, halacha } from '../define';
 import { HalfDays, MonthLengths, RoshChodesh, TypeSigns, YearTypeByGap } from '../widgets/dechiyot';
 import { TopicLink } from '../widgets/TopicLink';
 
-const D = true;
+const D = false;   // approved by the content owner (2026-10-28)
 
 export const CH8 = defineChapter(8, 'חודשים מלאים וחסרים', [
   halacha<'len' | 'whole'>({

@@ -10,6 +10,7 @@ import { DMS, Num } from '../../components/text';
 import { YearControl } from '../../components/YearControl';
 import { NUM } from '../../lib/format';
 import { SignPos } from './Wheels14';
+import { Magnifier } from '../widgets/zodiac';
 
 export type Which = 'moon' | 'crs' | 'sun' | 'apo' | 'head';
 export const FULL = 1296000;
@@ -24,12 +25,13 @@ export function MotionTable({ which, hl = [], used }: { which: Which; hl?: Block
   return (
     <div className="table-wrap">
       <table className="kt rtable">
-        <thead><tr><th>זמן</th><th>{WHICH_NAME[which]}: שארית המהלך</th>{used && <th>פעמים</th>}</tr></thead>
+        <thead><tr><th>זמן</th><th>{WHICH_NAME[which]}: שארית המהלך</th><th><span className="sr">הגדלה</span></th>{used && <th>פעמים</th>}</tr></thead>
         <tbody>
           {ORDER.map(k => (
             <tr key={k} className={hl.includes(k) || used?.has(k) ? 'hl' : ''}>
               <td>{BLOCK_NAME[k]}</td>
               <td><DMS sec={secOf(RB[which][k])} /></td>
+              <td><Magnifier from={0} to={secOf(RB[which][k]) / 3600} title={<>{WHICH_NAME[which]}, {BLOCK_NAME[k]}: <DMS sec={secOf(RB[which][k])} /></>}>🔍</Magnifier></td>
               {used && <td>{used.has(k) ? <Num>{used.get(k)}</Num> : ''}</td>}
             </tr>
           ))}

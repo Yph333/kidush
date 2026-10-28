@@ -5,7 +5,7 @@ import { defineChapter, halacha } from '../define';
 import { TrueTekufot } from '../widgets/astro';
 import { SeasonsScene, TekufaCalc, YearCompare } from '../widgets/tekufot';
 
-const D = true;
+const D = false;   // approved by the content owner (2026-10-28)
 const NOW = 5787;
 
 export const CH10 = defineChapter(10, 'התקופות לפי רב אדא', [

@@ -6,7 +6,7 @@ import { defineChapter, halacha } from '../define';
 import { Decompose, FullCalc, MotionTable } from '../ch14/Blocks';
 import { Eccentric } from '../widgets/astro';
 
-const D = true;
+const D = false;   // approved by the content owner (2026-10-28)
 const TAMMUZ = { month: 'תמוז', day: 14 };
 
 export const CH12 = defineChapter(12, 'מהלך השמש האמצעי', [

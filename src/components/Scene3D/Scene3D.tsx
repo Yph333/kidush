@@ -14,7 +14,7 @@ export function webglAvailable(): boolean {
   return glCache;
 }
 
-export function Scene3D<P>({ load, props, views, fallback, label, height = 440, play }: {
+export function Scene3D<P>({ load, props, views, fallback, label, height = 440, play, view: viewProp }: {
   load: () => Promise<SceneModule<P>>;
   /** must be referentially stable between renders when unchanged (useMemo) */
   props: P;
@@ -25,13 +25,20 @@ export function Scene3D<P>({ load, props, views, fallback, label, height = 440, 
   height?: number;
   /** play/pause control for the scene's own animation (shown in 3D and 2D) */
   play?: { playing: boolean; toggle: () => void; label?: string };
+  /** drive the view from outside (e.g. a guided step); the viewer can still pick another */
+  view?: string;
 }) {
   const [hasGL] = useState(webglAvailable);
   const [mode, setMode] = useState<'3d' | '2d'>(hasGL ? '3d' : '2d');
   const [status, setStatus] = useState<'loading' | 'ready' | 'error'>('loading');
   /** why the 3D scene could not start (shown, so a screenshot tells what went wrong) */
   const [failure, setFailure] = useState<string | null>(null);
-  const [view, setView] = useState(views[0]?.id);
+  const [view, setView] = useState(viewProp ?? views[0]?.id);
+  useEffect(() => {
+    if (!viewProp) return;
+    setView(viewProp);
+    handle.current?.setView(viewProp);
+  }, [viewProp]);
   const [spin, setSpin] = useState(false);
   // photographic bodies (on) or the schematic look; only scenes that have photographic bodies offer the switch
   const [real, setReal] = useState(true);

@@ -5,7 +5,7 @@ import { defineChapter, halacha } from '../define';
 import { SeasonsScene } from '../widgets/tekufot';
 import { LeapCourt, Points, TekufaSixteen, ThreeLands, TwoWays } from '../widgets/halacha';
 
-const D = true;
+const D = false;   // approved by the content owner (2026-10-28)
 
 export const CH4 = defineChapter(4, 'עיבור השנה', [
   halacha<'adar' | 'aviv'>({
