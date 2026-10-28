@@ -324,6 +324,17 @@ test('desktop: the lesson map column folds away and comes back', async ({ page }
   await expect(map).toBeVisible();
 });
 
+test('3D: the labels on a model can be hidden and shown again', async ({ page }, info) => {
+  test.skip(info.project.name !== 'desktop', 'one viewport is enough');
+  await page.goto(`/#/rambam/11/7?y=${YEAR}&city=0&mode=explore`);
+  const host = page.locator('.scene-host').first();
+  await expect(host.locator('.scene-labels')).toBeVisible({ timeout: 15000 });
+  await page.getByRole('button', { name: 'הסתרת הטקסט' }).first().click();
+  await expect(host.locator('.scene-labels')).toBeHidden();
+  await page.getByRole('button', { name: 'הצגת הטקסט' }).first().click();
+  await expect(host.locator('.scene-labels')).toBeVisible();
+});
+
 test('home: two equal ways in', async ({ page }) => {
   await page.goto(`/#/yesodot/petiha?y=${YEAR}&city=0&mode=explore`);
   await page.getByRole('button', { name: /הלכה הלכה ברמב״ם/ }).click();

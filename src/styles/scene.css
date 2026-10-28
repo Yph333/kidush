@@ -48,3 +48,5 @@
 .viz, .engine { position: relative; z-index: 1; }
 .scene3d > :not(.scene-host) { position: relative; z-index: 2; }   /* captions and the 2D toggle stay above the overscan */
 .scene-fail { color: var(--c-shift); }
+/* the viewer hid the labels (Scene3D: "הסתרת הטקסט") */
+.scene-host.no-labels .scene-labels { display: none; }
